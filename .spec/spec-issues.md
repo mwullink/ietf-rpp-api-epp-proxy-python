@@ -536,3 +536,8 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
   a data object outside the selected profile, or that the backend does not hold, is 501 `02307` (core §16.1.6 allows
   404 or 501 for an endpoint a server does not implement). The Profile Data Object is the same on every server, whatever
   the backend holds.
+## Result code of an HTTP-level error
+
+- Core has no result code for a 404 on an unknown path, a 405, a 406 or a 415. Core §18.1 maps a code missing from Table 9 by Table 10, which would make `02001` (x20zz) a 400, so a 404 or 405 with `02001` goes against it.
+- **Proxy:** keeps the HTTP status of the framework and sends `02001` through `_default_result` in `problem.py`.
+- **Proxy:** a path with a line feed is treated as an unknown path: 404 with `02001`, see `LineFeedPathMiddleware` (#98).

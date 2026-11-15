@@ -114,7 +114,8 @@ flow, the port and the EPP commands of one object.
 3. **`rpp/http/`:** what every handler shares. `operation.py` holds `rpp_operation` (anything unexpected is a 500
    Problem Detail) and `map_request`, which runs a mapper and turns what it refuses into a Problem Detail.
    `problem.py` applies core §18.1 to registry errors (`raise_registry_error`) and renders every error as a core §9
-   Problem Detail (`handle_rpp_error`). `headers.py` builds the `RPP-*` headers. `context.py` is the only reader of
+   Problem Detail (`handle_rpp_error`); a framework `HTTPException` (unknown path, wrong method) is converted by
+   `handle_http_exception` and rendered through `handle_rpp_error`. `headers.py` builds the `RPP-*` headers. `context.py` is the only reader of
    the app configuration and the request context: the backend, the `BackendProfile` and the discovery settings.
 4. **`rpp/mapping/`:** converts inbound RPP JSON dicts ↔ the `core.model` dataclasses, through the RPP dataclasses in
    `rpp/dto/`. Validates every payload against a JSON Schema via `validate_schema(...)` (`rpp/schema/validator.py`)
@@ -334,6 +335,12 @@ adds after security and before Connexion's validators, so an anonymous client ge
 It reads the whole body of a request that has one before anything else runs, drops the request if the client
 disconnects first, and passes on a complete request with a `content-length`. So chunked bodies, late bodies and
 aborted uploads reach no handler half-received. It has no size limit (#93).
+
+`LineFeedPathMiddleware` in `rpp/http/middleware/` is added before routing, inside Connexion's exception handling and
+before security. A path with a line feed is not matched by Connexion's mount pattern (`.` does not match `\n`) and
+used to fall through to Flask as a 500, so the middleware raises a 404, which `handle_http_exception` renders as a
+404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. Swagger UI
+paths are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed still serves them.
 
 The restore handlers are `domainNameRestoreProcesses_create`, `_update`, `_updatePartial` and `_read` in
 `rpp/handlers/domain/domain_handlers.py`. A request and a report are a domain update with the RFC 3915 `rgp:restore`

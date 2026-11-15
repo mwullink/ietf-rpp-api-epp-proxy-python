@@ -1,6 +1,9 @@
+from http import HTTPStatus
+
 from connexion import ProblemException
 from connexion.lifecycle import ConnexionRequest, ConnexionResponse
 from connexion.problem import problem
+from starlette.exceptions import HTTPException
 
 from core.result.error_response import ErrorResponse
 from core.result.result_code import ResultCode
@@ -75,3 +78,17 @@ def handle_rpp_error(request: ConnexionRequest, exc: ProblemException) -> Connex
             "reason": exc.detail or exc.title,
         }]},
     )
+
+
+def handle_http_exception(request: ConnexionRequest, exc: HTTPException) -> ConnexionResponse:
+    """Renders an error of the framework (unknown path, wrong method) as every other error, keeping its headers."""
+    try:
+        title = HTTPStatus(exc.status_code).phrase
+    except ValueError:
+        title = "Error"
+    return handle_rpp_error(request, ProblemException(
+        status=exc.status_code,
+        title=title,
+        detail=exc.detail,
+        headers=dict(exc.headers or {}),
+    ))
