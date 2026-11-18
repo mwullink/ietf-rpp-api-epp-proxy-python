@@ -111,3 +111,4 @@ facts:
     over_max_length_cut: true          # a value longer than its column is stored cut, not refused (pawel-kow/epp#21)
     long_label_cut: true               # a domain label of 61 to 63 is stored cut, with no reply (pawel-kow/epp#30)
     host_attr_without_address_refused: true  # a hostAttr of an external host without addresses is refused (pawel-kow/epp#33)
+    queue_del_no_msgcnt: false

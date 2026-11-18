@@ -237,7 +237,18 @@ would be (`env.session.cltrid_reuse_supported`); an `lgr` on an ASCII name is no
 (`env.domainName.name.lgr.ascii_supported`); clearing a contact's name or email is refused by RRI with 422 `02306`
 (`env.contact.name.min_count`), where EPP cannot clear them and the proxy refuses with 501
 (`profile.contact.name.removable`). [config.rri-mtest.yaml](../../config.rri-mtest.yaml) offers `latn-1.0` as the
-LGR.
+LGR. QUEUE-DELMSG states no count of the messages left, so the proxy answers an acknowledge without `RPP-Queue-Size`
+(#172, `env.bugs.queue_del_no_msgcnt`, `message/test6`).
+
+### Local RRI
+
+`RPP_TEST_ENV=rri-local pytest -n 4 tests/integration` runs the suite against an RRI test server on the machine through
+[config.rri-local.yaml](../../config.rri-local.yaml), with the `TEST_RRI_LOCAL_*` variables in `.env` (as `TEST_RRI_*`
+for MTEST), so that a run with MTEST's credentials only does not test it. The config names the server's container on
+Docker's default bridge network (`172.17.0.8`); another host goes in an untracked `config.rri-local.local.yaml`
+(`rpp_rri_host: <host>`). Its facts are MTEST's, except that its predelegation check passes every create and update
+(`failed_dns_status: null`, `update.dns_checked: false`, so `domain_create/test43` and the update cases of a check do
+not run), and that it allows 2000 RPP requests a minute per registrar.
 
 ## Selectors
 

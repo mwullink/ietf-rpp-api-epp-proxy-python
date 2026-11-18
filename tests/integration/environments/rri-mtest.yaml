@@ -99,3 +99,4 @@ facts:
     over_max_length_cut: false
     long_label_cut: false
     host_attr_without_address_refused: false
+    queue_del_no_msgcnt: true          # QUEUE-DELMSG states no remaining count, so no RPP-Queue-Size (#172)

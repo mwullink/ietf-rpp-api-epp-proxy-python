@@ -543,7 +543,7 @@
       }
     },
     {
-      "comment": "Acknowledges message the captured head; expects 200 01000, with RPP-Queue-Size where the backend reports it (RRI's QUEUE-DELMSG does not). The operation this case checks.",
+      "comment": "Acknowledges message the captured head; expects 200 01000, with RPP-Queue-Size, except where the proxy does not state it (bugs.queue_del_no_msgcnt, #172). The operation this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/messages/{capture:head}",
@@ -563,11 +563,7 @@
             "select": [
               {
                 "when": {
-                  "profile.extensions": {
-                    "not": {
-                      "contains": "de.denic.rpp.rri"
-                    }
-                  }
+                  "env.bugs.queue_del_no_msgcnt": false
                 },
                 "then": {
                   "type": "not_null"

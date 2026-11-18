@@ -1,0 +1,30 @@
+# The proxy in front of a local RRI test server, for the integration suite (RPP_TEST_ENV=rri-local).
+# The credentials are the clients' own: HTTP Basic is passed through as the RRI LOGIN.
+# Another host or port goes in an untracked config.rri-local.local.yaml next to this file, whose top-level keys replace
+# these (e.g. `rpp_rri_host: localhost`).
+rpp_backend: rri
+rpp_rri_host: 172.17.0.8   # the local RRI server's container on Docker's default bridge network
+rpp_rri_port: 51131
+rpp_rri_use_tls: true
+rpp_rri_tls_insecure_skip_verify: true   # its certificate is self-signed
+# How a client names the preset of a request (core, Preset Signalling): `header` is the RPP-Preset header field,
+# `media-type` the preset and preset-version parameters of Accept and Content-Type. Without the key it is `header`. A
+# request that names none gets default_preset below.
+rpp_preset_signalling: media-type
+
+# The profile of this server (see config.yaml): DENIC's, src/settings/profiles/rri.yaml.
+rpp_backend_profile:
+  extends: rri
+  # The RPP presets offered (src/rpp/schema/schemas/presets), and the one a request gets when it names none.
+  presets:
+    - base
+    - rri
+  default_preset: rri
+rpp_rri_lgr: latn-1.0   # the one LGR name a client may give for DENIC's IDN repertoire (gap Q11)
+
+# What the discovery document states (placeholders for the test deployment).
+rpp_base_url: https://localhost:8000
+rpp_tlds:
+  - de
+rpp_environment_name: rpp-rri-proxy.example
+rpp_environment_status: test
