@@ -38,9 +38,10 @@ Its host and port come from `config.yaml` (`rpp_epp_host`/`rpp_epp_port`) via
 `new_epp_client` in [src/main.py](../../src/main.py). The backend is a docker compose project (today `epptest`),
 and `config.yaml` names its EPP server by the compose service name, `epp-server`, on TLS port `743`. That name
 resolves on the project's network, `<project>_epp_net` (today `epptest_epp_net`), which the devcontainer has to
-join: `postStartCommand` in [.devcontainer/devcontainer.json](../../.devcontainer/devcontainer.json) no longer does it
-(#111), so attach it by hand: `docker network connect epptest_epp_net <container>`, where `<container>` is the
-devcontainer's id (`cat /etc/hostname` inside it). Without it every
+join: `postStartCommand` in [.devcontainer/devcontainer.json](../../.devcontainer/devcontainer.json) joins it on every
+start (#111). Where the backend was not up then, attach it by hand:
+`docker network connect epptest_epp_net <container>`, where `<container>` is the devcontainer's id (`cat /etc/hostname`
+inside it); `getent hosts epp-server` shows whether it resolves. Without it every
 integration case fails with 401 (`02200`). Its certificate is self-signed and does not name that host, so
 `config.yaml` sets `rpp_epp_tls_insecure_skip_verify`. Where the backend has another name, put it in an untracked
 `config.local.yaml` (`rpp_epp_host: <name>`): its top-level keys replace those of `config.yaml`.
