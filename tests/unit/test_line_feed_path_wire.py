@@ -47,5 +47,5 @@ def test_other_control_characters_are_not_caught_by_the_guard(client, path):
 
 
 @pytest.mark.parametrize("path", ["/ui/", "/openapi.json"])
-def test_swagger_ui_paths_are_unaffected(client, path):
+def test_ui_and_document_paths_are_unaffected(client, path):
     assert client.get(path).status_code == 200

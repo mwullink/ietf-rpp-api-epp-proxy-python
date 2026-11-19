@@ -514,9 +514,9 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 - **Proxy:** the specification lists every operation; Delete answers 501 on RRI. The paths are made when the app is
   built, from those of the Contact Data Object. The OpenAPI document served is OpenAPI 3.1 with the body schemas of the
   default preset's Preset Schema (#204): the drafts' OpenAPI is 3.0, which cannot hold a 2020-12 Preset Schema, and the
-  schema of a body differs per preset; whether OpenAPI can express that per signalling method is #205. Two switches,
-  off by default, leave out of it the operations on objects the backend does not hold and those no handler serves
-  (`rpp_openapi_omit_*`), against the API contract, which lists them; the demo turns them on.
+  schema of a body differs per preset, see [The body schemas of every preset in OpenAPI](#the-body-schemas-of-every-preset-in-openapi).
+  Two switches, off by default, leave out of it the operations on objects the backend does not hold and those no handler
+  serves (`rpp_openapi_omit_*`), against the API contract, which lists them; the demo turns them on.
 
 ### Members of two extensions with the same name
 
@@ -609,6 +609,33 @@ they were. The proxy follows the proposals, with the following.
   schema `false`. A whitelist cannot let a schema that constrains the base slip through by a keyword the check did not think of.
 - **Responses.** The proposals do not say whether a response is validated against the profiles. **Proxy:** never; a response is validated
   against the preset schema without profiles.
+
+## The body schemas of every preset in OpenAPI
+
+- Core §Preset Signalling lets a client choose the preset of a request, and the body schemas differ per preset (its extensions and
+  profiles). Neither core nor json says how a server's OpenAPI document shows the presets other than its default, and OpenAPI 3.1 can
+  choose a body schema by the media type, never by a header. Findings of #205 (OpenAPI 3.1, Connexion 3.2; UIs Swagger UI 5.17.14
+  and 5.35.0, Scalar 1.80.0 and 1.76.4, Stoplight Elements 9.0.29, RapiDoc 14.1.0, Redoc 3.1.0, in a browser against the demo):
+  - Media type signalling, one document with a `content` entry per preset keyed by `application/rpp+json; preset=…; preset-version=…`:
+    valid OpenAPI 3.1. Connexion drops the parameters before it looks up the body schema (only such keys: 415 for every request;
+    with a bare key as well: every preset validated with the bare key's schema). Swagger UI, Elements and RapiDoc send the chosen
+    preset's `Content-Type` (and `Accept`); Redoc shows the schema per entry and sends nothing; Scalar's test client always sends the
+    first entry. Possible, but not in every UI.
+  - Header signalling, one document: not possible. `oneOf` of the presets' schemas without a discriminator refuses a body valid under
+    two presets and `anyOf` accepts a member of an extension under a preset without it; no UI ties an `RPP-Preset` enum to the body
+    (the `oneOf` branch is a choice of its own) or reads an `x-` map.
+  - Both methods, one document per preset (the preset's `RPP-Preset` as the only value of the parameter, or its media type as the
+    key of every body): possible. Swagger UI (definition selector) and Scalar (source switcher) offer them and send the preset;
+    Elements, RapiDoc and Redoc have no selector.
+  - Media type signalling with a request without a body (a read): the request preset is that of `Content-Type`, so the request
+    must carry one, which OpenAPI does not let a document state (a header parameter `Content-Type` "SHALL be ignored") and a UI
+    does not send. Without it the request preset is the default one, and an `Accept` that names only the document's preset is a 400.
+- **Proxy:** one document per offered preset, `/openapi/{preset-id}.json` and `.yaml` (outside the RPP paths), stating the preset
+  as the server's signalling takes it: header, `RPP-Preset` required with the preset as its only value; media type, every RPP body
+  keyed by the preset's media type and no `RPP-Preset` parameter. A preset's document leaves out the objects of extensions the
+  preset does not contain (a request to them is a 400 under it). `/openapi.json` stays the default preset's. `/ui/` is Scalar with a
+  source per preset. Routing and validation are unchanged: Connexion routes with the bare media type, and the body validators
+  validate with the signalled preset.
 
 ## An extension that adds members to the data object of another extension
 

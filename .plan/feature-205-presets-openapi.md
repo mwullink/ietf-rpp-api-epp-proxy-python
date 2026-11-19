@@ -38,6 +38,11 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
   no request leaves the origin), the `sources` switcher changes the document, and Test Request on `POST /planets` of a header
   document sends its `RPP-Preset`. The npm package has no LICENSE file; the MIT text is the repository's (`scalar/scalar`).
 
+- F10 Media-type signalling, a request without a body (a read, discovery) from a preset's document in Scalar: no
+  `Content-Type`, so the request preset is the default one, and an `Accept` that lists only the document's preset is 400 `02001`
+  (real `/ui/` on `config.demo-bound.yaml`). A `Content-Type` header parameter (required, the preset's media type) added to the
+  document makes Scalar send it: 200. OAS 3.1 says such a parameter SHALL be ignored. Body requests work (201, both methods).
+
 ## Decisions (maintainer, 2026-11-19)
 
 - D1 One document per offered preset, for both signalling methods, shown with Scalar.
@@ -77,10 +82,15 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
   external URL
 - [x] T2 Documents per preset and their routes
 - [x] T3 Scalar vendored and configured, Swagger UI removed
-- [~] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
+- [x] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
   (findings); findings in #205
-- [ ] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
+- [~] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
 
 ## Open questions
 
-- none
+- Q5 F10: under media-type signalling, give the operations without a request body a `Content-Type` header parameter (required,
+  the preset's media type) in a preset's document, so that a read from the UI uses the preset (against OAS's "SHALL be ignored",
+  but Scalar sends it)? Or leave it, and say in the document that a read needs `Content-Type`? Or file an issue on the server's
+  rule (request preset of a request without a body)?
+- Q6 C1: accept that a preset's document leaves out the objects of the extensions the preset does not contain?
+- Q7 `swagger_ui_bundle` in requirements.txt is unused (since #204, the UI is vendored): remove it?

@@ -26,8 +26,9 @@ src/
 │   ├── session/             SessionPool
 │   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message,request_contact}/
 ├── rpp/                     receiving adapter: RPP over HTTP
-│   ├── http/                app (create_app), extension_paths, body_definitions, served_document, served_specification,
-│   │                        swagger_ui/ (Swagger UI 5, vendored), middleware/, validators/, security/, problem, headers,
+│   ├── http/                app (create_app), extension_paths, body_definitions, served_document, served_documents,
+│   │                        preset_document, document_signalling, served_specification, scalar_ui/ (Scalar, vendored),
+│   │                        middleware/, validators/, security/, problem, headers,
 │   │                        context, operation, preset_signalling, preset_middleware, request_presets,
 │   │                        preset_selection, header_preset_signalling, media_type_preset_signalling, preset_header,
 │   │                        media_range, native_accept
@@ -416,8 +417,9 @@ aborted uploads reach no handler half-received. It has no size limit (#93).
 `LineFeedPathMiddleware` in `rpp/http/middleware/` is added before routing, inside Connexion's exception handling and
 before security. A path with a line feed is not matched by Connexion's mount pattern (`.` does not match `\n`) and
 used to fall through to Flask as a 500, so the middleware raises a 404, which `handle_http_exception` renders as a
-404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. Swagger UI
-paths are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed still serves them.
+404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. The paths of
+the served documents and the UI are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed
+still serves them.
 
 **The OpenAPI document served** (#204). Connexion routes with the generated spec, OpenAPI 3.0, which is all it loads
 (Connexion 3.2 and 3.3 refuse `openapi: 3.1.0`). What `/openapi.json`, `/openapi.yaml` and `/ui/` serve is another document,
@@ -426,19 +428,30 @@ extension paths), the `$defs` of the default preset's Preset Schema under `compo
 rewritten from `#/$defs/`), each body that stands for a definition pointing at the preset's (`domainName.create`, an extension's
 own object at its key: `ext.rri.requestContact.create`), the schemas nothing refers to any more left out, and `info.x-rpp-preset`
 naming the preset. It is the same as `GET /presets/{id}/schema` publishes, profile constraints included. A body of no
-definition (`protocol.PartialUpdate`) or of one the default preset lacks keeps its generated schema. Other presets are #205.
+definition (`protocol.PartialUpdate`) or of one the default preset lacks keeps its generated schema.
+**A document per offered preset** (#205): `/openapi/{preset-id}.json` and `.yaml`, outside the RPP paths, made the same way from
+each preset's Preset Schema (`preset_documents` in `app.py`, the default preset's first), with the objects of the extensions the
+preset does not contain left out (`outside_the_preset`: a request to them is a 400 under it), and the preset stated as the
+server's signalling takes it, so that a client or the UI sends it: the signalling method's `state_in` (`HeaderPresetSignalling`:
+`RPP-Preset` required, with the preset as its only value and default; `MediaTypePresetSignalling`: every RPP body keyed by
+`preset_media_type`, the media type a response is typed with, and no `RPP-Preset` parameter), with the places in the document
+found by `document_signalling`. `/openapi.json` stays the default preset's and states no preset. `ServedDocuments` holds them,
+`PresetDocument` one of them.
 Two switches (`OpenApiSettings`, off by default, a deviation from the drafts' API contract) leave operations out of it:
 `rpp_openapi_omit_unheld_objects` those on a data object the backend does not hold under the default preset (by the first path
 segment, `collections` in `extension_paths`), `rpp_openapi_omit_unimplemented` those no handler serves
 (`ExtensionResolver.implements`). A path left without an operation goes, a tag no operation has, and every schema nothing refers to,
-the Preset Schema's definitions too (`omitted_operations` in `app.py`, `served_document(omit=...)`). Routing does not change: those
-requests answer 501 as before. The demo configurations turn both on.
-`ServedDocumentSwaggerUIMiddleware` in `rpp/http/middleware/` takes the place of Connexion's `SwaggerUIMiddleware` in the
-middleware list `create_app` gives `FlaskApp` (a `functools.partial` with the document, as Connexion builds a middleware with the
-app alone), and serves it as a `ServedSpecification` (`rpp/http/served_specification.py`: not checked against Connexion's 3.0
-meta-schema, references not resolved). Connexion's response validation, which writes `components` into the response schemas of
-the spec its middlewares share (#193), does not reach it. Swagger UI is `swagger-ui-dist` 5 in `rpp/http/swagger_ui/`
-(`swagger_ui_bundle` ships 4.15.5, which renders no 3.1; the version and how to update are in its README.md).
+the Preset Schema's definitions too (`omitted_operations` in `app.py`, `served_document(omit=...)`); in a preset's document, by
+the objects that preset holds. Routing does not change: those requests answer 501 as before. The demo configurations turn both on.
+`ServedDocumentsMiddleware` in `rpp/http/middleware/` takes the place of Connexion's `SwaggerUIMiddleware` in the
+middleware list `create_app` gives `FlaskApp` (a `functools.partial` with the documents, as Connexion builds a middleware with the
+app alone), and `ServedDocumentsAPI` serves each as a `ServedSpecification` (`rpp/http/served_specification.py`: not checked
+against Connexion's 3.0 meta-schema, references not resolved), with the base path of the request in `servers`. Connexion's
+response validation, which writes `components` into the response schemas of the spec its middlewares share (#193), does not
+reach them. `/ui/` is Scalar (`@scalar/api-reference`, `rpp/http/scalar_ui/`; the version and how to update are in its
+README.md), with a source per offered preset and `UI_CONFIGURATION` (`served_documents_api.py`): only its API reference and test
+client, nothing of Scalar's platform (developer tools, AI agent, MCP, telemetry, remote fonts, the hosted client's link, which
+`index.j2` hides), so the page loads nothing from another origin; snippets HTTP/1.1 and curl.
 `MiddlewarePosition.BEFORE_SWAGGER` names Connexion's class and cannot be used with this list.
 
 The restore handlers are `domainNameRestoreProcesses_create`, `_update`, `_updatePartial` and `_read` in
@@ -616,8 +629,8 @@ The third kind is known only from the EPP greeting, which mappers cannot reach, 
 
 The frozen contract covers the OpenAPI paths and schemas, the core §18.1 result code
 to HTTP status mapping, and the `RPP-*` headers. RPP result codes are EPP codes with a
-leading `0`. The document served is OpenAPI 3.1 with the default preset's body schemas, a decision of #204; the routing spec
-stays the generated 3.0.
+leading `0`. The document served is OpenAPI 3.1 with the default preset's body schemas, a decision of #204, and each offered preset
+has one of its own (#205); the routing spec stays the generated 3.0.
 
 ## Configuration
 

@@ -26,10 +26,12 @@ keys it has, for one machine's settings.
 The proxy speaks EPP to the registry by default; see [EPP or RRI behind the API](#epp-or-rri-behind-the-api) for
 DENIC RRI.
 
-Swagger UI shall be available at http://127.0.0.1:8000/ui/. The OpenAPI document it shows (`/openapi.json`,
-`/openapi.yaml`) is OpenAPI 3.1, with the body schemas of the default preset: the members of its extensions and the
-constraints of its profiles, as `GET /presets/{id}/schema` publishes them. It lists every operation of the drafts' API
-contract, also those the server answers with 501. Two switches leave those out, against the contract, so each is off by
+The API documentation (Scalar) shall be available at http://127.0.0.1:8000/ui/, with a document per offered preset to choose
+from (top left). Each preset's OpenAPI document (`/openapi/{preset-id}.json`, `.yaml`) is OpenAPI 3.1, with the body schemas
+of that preset: the members of its extensions and the constraints of its profiles, as `GET /presets/{id}/schema` publishes
+them, and the preset signalled as the server takes it (the `RPP-Preset` header or the media type), so a request sent from
+it uses that preset. `/openapi.json` and `/openapi.yaml` are the default preset's. A document lists every operation of the
+drafts' API contract, also those the server answers with 501. Two switches leave those out, against the contract, so each is off by
 default; the demo configurations turn both on, so their document shows the planets and satellites only:
 
 ```yaml
@@ -180,7 +182,7 @@ The image holds [config.yaml](config.yaml) as it is at build time.
 docker run --rm -p 8000:8091 pawelk/rpp_server_epp_proxy
 ```
 
-The proxy listens on 8091 in the container, so Swagger UI is at http://127.0.0.1:8000/ui/.
+The proxy listens on 8091 in the container, so the API documentation is at http://127.0.0.1:8000/ui/.
 
 Against the [local EPP server](#local-epp-server), join the container to its network, where the built-in
 `config.yaml` finds it:
