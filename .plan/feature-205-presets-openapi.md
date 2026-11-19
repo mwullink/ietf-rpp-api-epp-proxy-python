@@ -86,6 +86,17 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
   (findings); findings in #205
 - [~] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
 
+## Check results (on cb74be8)
+
+- `lint-imports`: 28 kept, 0 broken.
+- Unit: 2889 passed.
+- Smoke: 152 passed, 440 skipped (selectors), 38 failed, all of `epp-docker`: `epp-server` does not resolve from this container
+  (`Name or service not known`, 401 `02200`), the backend's network is not joined since the restart. To rerun once it is.
+  MTEST pending for the maintainer (`rpp` changed).
+- Browser (real `/ui/`, Scalar 1.76.4, `config.demo-extended.yaml` and `config.demo-bound.yaml`): the sources of every preset, the
+  default first; `POST /planets` from the `planets-atmosphere` document 201 under both methods, with its `RPP-Preset` / media type;
+  nothing loaded from another origin.
+
 ## Open questions
 
 - Q5 F10: under media-type signalling, give the operations without a request body a `Content-Type` header parameter (required,
