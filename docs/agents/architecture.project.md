@@ -12,6 +12,8 @@ registry object (#120). The rules below are checked by `import-linter`.
 ```
 src/
 ├── main.py                  composition root, the only module that knows all others
+├── api_docs/                serves the OpenAPI documents and the UI (Scalar, scalar_ui/ vendored) in front of the rpp app:
+│                            docs_app (DocsApp), served_documents, ui_configuration; knows no other package
 ├── registry_setup.py        the extensions the settings name, registered, and the backend profile built with them
 ├── settings/                loads config.yaml once into typed sections, which main.py passes on
 │   └── profiles/            epp.yaml, rri.yaml, sqlite.yaml: the generic backend profile of each protocol (not the RPP presets and profiles)
@@ -26,9 +28,8 @@ src/
 │   ├── session/             SessionPool
 │   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message,request_contact}/
 ├── rpp/                     receiving adapter: RPP over HTTP
-│   ├── http/                app (create_app), extension_paths, body_definitions, served_document, served_documents,
-│   │                        preset_document, document_signalling, served_specification, scalar_ui/ (Scalar, vendored),
-│   │                        middleware/, validators/, security/, problem, headers,
+│   ├── http/                app (create_app), rpp_app (RppApp), extension_paths, body_definitions, served_document,
+│   │                        document_signalling, middleware/, validators/, security/, problem, headers,
 │   │                        context, operation, preset_signalling, preset_middleware, request_presets,
 │   │                        preset_selection, header_preset_signalling, media_type_preset_signalling, preset_header,
 │   │                        media_range, native_accept
@@ -81,6 +82,8 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
   is part of the composition root (it builds the registry and the backend profile from the settings, so that the test
   environments can build a profile without composing an app). `core`, `registration`, `rpp`, `extensions` and
   `registry_adapter` are forbidden to import `settings` by their contracts.
+- `api_docs` imports no other package of the proxy, and no web framework but Starlette: it gets the documents as plain
+  dicts, which `main` takes from the rpp app (`RppApp.openapi_documents`) and hands over. No package but `main` imports it.
 - `registration` imports no other package of the proxy. No generic package (`core`, `rpp`, `registry_adapter`,
   `settings`, `registration`) imports `extensions`, but `registry_adapter/sqlite/extensions/<name>` imports the `core` of
   its extension and nothing else of it. An extension imports no registry adapter, settings or XML; its `core` imports
@@ -105,7 +108,8 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
 | `core.ports` / `core.flows` | Any concrete backend, wire format, HTTP, RPP representations, `includeElements` |
 | `rpp.mapping` | HTTP objects, EPP/RRI, IDN table ids, the session, the gateways |
 | `rpp.handlers` | XML, the backend protocol, orchestration (that belongs in flows) |
-| `rpp.http` | Object semantics, the backend protocol |
+| `rpp.http` | Object semantics, the backend protocol, how the documents are served and shown |
+| `api_docs` | RPP beyond a document's `info.x-rpp-preset`: presets, signalling, schemas; the backends, the settings, Connexion |
 | `registry_adapter.*` | HTTP, RPP JSON, OpenAPI, Problem Details, `includeElements`, config files |
 | `registry_adapter.common` | Which protocol uses it, the model, the result codes |
 
@@ -418,8 +422,8 @@ aborted uploads reach no handler half-received. It has no size limit (#93).
 before security. A path with a line feed is not matched by Connexion's mount pattern (`.` does not match `\n`) and
 used to fall through to Flask as a 500, so the middleware raises a 404, which `handle_http_exception` renders as a
 404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. The paths of
-the served documents and the UI are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed
-still serves them.
+the served documents and the UI never reach it: `api_docs` serves them in front of the rpp app, so `/ui/` or `/openapi.json`
+followed by a trailing line feed still serves them.
 
 **The OpenAPI document served** (#204). Connexion routes with the generated spec, OpenAPI 3.0, which is all it loads
 (Connexion 3.2 and 3.3 refuse `openapi: 3.1.0`). What `/openapi.json`, `/openapi.yaml` and `/ui/` serve is another document,
@@ -437,24 +441,24 @@ server's signalling takes it, so that a client or the UI sends it: the signallin
 `preset_media_type`, the media type a response is typed with, every operation without a request body given a required
 `Content-Type` header parameter of it, as such a request's preset is that of its `Content-Type` (OAS 3.1 has the parameter
 ignored, Scalar sends it), and no `RPP-Preset` parameter), with the places in the document
-found by `document_signalling`. `/openapi.json` stays the default preset's and states no preset. `ServedDocuments` holds them,
-`PresetDocument` one of them.
+found by `document_signalling`. `/openapi.json` stays the default preset's and states no preset.
 Two switches (`OpenApiSettings`, off by default, a deviation from the drafts' API contract) leave operations out of it:
 `rpp_openapi_omit_unheld_objects` those on a data object the backend does not hold under the default preset (by the first path
 segment, `collections` in `extension_paths`), `rpp_openapi_omit_unimplemented` those no handler serves
 (`ExtensionResolver.implements`). A path left without an operation goes, a tag no operation has, and every schema nothing refers to,
 the Preset Schema's definitions too (`omitted_operations` in `app.py`, `served_document(omit=...)`); in a preset's document, by
 the objects that preset holds. Routing does not change: those requests answer 501 as before. The demo configurations turn both on.
-`ServedDocumentsMiddleware` in `rpp/http/middleware/` takes the place of Connexion's `SwaggerUIMiddleware` in the
-middleware list `create_app` gives `FlaskApp` (a `functools.partial` with the documents, as Connexion builds a middleware with the
-app alone), and `ServedDocumentsAPI` serves each as a `ServedSpecification` (`rpp/http/served_specification.py`: not checked
-against Connexion's 3.0 meta-schema, references not resolved), with the base path of the request in `servers`. Connexion's
-response validation, which writes `components` into the response schemas of the spec its middlewares share (#193), does not
-reach them. `/ui/` is Scalar (`@scalar/api-reference`, `rpp/http/scalar_ui/`; the version and how to update are in its
-README.md), with a source per offered preset and `UI_CONFIGURATION` (`served_documents_api.py`): only its API reference and test
-client, nothing of Scalar's platform (developer tools, AI agent, MCP, telemetry, remote fonts, the hosted client's link, which
-`index.j2` hides), so the page loads nothing from another origin; snippets HTTP/1.1 and curl.
-`MiddlewarePosition.BEFORE_SWAGGER` names Connexion's class and cannot be used with this list.
+**Serving them** (#205) is no part of `rpp`. The rpp app (`RppApp`, a `FlaskApp`, built by `create_app` without Connexion's
+`SwaggerUIMiddleware`) serves no document and no UI; it only gives them, `openapi_documents()`: the default document first, then
+one per offered preset, copies made when the app is built, so Connexion's response validation, which writes `components` into
+the response schemas of the spec its middlewares share (#193), does not reach them. `main.compose` puts `DocsApp` (`api_docs`)
+in front of it (`Composition.app` is what uvicorn serves, `Composition.rpp_app` the rpp app). `DocsApp` serves `/openapi.json`,
+`/openapi.yaml`, `/openapi/{preset-id}.json` and `.yaml`, each with the base path of the request (`root_path`) in `servers`
+and readable from any origin (CORS), a preset it has no document of a plain 404, and `/ui/`; every other request and the
+lifespan go to the rpp app. `/ui/` is Scalar (`@scalar/api-reference`, `api_docs/scalar_ui/`; the version and how to update
+are in its README.md), with a source per preset document and `UI_CONFIGURATION` (`ui_configuration.py`): only its API
+reference and test client, nothing of Scalar's platform (developer tools, AI agent, MCP, telemetry, remote fonts, the hosted
+client's link, which `index.j2` hides), so the page loads nothing from another origin; snippets HTTP/1.1 and curl.
 
 The restore handlers are `domainNameRestoreProcesses_create`, `_update`, `_updatePartial` and `_read` in
 `rpp/handlers/domain/domain_handlers.py`. A request and a report are a domain update with the RFC 3915 `rgp:restore`

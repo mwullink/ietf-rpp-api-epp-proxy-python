@@ -99,18 +99,19 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 - [x] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
   (findings); findings in #205
 - [x] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
-- [~] T6 Tests first (D10): `api_docs` alone (fake app, plain documents: routes, base path, CORS, 404, passing on, lifespan);
+- [x] T6 Tests first (D10): `api_docs` alone (fake app, plain documents: routes, base path, CORS, 404, passing on, lifespan);
   the rpp app serves no document and gives `openapi_documents()`; the served-document tests through the composed app
-- [ ] T7 `api_docs` package, `RppApp`, `main.compose`; the serving parts leave `rpp`
-- [ ] T8 Contracts (`root_packages`, `api-docs-standalone`, `rpp` never imports `api_docs`), architecture.project.md, README
-- [ ] T9 Checks
+- [x] T7 `api_docs` package, `RppApp`, `main.compose`; the serving parts leave `rpp`
+- [x] T8 Contracts (`root_packages`, `api-docs-standalone`, `rpp` never imports `api_docs`), architecture.project.md, README
+- [x] T9 Checks
 
-## Check results (after D7-D9)
+## Check results (after D10)
 
-- `lint-imports`: 28 kept, 0 broken.
-- Unit: 2892 passed (without `swagger_ui_bundle` installed).
-- Smoke: 190 passed, 440 skipped (selectors), the devcontainer joined to `epptest_epp_net`. MTEST pending for the maintainer
-  (`rpp` changed).
+- `lint-imports`: 29 kept, 0 broken (a probe import `api_docs -> rpp` and `rpp -> api_docs` each breaks its contract).
+- Unit: 2904 passed.
+- Smoke: 190 passed, 440 skipped (selectors). MTEST pending for the maintainer (`rpp` changed).
+- uvicorn `main:app` on `config.demo-bound.yaml`: `/ui` 307, `/ui/`, `/ui/standalone.js`, `/openapi.json`, `.yaml`, a preset's
+  document 200, an unknown preset 404, `/.well-known/rpp` 200 from the rpp app.
 - Browser (real `/ui/`, Scalar 1.76.4, `config.demo-extended.yaml` and `config.demo-bound.yaml`): the sources of every preset, the
   default first; `POST /planets` from the `planets-atmosphere` document 201 under both methods, with its `RPP-Preset` / media type;
   nothing loaded from another origin.
