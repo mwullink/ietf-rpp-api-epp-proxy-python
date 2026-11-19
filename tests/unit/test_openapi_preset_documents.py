@@ -162,7 +162,8 @@ def test_a_preset_document_holds_its_whole_preset_schema_where_nothing_is_left_o
         assert_holds_the_preset_schema(preset_document(epp, preset_id), preset_defs(epp, preset_id))
 
 
-def test_a_preset_document_leaves_out_the_objects_its_preset_does_not_hold(servers):
+def test_a_preset_document_leaves_out_the_objects_of_extensions_its_preset_does_not_contain(servers):
+    """A request to them under the preset is refused (400, core RC4): the base preset has no planets."""
     client = servers["bound"].client
 
     assert "/planets" not in preset_document(client, BASE)["paths"]

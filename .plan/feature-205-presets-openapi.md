@@ -61,6 +61,13 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 - Routing and validation do not change (F2): the request is validated with the signalled preset's schemas, 400 / 422 `02308`
   as in #204.
 
+## Corrections
+
+- C1 The omit switch of unheld objects does not leave a demo object out of the base preset's document: the backend holds it
+  under every preset. A request to it under a preset without its extension is refused (400, core RC4), so a preset's document
+  always leaves out the objects of the extensions the preset does not contain (`outside_the_preset` in `app.py`; not a switch,
+  as the drafts' paths stay). `/openapi.json` is unchanged (#204). For the maintainer's review.
+
 ## Tasks
 
 - [x] T0 Plan, findings, design for acceptance
@@ -68,9 +75,9 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
   signalling of each (header value / media type keys, no `RPP-Preset` under media-type); `/openapi.json` unchanged; a request
   under a non-default preset validated with its schemas (400 / 422 `02308`); `/ui/` serves Scalar with every preset, no
   external URL
-- [~] T2 Documents per preset and their routes
-- [ ] T3 Scalar vendored and configured, Swagger UI removed
-- [ ] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
+- [x] T2 Documents per preset and their routes
+- [x] T3 Scalar vendored and configured, Swagger UI removed
+- [~] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
   (findings); findings in #205
 - [ ] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
 

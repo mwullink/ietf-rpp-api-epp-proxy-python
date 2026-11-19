@@ -22,7 +22,9 @@ from rpp.http.preset_middleware import PresetMiddleware
 from rpp.http.preset_signalling import HEADER_SIGNALLING, preset_signalling
 from rpp.http.request_presets import RequestPresets
 from rpp.http.middleware.line_feed_path_middleware import LineFeedPathMiddleware
-from rpp.http.middleware.served_document_swagger_ui_middleware import ServedDocumentSwaggerUIMiddleware
+from rpp.http.middleware.served_documents_middleware import ServedDocumentsMiddleware
+from rpp.http.preset_document import PresetDocument
+from rpp.http.served_documents import ServedDocuments
 from rpp.http.security.bearer_refusing_security_handler import BearerRefusingSecurityHandler
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
@@ -41,8 +43,8 @@ from rpp.schema.preset_schemas import PresetSchemas
 
 OPENAPI_SPEC = Path(__file__).parent.parent / "openapi.yaml"
 
-# Swagger UI 5, which renders OpenAPI 3.1 (#204): the files of swagger-ui-dist, see its README.md.
-SWAGGER_UI = Path(__file__).parent / "swagger_ui"
+# Scalar, which shows a document per offered preset (#205): the files of @scalar/api-reference, see its README.md.
+SCALAR_UI = Path(__file__).parent / "scalar_ui"
 
 
 @cache
@@ -83,6 +85,32 @@ def omitted_operations(openapi_settings, held_objects, extension_ids, resolver: 
     return omit
 
 
+def outside_the_preset(item, presets: OfferedPresets, omit):
+    """`omit`, and the operations on a data object of an extension the preset does not contain: a request under it is refused
+    (400, core RC4), so they are no part of its API (#205)."""
+    own = set(collections(item.extension_ids).values())
+    foreign = {segment for segment, obj in collections(presets.extension_ids()).items() if obj not in own}
+
+    def outside(path: str, operation: dict) -> bool:
+        return path.lstrip("/").split("/", 1)[0] in foreign or (omit is not None and omit(path, operation))
+    return outside
+
+
+def preset_documents(spec, presets: OfferedPresets, preset_schemas: PresetSchemas, request_presets: RequestPresets, signalling,
+                     openapi_settings, resolver: ExtensionResolver) -> tuple[PresetDocument, ...]:
+    """The OpenAPI document of each offered preset, the default preset's first (#205): the preset's body schemas, what it does
+    not hold or no handler serves left out as the switches say, the objects of extensions it does not contain left out, and the
+    preset stated as `signalling` takes it."""
+    documents = []
+    for item in (presets.default, *(other for other in presets.offered if other is not presets.default)):
+        omit = omitted_operations(openapi_settings, request_presets.profile_of(item).objects, presets.extension_ids(), resolver)
+        document = served_document(spec, preset_schemas.document_of(item), item.extension_ids,
+                                   outside_the_preset(item, presets, omit))
+        signalling.state_in(document, item)
+        documents.append(PresetDocument(preset_id=item.id, version=item.version, document=document))
+    return tuple(documents)
+
+
 def create_app(sessions, profile: BackendProfile, discovery_settings=None, signalling=HEADER_SIGNALLING,
                registry: ExtensionRegistry | None = None, openapi_settings=None):
     """
@@ -110,24 +138,27 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     preset_schemas = PresetSchemas(presets, public_base_url(discovery_settings))
     request_presets = RequestPresets(profile, presets, preset_schemas)
     # connexion changes the spec it is given, so each app gets its own copy. Each body that stands for a definition is marked
-    # with it, which the body validators validate with under the request's preset; the document served is OpenAPI 3.1 with
-    # the definitions of the default preset (#204).
+    # with it, which the body validators validate with under the request's preset; the documents served are OpenAPI 3.1, with
+    # the definitions of the default preset (#204) and of each offered preset (#205).
     spec = add_registered_paths(add_extension_paths(copy.deepcopy(parsed_spec()), presets.extension_ids()), registry)
     spec = mark_body_definitions(spec, {*bundle_definitions(), *own_definitions(presets.extension_ids())})
     resolver = ExtensionResolver('rpp.handlers', registry.handler_packages())
     omit = omitted_operations(openapi_settings, request_presets.profile_of(presets.default).objects, presets.extension_ids(),
                               resolver)
     served = served_document(spec, preset_schemas.document_of(presets.default), presets.default.extension_ids, omit)
+    method = preset_signalling(signalling, presets)
+    documents = ServedDocuments(served, preset_documents(spec, presets, preset_schemas, request_presets, method, openapi_settings,
+                                                         resolver))
     app = FlaskApp(
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions), "bearer": BearerRefusingSecurityHandler},
-        middlewares=[partial(ServedDocumentSwaggerUIMiddleware, document=served) if middleware is SwaggerUIMiddleware
+        middlewares=[partial(ServedDocumentsMiddleware, documents=documents) if middleware is SwaggerUIMiddleware
                      else middleware for middleware in ConnexionMiddleware.default_middlewares],
     )
     app.add_middleware(LineFeedPathMiddleware, position=MiddlewarePosition.BEFORE_ROUTING)
     app.add_middleware(BodyBufferingMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION)
     app.add_middleware(PresetMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION,
-                       signalling=preset_signalling(signalling, presets), request_presets=request_presets,
+                       signalling=method, request_presets=request_presets,
                        extensions=presets.extension_ids())
     app.add_middleware(
         CORSMiddleware,
@@ -138,7 +169,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         allow_headers=["*"],
     )
     app.add_api(spec, resolver=resolver, resolver_error=501,
-                validate_responses=True, swagger_ui_options=SwaggerUIOptions(swagger_ui_template_dir=str(SWAGGER_UI)),
+                validate_responses=True, swagger_ui_options=SwaggerUIOptions(swagger_ui_template_dir=str(SCALAR_UI)),
                 validator_map={
                     "body": MediaTypeDict({**VALIDATOR_MAP["body"], "*/*json": RppRequestBodyValidator}),
                     "response": MediaTypeDict({"*/*json": RppResponseBodyValidator}),
