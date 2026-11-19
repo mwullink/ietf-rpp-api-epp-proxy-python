@@ -6,6 +6,7 @@ from rpp.http.preset_header import HEADER as PRESET_HEADER
 from rpp.http.served_document import METHODS
 
 _COMPONENT_PARAMETERS = "#/components/parameters/"
+CONTENT_TYPE_PARAMETER = "rpp.PresetContentType"
 
 
 def _operations(document: dict):
@@ -51,3 +52,17 @@ def key_rpp_bodies(document: dict, media_type: str) -> None:
         for content in contents:
             if RPP_MEDIA_TYPE in content:
                 content[media_type] = content.pop(RPP_MEDIA_TYPE)
+
+
+def require_content_type(document: dict, media_type: str) -> None:
+    """Gives every operation without a request body a required `Content-Type` header parameter of `media_type` alone: the
+    request preset of such a request is that of its `Content-Type` too, the default preset without one (core §13). OAS 3.1
+    has a `Content-Type` header parameter ignored, but a UI that sends it (Scalar) then reads with the document's preset (#205)."""
+    document.setdefault("components", {}).setdefault("parameters", {})[CONTENT_TYPE_PARAMETER] = {
+        "name": "Content-Type", "in": "header", "required": True,
+        "description": "The preset of this request (media type signalling): a request without content is the default "
+                       "preset's without it.",
+        "schema": {"type": "string", "enum": [media_type], "default": media_type}}
+    for operation in _operations(document):
+        if "requestBody" not in operation:
+            operation.setdefault("parameters", []).append({"$ref": _COMPONENT_PARAMETERS + CONTENT_TYPE_PARAMETER})

@@ -5,7 +5,7 @@ from connexion import ProblemException
 from core.result.result_code import ResultCode
 from rpp.http import media_range
 from rpp.http.asgi_headers import request_values, rewriting_start, values_of, without
-from rpp.http.document_signalling import drop_preset_parameter, key_rpp_bodies
+from rpp.http.document_signalling import drop_preset_parameter, key_rpp_bodies, require_content_type
 from rpp.http.headers import RPP_MEDIA_TYPE, problem_headers
 from rpp.http.media_range import MediaRange
 from rpp.http.media_range_error import MediaRangeError
@@ -141,9 +141,11 @@ class MediaTypePresetSignalling:
 
     def state_in(self, document: dict, preset: OfferedPreset) -> None:
         """Makes `document`, the OpenAPI document of `preset` (#205), send it: every RPP body is keyed by the preset's media
-        type, which a client then sends as `Content-Type` and `Accept`, and `RPP-Preset`, which this method refuses, is left out."""
+        type, which a client then sends as `Content-Type` and `Accept`; an operation without a body has that media type as its
+        `Content-Type` parameter; and `RPP-Preset`, which this method refuses, is left out."""
         drop_preset_parameter(document)
         key_rpp_bodies(document, preset_media_type(preset))
+        require_content_type(document, preset_media_type(preset))
 
     def problem_headers(self, selection: PresetSelection, headers: dict) -> dict:
         """The headers of a Problem Detail rendered after the selection: no preset parameters, no `RPP-Preset`."""
