@@ -34,13 +34,20 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
   SHALL be ignored.
 - F8 Scalar `@scalar/api-reference` is MIT. 1.80.0 (tested) was published 2026-11-17; the newest release at least two weeks old
   is 1.76.4 (2026-10-30).
+- F9 1.76.4 rechecked (2026-11-19, same demo): the options of F6 exist and work (only "Test Request" visible, HTTP/1.1 and curl,
+  no request leaves the origin), the `sources` switcher changes the document, and Test Request on `POST /planets` of a header
+  document sends its `RPP-Preset`. The npm package has no LICENSE file; the MIT text is the repository's (`scalar/scalar`).
 
 ## Decisions (maintainer, 2026-11-19)
 
 - D1 One document per offered preset, for both signalling methods, shown with Scalar.
 - D2 Scalar with the reference and the test client only (F6), snippets HTTP/1.1 (default) and curl.
+- D3 (Q1) A preset's document is outside the RPP paths: `/openapi/{preset-id}.json` and `.yaml`.
+- D4 (Q2) The drafts' `Accept` header parameter stays in the served documents.
+- D5 (Q3) Scalar 1.76.4.
+- D6 (Q4) The findings go to #205 and `.spec/spec-issues.md`.
 
-## Proposed design (for acceptance)
+## Design (accepted 2026-11-19)
 
 - `served_document` is made for every offered preset when the app is built (its Preset Schema, its extensions, and the omit
   switches by the objects that preset holds). `/openapi.json` and `/openapi.yaml` stay the default preset's (unchanged).
@@ -56,8 +63,8 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 
 ## Tasks
 
-- [~] T0 Plan, findings, design for acceptance
-- [ ] T1 Tests first (unit): a document per offered preset, equal to `GET /presets/{id}/schema`'s definitions, valid 3.1; the
+- [x] T0 Plan, findings, design for acceptance
+- [~] T1 Tests first (unit): a document per offered preset, equal to `GET /presets/{id}/schema`'s definitions, valid 3.1; the
   signalling of each (header value / media type keys, no `RPP-Preset` under media-type); `/openapi.json` unchanged; a request
   under a non-default preset validated with its schemas (400 / 422 `02308`); `/ui/` serves Scalar with every preset, no
   external URL
@@ -69,9 +76,4 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 
 ## Open questions
 
-- Q1 The path of a preset's document: `/openapi/{preset-id}.json` and `.yaml` (outside the RPP paths), or
-  `/presets/{id}/openapi.json` (next to `/presets/{id}/schema`, inside the RPP namespace)?
-- Q2 The drafts' `Accept` header parameter (F7): leave it out of the served documents (OAS says to ignore it; routing keeps it),
-  or keep it?
-- Q3 Scalar version: 1.76.4 (at least two weeks old, to be re-checked against F4 to F6) or 1.80.0 (tested)?
-- Q4 May the findings be posted to #205 and recorded in `.spec/spec-issues.md` (acceptance criterion 1)?
+- none
