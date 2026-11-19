@@ -71,6 +71,15 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 - D8 (Q6) C1 accepted.
 - D9 (Q7) `swagger_ui_bundle` removed from requirements.txt.
 
+- D10 (review of #210) Serving the OpenAPI documents and the UI is no part of `rpp`: a top-level package `api_docs`
+  (Starlette, no Connexion, imports no project package) serves `/openapi.json`, `/openapi.yaml`, `/openapi/{preset-id}.json`
+  and `.yaml`, and `/ui/` (Scalar) in front of the rpp app, and passes every other request to it. `rpp` only makes the
+  documents: `create_app` returns an `RppApp` (a `FlaskApp`) whose `openapi_documents()` gives the default document (#204)
+  first, then one per offered preset, the default preset's first. `main.compose` puts them together (`Composition.app` is
+  what is served, `Composition.rpp_app` the rpp app). Contracts: `api-docs-standalone`; `rpp` never imports `api_docs`. A
+  document of a preset that is not offered is a plain 404 (was a Problem Detail); the line-feed guard no longer sees the
+  document and UI paths.
+
 ## Corrections
 
 - C1 The omit switch of unheld objects does not leave a demo object out of the base preset's document: the backend holds it
@@ -89,7 +98,12 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 - [x] T3 Scalar vendored and configured, Swagger UI removed
 - [x] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
   (findings); findings in #205
-- [~] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
+- [x] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
+- [~] T6 Tests first (D10): `api_docs` alone (fake app, plain documents: routes, base path, CORS, 404, passing on, lifespan);
+  the rpp app serves no document and gives `openapi_documents()`; the served-document tests through the composed app
+- [ ] T7 `api_docs` package, `RppApp`, `main.compose`; the serving parts leave `rpp`
+- [ ] T8 Contracts (`root_packages`, `api-docs-standalone`, `rpp` never imports `api_docs`), architecture.project.md, README
+- [ ] T9 Checks
 
 ## Check results (after D7-D9)
 

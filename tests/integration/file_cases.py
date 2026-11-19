@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 from dotenv import load_dotenv
+from starlette.testclient import TestClient
 
 from main import compose
 from settings.load_settings import load_settings
@@ -68,7 +69,7 @@ class EnvironmentRun:
     @functools.cached_property
     def composition(self):
         composition = compose(load_settings(str(REPOSITORY / self.environment.config)))
-        composition.app.app.config.update({"TESTING": True})
+        composition.rpp_app.app.config.update({"TESTING": True})
         return composition
 
     @property
@@ -224,7 +225,7 @@ def run_case(case, run: EnvironmentRun):
     """Runs a loaded case in the environment, in a test client of its own."""
     # The selectors are resolved first, then the placeholders, then the captures.
     # {test_start} is the start of this case, so the time windows in the data do not depend on suite length.
-    with run.app.test_client() as client:
+    with TestClient(run.app) as client:
         selected = with_rpp_headers(select(case, run.facts), run.environment)
         endpoint_test(client, process_placeholders(selected, run.environment,
                                                    started=datetime.datetime.now(datetime.UTC)),

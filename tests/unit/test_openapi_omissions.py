@@ -9,10 +9,12 @@ from types import SimpleNamespace
 import pytest
 from openapi_spec_validator import OpenAPIV31SpecValidator
 from openapi_spec_validator.validation.exceptions import ExtraParametersError
+from starlette.testclient import TestClient
 
 from core.session.session_pool import SessionPool
 from main import compose
 from rpp.http.app import create_app
+from tests.helper.api_docs import served_client
 from settings.load_settings import load_settings
 from settings.openapi_settings import OpenApiSettings
 from settings.sqlite_settings import SqliteSettings
@@ -25,7 +27,7 @@ DRAFT_OBJECTS = ("/domainNames", "/contacts", "/hosts")
 
 def app(profile, unheld=False, unimplemented=False):
     switches = SimpleNamespace(rpp_openapi_omit_unheld_objects=unheld, rpp_openapi_omit_unimplemented=unimplemented)
-    return create_app(SessionPool(lambda username, password: None), profile, openapi_settings=switches).test_client()
+    return served_client(create_app(SessionPool(lambda username, password: None), profile, openapi_settings=switches))
 
 
 def paths(client):
@@ -48,7 +50,7 @@ def demo(tmp_path_factory):
         rpp_sqlite_url=f"sqlite:///{tmp_path_factory.mktemp('omit') / 'demo.db'}",
         rpp_sqlite_clients=settings.sqlite.rpp_sqlite_clients))
     composition = compose(settings)
-    yield composition.app.test_client()
+    yield TestClient(composition.app)
     composition.sessions.close()
 
 

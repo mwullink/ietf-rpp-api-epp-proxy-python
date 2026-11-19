@@ -6,6 +6,7 @@ import re
 
 from openapi_spec_validator import OpenAPIV31SpecValidator
 from openapi_spec_validator.validation.exceptions import ExtraParametersError
+from starlette.testclient import TestClient
 
 from main import compose
 from settings.load_settings import load_settings
@@ -34,7 +35,7 @@ class Server:
         settings = dataclasses.replace(settings, sqlite=SqliteSettings(
             rpp_sqlite_url=f"sqlite:///{directory / (name + '.db')}", rpp_sqlite_clients=settings.sqlite.rpp_sqlite_clients))
         self.composition = compose(settings)
-        self.client = self.composition.app.test_client()
+        self.client = TestClient(self.composition.app)
         self.signalling = settings.preset_signalling
         self.default = settings.profile_layers[1]["default_preset"]
         self.counter = 0

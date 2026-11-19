@@ -7,6 +7,7 @@ import dataclasses
 import json
 
 import pytest
+from starlette.testclient import TestClient
 
 from main import compose
 from settings.load_settings import load_settings
@@ -46,7 +47,7 @@ class Server:
         self.settings = dataclasses.replace(settings, sqlite=SqliteSettings(
             rpp_sqlite_url=f"sqlite:///{directory / (name + '.db')}", rpp_sqlite_clients=settings.sqlite.rpp_sqlite_clients))
         self.composition = compose(self.settings)
-        self.client = self.composition.app.test_client()
+        self.client = TestClient(self.composition.app)
         self.signalling = self.settings.preset_signalling
         self.default = p(self.settings.profile_layers[1]["default_preset"])
         self.counter = 0

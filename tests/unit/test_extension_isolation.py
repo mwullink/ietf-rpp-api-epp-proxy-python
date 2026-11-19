@@ -8,6 +8,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
+from starlette.testclient import TestClient
 
 from main import compose
 from rpp.schema.extension_registration import check_names
@@ -23,7 +24,7 @@ def demo_settings(**changes):
 
 
 def spec_of(composition) -> dict:
-    return composition.app.test_client().get("/openapi.json").json()
+    return TestClient(composition.app).get("/openapi.json").json()
 
 
 def test_an_app_without_the_extension_has_no_planet_path_and_no_handler_of_it():

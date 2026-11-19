@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 import jinja2
 import pytest
 import yaml
+from starlette.testclient import TestClient
 
 from main import compose
 from settings.load_settings import load_settings
@@ -70,7 +71,7 @@ def test_the_proxy_starts_with_a_template(rendered, tmp_path):
 
     composition = compose(settings)
     try:
-        response = composition.app.test_client().get("/.well-known/rpp", headers={"RPP-Cltrid": "deploy-1"})
+        response = TestClient(composition.app).get("/.well-known/rpp", headers={"RPP-Cltrid": "deploy-1"})
         assert response.status_code == 200
     finally:
         composition.sessions.close()

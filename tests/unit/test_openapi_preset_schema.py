@@ -8,6 +8,7 @@ import yaml
 
 from core.session.session_pool import SessionPool
 from rpp.http.app import create_app
+from tests.helper.api_docs import served_client
 from tests.helper.openapi_documents import (
     CONFIGS,
     MEDIA_TYPE,
@@ -35,12 +36,12 @@ def servers(tmp_path_factory):
 
 @pytest.fixture(scope="module")
 def epp():
-    return create_app(SessionPool(lambda username, password: None), EPP_PROFILE).test_client()
+    return served_client(create_app(SessionPool(lambda username, password: None), EPP_PROFILE))
 
 
 @pytest.fixture(scope="module")
 def rri():
-    return create_app(SessionPool(lambda username, password: None), RRI_PROFILE).test_client()
+    return served_client(create_app(SessionPool(lambda username, password: None), RRI_PROFILE))
 
 
 def request_ref(doc, path, method="post"):

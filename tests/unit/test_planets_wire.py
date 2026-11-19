@@ -6,6 +6,7 @@ import json
 import sqlite3
 
 import pytest
+from starlette.testclient import TestClient
 
 from core.session.session_pool import SessionPool
 from main import compose
@@ -48,7 +49,7 @@ def client(composition, database):
     with sqlite3.connect(database) as connection:
         for table in ("messages", "satellites", "planet_transfers", "planets"):
             connection.execute(f"DELETE FROM {table}")
-    return composition.app.test_client()
+    return TestClient(composition.app)
 
 
 def basic(who: str) -> str:
