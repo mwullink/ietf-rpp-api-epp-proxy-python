@@ -64,11 +64,11 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 ## Tasks
 
 - [x] T0 Plan, findings, design for acceptance
-- [~] T1 Tests first (unit): a document per offered preset, equal to `GET /presets/{id}/schema`'s definitions, valid 3.1; the
+- [x] T1 Tests first (unit): a document per offered preset, equal to `GET /presets/{id}/schema`'s definitions, valid 3.1; the
   signalling of each (header value / media type keys, no `RPP-Preset` under media-type); `/openapi.json` unchanged; a request
   under a non-default preset validated with its schemas (400 / 422 `02308`); `/ui/` serves Scalar with every preset, no
   external URL
-- [ ] T2 Documents per preset and their routes
+- [~] T2 Documents per preset and their routes
 - [ ] T3 Scalar vendored and configured, Swagger UI removed
 - [ ] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
   (findings); findings in #205
