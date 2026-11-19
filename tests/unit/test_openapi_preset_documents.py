@@ -239,6 +239,52 @@ def test_under_media_type_signalling_the_media_type_of_a_document_selects_its_pr
     assert response.headers["Content-Type"] == key
 
 
+def content_type_parameters(doc, operation):
+    return [parameter for parameter in parameters(doc, operation) if parameter["name"].lower() == "content-type"]
+
+
+def test_under_media_type_signalling_an_operation_without_a_body_states_the_documents_preset_as_content_type(servers):
+    """The request preset of a request without a body is that of its Content-Type too (core §13): without one it is the
+    default preset. OAS 3.1 has a Content-Type header parameter ignored; Scalar sends it."""
+    doc = preset_document(servers["bound"].client, p("planets-atmosphere"))
+    key = body_key(doc, "/planets")
+    bodyless = [(path, method, operation) for path, method, operation in operations(doc) if "requestBody" not in operation]
+
+    assert bodyless
+    for path, method, operation in bodyless:
+        found = content_type_parameters(doc, operation)
+        assert len(found) == 1, (path, method, found)
+        assert found[0]["in"] == "header"
+        assert found[0]["required"] is True
+        assert found[0]["schema"]["enum"] == [key] and found[0]["schema"]["default"] == key
+    for path, method, operation in operations(doc):
+        if "requestBody" in operation:
+            assert content_type_parameters(doc, operation) == [], (path, method)
+
+
+def test_under_header_signalling_no_operation_has_a_content_type_parameter(servers):
+    doc = preset_document(servers["extended"].client, p("planets-atmosphere"))
+
+    assert all(content_type_parameters(doc, operation) == [] for _, _, operation in operations(doc))
+
+
+def test_under_media_type_signalling_the_content_type_of_a_read_selects_the_documents_preset(servers):
+    server = servers["bound"]
+    doc = preset_document(server.client, p("planets-atmosphere"))
+    key = content_type_parameters(doc, doc["paths"]["/planets/{id}"]["get"])[0]["schema"]["default"]
+    created = server.client.request("POST", "/planets", headers={**server.headers("planets"), "Content-Type": key, "Accept": key},
+                                    content=json.dumps(planet("oas-read", atmosphere=ATMOSPHERE)))
+    assert created.status_code == 201, created.text
+
+    plain = {name: value for name, value in server.headers("planets").items() if name != "Content-Type"}
+    without = server.client.get("/planets/oas-read", headers={**plain, "Accept": key})
+    response = server.client.get("/planets/oas-read", headers={**server.headers("planets"), "Content-Type": key, "Accept": key})
+
+    assert without.status_code == 400, without.text
+    assert response.status_code == 200, response.text
+    assert response.headers["Content-Type"] == key
+
+
 # --- /openapi.json stays the default preset's (#204)
 
 def test_the_default_document_is_unchanged_by_the_signalling(servers):
