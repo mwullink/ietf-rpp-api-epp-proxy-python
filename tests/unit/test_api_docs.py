@@ -109,3 +109,8 @@ def test_the_app_has_its_lifespan(app):
         pass
 
     assert app.lifespan == ["lifespan.startup", "lifespan.shutdown"]
+
+
+def test_a_trailing_line_feed_still_serves_a_document(client):
+    """As before #205 the line-feed guard of the rpp app (#98) does not refuse it: the document is served in front of it."""
+    assert client.get("/openapi.json%0A").json()["info"]["title"] == "default"

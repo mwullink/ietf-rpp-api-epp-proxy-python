@@ -41,8 +41,8 @@ def test_the_rpp_app_gives_the_default_document_then_one_per_offered_preset():
     documents = build_app().openapi_documents()
     presets = [document["info"]["x-rpp-preset"]["id"] for document in documents]
 
-    assert presets[0] == presets[1] == EPP_PROFILE.default_preset
-    assert sorted(presets[1:]) == sorted(EPP_PROFILE.presets)
+    assert presets[0] == presets[1] == f"urn:ietf:params:rpp:preset:{EPP_PROFILE.default_preset}"
+    assert sorted(presets[1:]) == sorted(f"urn:ietf:params:rpp:preset:{name}" for name in EPP_PROFILE.presets)
 
 
 def test_the_documents_given_are_copies():
