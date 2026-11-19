@@ -66,6 +66,11 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 - Routing and validation do not change (F2): the request is validated with the signalled preset's schemas, 400 / 422 `02308`
   as in #204.
 
+- D7 (Q5) Media-type signalling: every operation without a request body in a preset's document gets a required `Content-Type`
+  header parameter of the preset's media type (`require_content_type`).
+- D8 (Q6) C1 accepted.
+- D9 (Q7) `swagger_ui_bundle` removed from requirements.txt.
+
 ## Corrections
 
 - C1 The omit switch of unheld objects does not leave a demo object out of the base preset's document: the backend holds it
@@ -86,18 +91,17 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
   (findings); findings in #205
 - [~] T5 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
 
-## Check results (on cb74be8)
+## Check results (after D7-D9)
 
 - `lint-imports`: 28 kept, 0 broken.
-- Unit: 2889 passed.
-- Smoke: 152 passed, 440 skipped (selectors), 38 failed, all of `epp-docker`: `epp-server` does not resolve from this container
-  (`Name or service not known`, 401 `02200`), the backend's network is not joined since the restart. To rerun once it is.
-  MTEST pending for the maintainer (`rpp` changed).
+- Unit: 2892 passed (without `swagger_ui_bundle` installed).
+- Smoke: 190 passed, 440 skipped (selectors), the devcontainer joined to `epptest_epp_net`. MTEST pending for the maintainer
+  (`rpp` changed).
 - Browser (real `/ui/`, Scalar 1.76.4, `config.demo-extended.yaml` and `config.demo-bound.yaml`): the sources of every preset, the
   default first; `POST /planets` from the `planets-atmosphere` document 201 under both methods, with its `RPP-Preset` / media type;
   nothing loaded from another origin.
 
-## Open questions
+## Answered questions
 
 - Q5 F10: under media-type signalling, give the operations without a request body a `Content-Type` header parameter (required,
   the preset's media type) in a preset's document, so that a read from the UI uses the preset (against OAS's "SHALL be ignored",

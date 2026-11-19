@@ -434,7 +434,9 @@ each preset's Preset Schema (`preset_documents` in `app.py`, the default preset'
 preset does not contain left out (`outside_the_preset`: a request to them is a 400 under it), and the preset stated as the
 server's signalling takes it, so that a client or the UI sends it: the signalling method's `state_in` (`HeaderPresetSignalling`:
 `RPP-Preset` required, with the preset as its only value and default; `MediaTypePresetSignalling`: every RPP body keyed by
-`preset_media_type`, the media type a response is typed with, and no `RPP-Preset` parameter), with the places in the document
+`preset_media_type`, the media type a response is typed with, every operation without a request body given a required
+`Content-Type` header parameter of it, as such a request's preset is that of its `Content-Type` (OAS 3.1 has the parameter
+ignored, Scalar sends it), and no `RPP-Preset` parameter), with the places in the document
 found by `document_signalling`. `/openapi.json` stays the default preset's and states no preset. `ServedDocuments` holds them,
 `PresetDocument` one of them.
 Two switches (`OpenApiSettings`, off by default, a deviation from the drafts' API contract) leave operations out of it:

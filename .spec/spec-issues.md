@@ -632,7 +632,9 @@ they were. The proxy follows the proposals, with the following.
     does not send. Without it the request preset is the default one, and an `Accept` that names only the document's preset is a 400.
 - **Proxy:** one document per offered preset, `/openapi/{preset-id}.json` and `.yaml` (outside the RPP paths), stating the preset
   as the server's signalling takes it: header, `RPP-Preset` required with the preset as its only value; media type, every RPP body
-  keyed by the preset's media type and no `RPP-Preset` parameter. A preset's document leaves out the objects of extensions the
+  keyed by the preset's media type, no `RPP-Preset` parameter, and every operation without a request body given a required
+  `Content-Type` header parameter of that media type (against OpenAPI's "SHALL be ignored": Scalar sends it, and a read then has the
+  document's preset). A preset's document leaves out the objects of extensions the
   preset does not contain (a request to them is a 400 under it). `/openapi.json` stays the default preset's. `/ui/` is Scalar with a
   source per preset. Routing and validation are unchanged: Connexion routes with the bare media type, and the body validators
   validate with the signalled preset.
