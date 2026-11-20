@@ -40,7 +40,8 @@ are never staged.
 - [x] Docs: supported Pythons and the check (README, testing.project.md, process.project.md)
 - [x] Checks: lint-imports (29 kept), unit tests (2904 passed), MTEST reachable, smoke in every environment (190
   passed, 440 skipped by selectors or missing rri-local credentials), the script on 3.11-3.15 (all pass)
-- [~] Draft PR; the workflow's first run on GitHub
+- [x] Draft PR #215; the workflow passes on GitHub (3.11-3.15)
+- [~] Maintainer review; a run of the install on macOS with 3.14 by the reporter
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Open questions
