@@ -144,6 +144,7 @@ def test_a_client_that_is_unknown_or_has_a_wrong_password_is_refused(client):
     assert client.get("/planets/mars", headers=unknown).status_code == 401
 
 
+@pytest.mark.pyversions
 def test_create_and_read_a_planet(client):
     created = send(client, "POST", "/planets", body=planet())
 

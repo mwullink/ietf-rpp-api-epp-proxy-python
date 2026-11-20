@@ -42,7 +42,8 @@ and that the proxy starts with it. A change of keys also tells the maintainer to
 
 ## Checks before done
 
-There is no CI in this repository. Run these checks from the repository root, in this order:
+The only CI is the workflow of the supported Python versions (step 5), so run these checks locally from the repository
+root, in this order:
 
 1. `PYTHONPATH=src lint-imports`: the module boundaries, see
    [architecture.project.md](architecture.project.md#the-check).
@@ -61,6 +62,9 @@ There is no CI in this repository. Run these checks from the repository root, in
    reached (no `TEST_RRI_*` in `.env`, a machine not on the allowlist of both RegAccs, a refused login), run
    `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration`, record the MTEST run as pending in the plan with
    the reason, and hand it over to the maintainer.
+5. For a change to `requirements*.txt`, or to a test marked `pyversions`: `./test_python_versions.sh` (Docker), which
+   the workflow `.github/workflows/python-versions.yml` also runs on every PR. See
+   [testing.project.md](testing.project.md#supported-python-versions).
 
 ## Issue labels
 

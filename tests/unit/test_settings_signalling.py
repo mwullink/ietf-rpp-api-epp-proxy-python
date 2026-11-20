@@ -9,6 +9,7 @@ def write(tmp_path, extra=""):
     return str(path)
 
 
+@pytest.mark.pyversions
 def test_the_signalling_is_the_header_without_the_key(tmp_path):
     assert load_settings(write(tmp_path)).preset_signalling == "header"
 

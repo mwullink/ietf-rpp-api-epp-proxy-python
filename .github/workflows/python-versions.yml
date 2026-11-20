@@ -1,0 +1,18 @@
+# Installs requirements-dev.txt and runs the tests marked `pyversions` on every supported Python (#213).
+name: Python versions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./test_python_versions.sh

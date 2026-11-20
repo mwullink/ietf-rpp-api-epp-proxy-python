@@ -43,10 +43,11 @@ OPENAPI_SPEC = Path(__file__).parent.parent / "openapi.yaml"
 def parsed_spec() -> dict:
     """
     The OpenAPI document, parsed once per process with libyaml, because parsing it takes most of the time an app
-    takes to build (#112). Callers get it shared: copy it before handing it on.
+    takes to build (#112). Callers get it shared: copy it before handing it on. A PyYAML without libyaml (no wheel for
+    that Python, built without it) has no CSafeLoader: the pure Python loader is slower but gives the same document.
     """
     with OPENAPI_SPEC.open("rb") as spec:
-        return yaml.load(spec, Loader=yaml.CSafeLoader)
+        return yaml.load(spec, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
 
 
 def public_base_url(discovery_settings) -> str | None:

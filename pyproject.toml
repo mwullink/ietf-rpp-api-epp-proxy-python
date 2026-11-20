@@ -18,6 +18,7 @@ pythonpath = [
 markers = [
     "smoke: a happy path of each operation, run on every iteration: pytest -m smoke",
     "lazy_schemas: the test maps without an app, so a validator is built on first use (tests/conftest.py)",
+    "pyversions: one test per native or version-sensitive dependency, run on every supported Python by test_python_versions.sh",
 ]
 addopts = "--strict-markers --tb=short -p no:warnings"
 
