@@ -143,8 +143,8 @@ registers under the TLD `example`. It refuses a reused `clTRID`, also across ses
 
 To run the proxy against it:
 
-- **In the devcontainer:** join the devcontainer to the network (again after each rebuild), then run the proxy as in
-  [Running](#running):
+- **In the devcontainer:** the devcontainer joins the network when it starts. If the backend was not up then, join it
+  by hand, then run the proxy as in [Running](#running):
   ```
   docker network connect epptest_epp_net $(cat /etc/hostname)
   ```

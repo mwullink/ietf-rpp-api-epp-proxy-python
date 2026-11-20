@@ -45,6 +45,7 @@
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
     },
     "postCreateCommand": "python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt",
-    // re-own the mount on every start to keep it writable for the remote user.
-    "postStartCommand": "sudo chown -R vscode:vscode /home/vscode/"
+    // re-own the mount on every start to keep it writable for the remote user, and join the EPP backend's network
+    // (#111); joining fails when the container is on it already or the backend is not up, which does not stop the start.
+    "postStartCommand": "sudo chown -R vscode:vscode /home/vscode/ && (docker network connect epptest_epp_net $(cat /etc/hostname) || true)"
 }
