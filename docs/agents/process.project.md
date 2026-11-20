@@ -51,9 +51,16 @@ There is no CI in this repository. Run these checks from the repository root, in
    tests every environment whose credentials are in `.env`. See
    [testing.project.md](testing.project.md#test-data-format). The full run, `pytest -n 4` (about 40 minutes), only
    when the maintainer asks for it.
-4. For a change to `registry_adapter/rri/`, `core` or `rpp`: the smoke run includes DENIC MTEST, from a machine on
-   the allowlist of both RegAccs, before the PR leaves draft. A coder without such a machine runs
-   `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration` and records the MTEST run as pending in the plan.
+4. For a change to `registry_adapter/rri/`, `core` or `rpp`: the smoke run includes DENIC MTEST before the PR leaves
+   draft. Always check first, with one case, whether you (or the agent) can reach MTEST from where the checks run:
+   ```bash
+   RPP_TEST_ENV=rri-mtest pytest "tests/integration/file_cases.py::rri-mtest::domain_availability::test3-a_label"
+   ```
+   It logs in and sends one RRI CHECK, and creates nothing. If it passes, the smoke run of step 3 covers MTEST (its
+   credentials are in `.env`): record in the plan that it ran. Only if it does not pass, because MTEST cannot be
+   reached (no `TEST_RRI_*` in `.env`, a machine not on the allowlist of both RegAccs, a refused login), run
+   `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration`, record the MTEST run as pending in the plan with
+   the reason, and hand it over to the maintainer.
 
 ## Issue labels
 
