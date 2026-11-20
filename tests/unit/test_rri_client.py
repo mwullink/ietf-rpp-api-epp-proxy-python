@@ -41,6 +41,7 @@ class FakeTransport:
 CHECK = RegistryRequest(registry_denic_de_domain_5_0_check=Check(handle="x.de"))
 
 
+@pytest.mark.pyversions
 def test_login_is_the_first_request_and_holds_the_credentials_unlogged():
     transport = FakeTransport([reply(), reply()])
     client = RriClient(transport, "DENIC-1000022-RRI", "s3cret")

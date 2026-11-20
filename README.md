@@ -1,5 +1,9 @@
 ## Installation
 
+The proxy runs on every Python version that is still supported upstream, 3.11 to 3.15 at the time of writing
+([devguide.python.org/versions](https://devguide.python.org/versions/)). `./test_python_versions.sh` checks this with
+Docker: it installs `requirements-dev.txt` and runs a short set of unit tests on each of them.
+
 Create and activate python virtual environment
 ```
 python -m venv .venv

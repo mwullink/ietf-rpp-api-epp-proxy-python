@@ -1,4 +1,4 @@
 -r requirements.txt
 import-linter==2.16
-xsdata[cli]==25.7
+xsdata[cli]==26.1
 openapi-spec-validator==0.7.1

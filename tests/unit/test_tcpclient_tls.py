@@ -50,6 +50,7 @@ def test_verification_on_does_not_warn(caplog):
     assert caplog.text == ""
 
 
+@pytest.mark.pyversions
 @pytest.mark.parametrize("insecure_skip_verify", [False, True])
 def test_tls_1_2_is_the_minimum(insecure_skip_verify):
     context = new_tls_context(insecure_skip_verify=insecure_skip_verify)

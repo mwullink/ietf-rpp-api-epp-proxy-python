@@ -79,6 +79,7 @@ def test_contact_availability_get(available, status):
     assert response.json() == {"@type": "contactAvailability", "available": available}
 
 
+@pytest.mark.pyversions
 def test_contact_availability_gives_the_reason():
     reply = contact_check_reply(False, "<contact:reason>In use</contact:reason>")
 

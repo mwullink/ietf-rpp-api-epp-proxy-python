@@ -21,6 +21,7 @@ def reply(res_data=""):
     )
 
 
+@pytest.mark.pyversions
 def test_check():
     xml = host_check_xml("ns1.example.example", client_request_id="cl-1", ns_map=EPP_NS_MAP)
 
@@ -98,6 +99,7 @@ def parsed_info(addresses=""):
     return parse_host_response(reply(INFO.format(addresses=addresses)), "cl-1")
 
 
+@pytest.mark.pyversions
 def test_parse_info():
     response = parsed_info()
 
