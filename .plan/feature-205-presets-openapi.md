@@ -98,7 +98,7 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 - [x] T3 Scalar vendored and configured, Swagger UI removed
 - [x] T4 Docs: architecture.project.md (served document, line feed note, structure), README.md, `.spec/spec-issues.md`
   (findings); findings in #205
-- [x] T5 Checks: lint-imports, unit, smoke (MTEST run by the maintainer, see the check results)
+- [x] T5 Checks: lint-imports, unit, smoke (MTEST included, see the check results)
 - [x] T6 Tests first (D10): `api_docs` alone (fake app, plain documents: routes, base path, CORS, 404, passing on, lifespan);
   the rpp app serves no document and gives `openapi_documents()`; the served-document tests through the composed app
 - [x] T7 `api_docs` package, `RppApp`, `main.compose`; the serving parts leave `rpp`
@@ -109,7 +109,9 @@ the served document of #204 for each preset of `config.demo-extended.yaml`, a he
 
 - `lint-imports`: 29 kept, 0 broken (a probe import `api_docs -> rpp` and `rpp -> api_docs` each breaks its contract).
 - Unit: 2904 passed.
-- Smoke: 190 passed, 440 skipped (selectors). DENIC MTEST smoke (`RPP_TEST_ENV=rri-mtest pytest -n 4 -m smoke tests/integration`): run by the maintainer on a0ef906, successful (2026-11-20).
+- Smoke: 190 passed, 440 skipped (selectors, `rri-local` without credentials). The run covers `epp-docker` and DENIC MTEST
+  (`rri-mtest`: its credentials are in `.env`, this machine reaches it), so MTEST was not pending. The maintainer's own MTEST
+  smoke run on a0ef906: successful (2026-11-20).
 - uvicorn `main:app` on `config.demo-bound.yaml`: `/ui` 307, `/ui/`, `/ui/standalone.js`, `/openapi.json`, `.yaml`, a preset's
   document 200, an unknown preset 404, `/.well-known/rpp` 200 from the rpp app.
 - Browser (real `/ui/`, Scalar 1.76.4, `config.demo-extended.yaml` and `config.demo-bound.yaml`): the sources of every preset, the
