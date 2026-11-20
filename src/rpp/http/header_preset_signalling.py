@@ -5,6 +5,7 @@ from connexion import ProblemException
 from core.result.result_code import ResultCode
 from rpp.http import preset_header
 from rpp.http.asgi_headers import request_values, rewriting_start, values_of, without
+from rpp.http.document_signalling import preset_parameters
 from rpp.http.headers import problem_headers
 from rpp.http.preset_selection import PresetSelection
 from rpp.schema.offered_preset import OfferedPreset
@@ -61,6 +62,14 @@ class HeaderPresetSignalling:
                                                 preset_header.format_preset(preset).encode()),
                     (b"vary", preset_header.vary_with_preset(vary).encode("latin-1"))]
         return rewriting_start(send, rewrite)
+
+    def state_in(self, document: dict, preset: OfferedPreset) -> None:
+        """Makes `document`, the OpenAPI document of `preset` (#205), send it: its `RPP-Preset` is required, with the preset as
+        its only value and its default, as a response names it."""
+        value = preset_header.format_preset(preset)
+        for parameter in preset_parameters(document):
+            parameter["required"] = True
+            parameter["schema"] = {"type": "string", "enum": [value], "default": value}
 
     def problem_headers(self, selection: PresetSelection, headers: dict) -> dict:
         """The headers of a Problem Detail rendered after the selection."""

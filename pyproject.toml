@@ -25,7 +25,7 @@ addopts = "--strict-markers --tb=short -p no:warnings"
 [tool.importlinter]
 # main is a module, which import-linter cannot take as a root. An import of it is therefore seen as external and
 # forbidden by name.
-root_packages = ["core", "extensions", "registration", "registry_adapter", "rpp", "settings"]
+root_packages = ["api_docs", "core", "extensions", "registration", "registry_adapter", "rpp", "settings"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
@@ -34,7 +34,7 @@ name = "core imports only the standard library"
 type = "forbidden"
 source_modules = ["core"]
 forbidden_modules = [
-    "main", "registry_adapter", "rpp", "settings",
+    "api_docs", "main", "registry_adapter", "rpp", "settings",
     "connexion", "dataclasses_json", "flask", "jsonschema", "lxml", "starlette", "werkzeug", "xsdata", "yaml",
 ]
 
@@ -65,10 +65,10 @@ forbidden_modules = [
 
 [[tool.importlinter.contracts]]
 id = "rpp-not-registry-adapter"
-name = "rpp imports core only, never registry_adapter, XML or settings"
+name = "rpp imports core only, never registry_adapter, api_docs, XML or settings"
 type = "forbidden"
 source_modules = ["rpp"]
-forbidden_modules = ["main", "registry_adapter", "settings", "lxml", "xsdata"]
+forbidden_modules = ["api_docs", "main", "registry_adapter", "settings", "lxml", "xsdata"]
 
 [[tool.importlinter.contracts]]
 id = "rpp-layers"
@@ -84,12 +84,24 @@ type = "forbidden"
 source_modules = ["rpp.mapping", "rpp.dto", "rpp.schema"]
 forbidden_modules = ["rpp.handlers", "rpp.http", "connexion", "flask", "starlette", "werkzeug"]
 
+# The OpenAPI documents and the UI over them are served by api_docs in front of the rpp app (#205): it takes the documents as
+# plain dicts (main hands them over) and knows nothing of RPP, of the backends or of Connexion.
+[[tool.importlinter.contracts]]
+id = "api-docs-standalone"
+name = "api_docs imports no other package of the proxy and no web framework but Starlette"
+type = "forbidden"
+source_modules = ["api_docs"]
+forbidden_modules = [
+    "core", "extensions", "main", "registration", "registry_adapter", "rpp", "settings",
+    "connexion", "flask", "werkzeug",
+]
+
 [[tool.importlinter.contracts]]
 id = "registry-adapter-not-rpp"
 name = "registry_adapter never imports rpp, core.flows, core.session, settings or a web framework"
 type = "forbidden"
 source_modules = ["registry_adapter"]
-forbidden_modules = ["core.flows", "core.session", "main", "rpp", "settings", "connexion", "dataclasses_json", "flask", "jsonschema", "starlette", "werkzeug"]
+forbidden_modules = ["api_docs", "core.flows", "core.session", "main", "rpp", "settings", "connexion", "dataclasses_json", "flask", "jsonschema", "starlette", "werkzeug"]
 
 [[tool.importlinter.contracts]]
 id = "epp-layers"
@@ -121,7 +133,7 @@ id = "settings-standalone"
 name = "settings imports no project package, and only main imports settings"
 type = "forbidden"
 source_modules = ["settings"]
-forbidden_modules = ["core", "main", "registry_adapter", "rpp"]
+forbidden_modules = ["api_docs", "core", "main", "registry_adapter", "rpp"]
 
 [[tool.importlinter.contracts]]
 id = "protocols-independent"
@@ -153,14 +165,14 @@ id = "registration-standalone"
 name = "registration imports no other package of the proxy"
 type = "forbidden"
 source_modules = ["registration"]
-forbidden_modules = ["core", "extensions", "main", "registry_adapter", "rpp", "settings"]
+forbidden_modules = ["api_docs", "core", "extensions", "main", "registry_adapter", "rpp", "settings"]
 
 [[tool.importlinter.contracts]]
 id = "generic-not-extensions"
 name = "No generic package imports an extension"
 type = "forbidden"
 source_modules = [
-    "core", "registration", "rpp", "settings", "registry_adapter.common", "registry_adapter.epp", "registry_adapter.rri",
+    "api_docs", "core", "registration", "rpp", "settings", "registry_adapter.common", "registry_adapter.epp", "registry_adapter.rri",
     "registry_adapter.sqlite.client_directory", "registry_adapter.sqlite.clock", "registry_adapter.sqlite.common_part",
     "registry_adapter.sqlite.extension_part", "registry_adapter.sqlite.gateways", "registry_adapter.sqlite.hash_password",
     "registry_adapter.sqlite.member_hook", "registry_adapter.sqlite.member_refused", "registry_adapter.sqlite.message_store",
@@ -219,7 +231,7 @@ name = "The core of an extension imports the core of the proxy and the standard 
 type = "forbidden"
 source_modules = ["extensions.planets.core", "extensions.planet_atmosphere.core", "extensions.satellite_orbit.core"]
 forbidden_modules = [
-    "main", "registration", "registry_adapter", "rpp", "settings", "extensions.planets.rpp",
+    "api_docs", "main", "registration", "registry_adapter", "rpp", "settings", "extensions.planets.rpp",
     "extensions.planet_atmosphere.rpp", "extensions.satellite_orbit.rpp", "sqlalchemy",
     "connexion", "dataclasses_json", "flask", "jsonschema", "lxml", "starlette", "werkzeug", "xsdata", "yaml",
 ]

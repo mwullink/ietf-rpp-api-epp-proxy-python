@@ -3,6 +3,7 @@ the extensions and the profiles that apply, discovery, and an app whose configur
 import base64
 
 import pytest
+from starlette.testclient import TestClient
 
 from registration import load_extensions
 from rpp.schema.definitions import Definitions
@@ -34,7 +35,7 @@ def extension(key):
 @pytest.fixture(scope="module")
 def client(tmp_path_factory):
     composition = demo_composition(tmp_path_factory.mktemp("demo") / "demo.db", bound={"planets-complete": ["catalogued-satellites"]})
-    yield composition.app.test_client()
+    yield TestClient(composition.app)
     composition.sessions.close()
 
 
@@ -94,7 +95,7 @@ def test_an_app_without_the_orbit_extension_starts_and_does_not_know_the_presets
     presets = ("planets", "planets-atmosphere", "catalogued-planets", "habitable-worlds")
     composition = demo_composition(tmp_path / "demo.db", extensions=(PLANETS, ATMOSPHERE), presets=presets)
     try:
-        client = composition.app.test_client()
+        client = TestClient(composition.app)
 
         assert read(client, f"/presets/{preset('habitable-worlds')}").status_code == 200
         assert read(client, f"/presets/{preset('planets-orbits')}").status_code == 404

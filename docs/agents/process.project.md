@@ -18,7 +18,7 @@ python -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt     # requirements.txt plus the development tools
 
 # Run the server (from src/: config.yaml is read relative to the working directory)
-cd src && uvicorn main:app        # Swagger UI at http://127.0.0.1:8000/ui/
+cd src && uvicorn main:app        # API documentation (Scalar) at http://127.0.0.1:8000/ui/
 
 # Docker
 docker build . -f ./.docker/Dockerfile -t pawelk/rpp_server_epp_proxy

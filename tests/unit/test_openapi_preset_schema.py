@@ -1,68 +1,28 @@
-"""#204: the OpenAPI document a deployment serves (`/openapi.json`, `/openapi.yaml`, `/ui/`) is OpenAPI 3.1 and carries, for each
+"""#204: the OpenAPI document a deployment serves (`/openapi.json`, `/openapi.yaml`) is OpenAPI 3.1 and carries, for each
 operation, the request and response body schemas of the default preset's Preset Schema, the same as `GET /presets/{id}/schema`
 publishes it (the members of its extensions and the constraints of its applicable profiles). Connexion validates a body with the
 schemas of the preset the request signals, and the results stay those of two-step validation: 400 for a body that breaks the
 preset schema, 422 `02308` for one that breaks only a profile constraint."""
-import base64
-import dataclasses
-import json
-import re
-
 import pytest
 import yaml
-from openapi_spec_validator import OpenAPIV31SpecValidator
-from openapi_spec_validator.validation.exceptions import ExtraParametersError
 
 from core.session.session_pool import SessionPool
-from main import compose
 from rpp.http.app import create_app
-from settings.load_settings import load_settings
-from settings.sqlite_settings import SqliteSettings
+from tests.helper.api_docs import served_client
+from tests.helper.openapi_documents import (
+    CONFIGS,
+    MEDIA_TYPE,
+    SCHEMAS,
+    Server,
+    assert_holds_the_preset_schema,
+    assert_valid_openapi_3_1,
+    definition,
+    document,
+    in_components,
+    p,
+    preset_defs,
+)
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
-from tests.helper.test_environment import REPOSITORY
-
-MEDIA_TYPE = "application/rpp+json"
-BASIC = "Basic " + base64.b64encode(b"demo-a:demo-a-password").decode()
-SCHEMAS = "#/components/schemas/"
-
-CONFIGS = {
-    "bare": "config.demo.yaml", "extended": "config.demo-extended.yaml", "bound": "config.demo-bound.yaml",
-    "inherit": "config.demo-inherit.yaml",
-}
-
-
-def p(key):
-    return f"org.example.rpp.preset.{key}"
-
-
-class Server:
-    """An app composed from a demo configuration file, with a database file of its own."""
-
-    def __init__(self, name, directory):
-        settings = load_settings(str(REPOSITORY / CONFIGS[name]))
-        settings = dataclasses.replace(settings, sqlite=SqliteSettings(
-            rpp_sqlite_url=f"sqlite:///{directory / (name + '.db')}", rpp_sqlite_clients=settings.sqlite.rpp_sqlite_clients))
-        self.composition = compose(settings)
-        self.client = self.composition.app.test_client()
-        self.signalling = settings.preset_signalling
-        self.default = settings.profile_layers[1]["default_preset"]
-        self.counter = 0
-
-    def headers(self, preset):
-        self.counter += 1
-        headers = {"Authorization": BASIC, "RPP-Cltrid": f"oas-{self.counter}"}
-        if self.signalling == "header":
-            headers.update({"Accept": MEDIA_TYPE, "Content-Type": MEDIA_TYPE, "RPP-Preset": f"preset={p(preset)};version=1.0"})
-        else:
-            typed = f'{MEDIA_TYPE}; preset="{p(preset)}"; preset-version="1.0"'
-            headers.update({"Accept": typed, "Content-Type": typed})
-        return headers
-
-    def post(self, url, body, preset):
-        return self.client.request("POST", url, headers=self.headers(preset), content=json.dumps(body))
-
-    def get(self, url, preset):
-        return self.client.get(url, headers=self.headers(preset))
 
 
 @pytest.fixture(scope="module")
@@ -76,29 +36,12 @@ def servers(tmp_path_factory):
 
 @pytest.fixture(scope="module")
 def epp():
-    return create_app(SessionPool(lambda username, password: None), EPP_PROFILE).test_client()
+    return served_client(create_app(SessionPool(lambda username, password: None), EPP_PROFILE))
 
 
 @pytest.fixture(scope="module")
 def rri():
-    return create_app(SessionPool(lambda username, password: None), RRI_PROFILE).test_client()
-
-
-def document(client):
-    response = client.get("/openapi.json")
-    assert response.status_code == 200, response.text
-    return response.json()
-
-
-def preset_defs(client, preset_id):
-    response = client.get(f"/presets/{preset_id}/schema", headers={"Accept": "application/schema+json"})
-    assert response.status_code == 200, response.text
-    return response.json()["$defs"]
-
-
-def in_components(schema):
-    """A definition of a Preset Schema as the OpenAPI document holds it: its references point into `components/schemas`."""
-    return json.loads(re.sub(r'"#/\$defs/', f'"{SCHEMAS}', json.dumps(schema)))
+    return served_client(create_app(SessionPool(lambda username, password: None), RRI_PROFILE))
 
 
 def request_ref(doc, path, method="post"):
@@ -109,28 +52,8 @@ def response_ref(doc, path, method, status):
     return doc["paths"][path][method]["responses"][status]["content"][MEDIA_TYPE]["schema"]["$ref"]
 
 
-def definition(doc, ref):
-    assert ref.startswith(SCHEMAS), ref
-    return doc["components"]["schemas"][ref[len(SCHEMAS):]]
-
-
-def assert_holds_the_preset_schema(doc, defs):
-    """Every definition of the Preset Schema is in the document, the same as published."""
-    schemas = doc["components"]["schemas"]
-    for key, schema in defs.items():
-        assert key in schemas, key
-        assert schemas[key] == in_components(schema), key
-
 
 # --- the document is OpenAPI 3.1, valid, and the same as JSON and YAML
-
-def assert_valid_openapi_3_1(doc):
-    """Valid OpenAPI 3.1. `ExtraParametersError` is a check of the validator's own, not of the specification: a `required` that
-    names a member another schema of an `allOf` declares, which a Profile Schema does (`profile.address` requires
-    `countryCode`), is valid JSON Schema."""
-    assert doc["openapi"] == "3.1.0"
-    errors = [str(error) for error in OpenAPIV31SpecValidator(doc).iter_errors() if not isinstance(error, ExtraParametersError)]
-    assert errors == []
 
 def test_the_document_served_is_valid_openapi_3_1(epp, rri):
     assert_valid_openapi_3_1(document(rri))
@@ -286,14 +209,3 @@ def test_a_body_of_another_type_is_a_400_with_02001(servers):
 
     assert response.status_code == 400, response.text
     assert response.headers["RPP-Code"] == "02001"
-
-
-# --- Swagger UI 5, which renders OpenAPI 3.1
-
-def test_swagger_ui_is_served_in_a_version_that_renders_openapi_3_1(epp):
-    page = epp.get("/ui/")
-    assert page.status_code == 200
-    assert "/openapi.json" in page.text
-    bundle = epp.get("/ui/swagger-ui-bundle.js")
-    assert bundle.status_code == 200
-    assert "isOAS31" in bundle.text

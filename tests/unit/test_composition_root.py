@@ -90,12 +90,12 @@ def test_the_composition_root_gives_discovery_the_configuration():
 
 
 def test_the_composition_root_hands_the_configuration_to_the_app():
-    assert main.app.app.config["RPP_DISCOVERY_SETTINGS"] is settings.discovery
+    assert main.rpp_app.app.config["RPP_DISCOVERY_SETTINGS"] is settings.discovery
 
 
 @epp_only
 def test_the_app_offers_the_configured_lgrs():
-    assert main.app.app.config["RPP_BACKEND_PROFILE"].lgrs == tuple(sorted(settings.epp.rpp_idn_lgr_tables or {}))
+    assert main.rpp_app.app.config["RPP_BACKEND_PROFILE"].lgrs == tuple(sorted(settings.epp.rpp_idn_lgr_tables or {}))
 
 
 @epp_only
@@ -113,6 +113,6 @@ def test_compose_builds_an_app_for_other_settings():
 
     assert rri.settings.backend == "rri"
     assert rri.app is not main.app
-    assert rri.app.app.config["RPP_BACKEND_PROFILE"] is rri.profile
+    assert rri.rpp_app.app.config["RPP_BACKEND_PROFILE"] is rri.profile
     assert isinstance(rri.new_backend("user", "pw"), RriBackend)
     assert isinstance(rri.sessions, SessionPool)

@@ -5,6 +5,7 @@ from connexion import ProblemException
 from core.result.result_code import ResultCode
 from rpp.http import media_range
 from rpp.http.asgi_headers import request_values, rewriting_start, values_of, without
+from rpp.http.document_signalling import drop_preset_parameter, key_rpp_bodies, require_content_type
 from rpp.http.headers import RPP_MEDIA_TYPE, problem_headers
 from rpp.http.media_range import MediaRange
 from rpp.http.media_range_error import MediaRangeError
@@ -16,6 +17,11 @@ from rpp.schema.offered_presets import OfferedPresets
 
 # What a media range of an Accept says about a preset, from the least to the most specific (RFC 9110 §12.5.1).
 ANY, ANY_APPLICATION, DEFAULT_ONLY, EXACT = 0, 1, 2, 3
+
+
+def preset_media_type(preset: OfferedPreset) -> str:
+    """The RPP media type with the parameters of `preset` (core §Media Type Signalling), as a response is typed with it."""
+    return f'{RPP_MEDIA_TYPE}; preset="{preset.id}"; preset-version="{preset.version}"'
 
 
 def _refused(status: int, code: ResultCode, detail: str) -> ProblemException:
@@ -122,8 +128,7 @@ class MediaTypePresetSignalling:
     def announce(self, send, selection: PresetSelection):
         """`send` that gives an RPP response (a Problem Detail is another media type) the preset applied in its
         `Content-Type` (core §Media Type Signalling), and lists `Accept` in `Vary`."""
-        preset = selection.response
-        applied = f'{RPP_MEDIA_TYPE}; preset="{preset.id}"; preset-version="{preset.version}"'
+        applied = preset_media_type(selection.response)
 
         def rewrite(status, headers):
             vary = ", ".join(values_of(headers, "Vary"))
@@ -133,6 +138,14 @@ class MediaTypePresetSignalling:
                 headers = [*without(headers, "Content-Type"), (b"content-type", applied.encode("latin-1"))]
             return headers
         return rewriting_start(send, rewrite)
+
+    def state_in(self, document: dict, preset: OfferedPreset) -> None:
+        """Makes `document`, the OpenAPI document of `preset` (#205), send it: every RPP body is keyed by the preset's media
+        type, which a client then sends as `Content-Type` and `Accept`; an operation without a body has that media type as its
+        `Content-Type` parameter; and `RPP-Preset`, which this method refuses, is left out."""
+        drop_preset_parameter(document)
+        key_rpp_bodies(document, preset_media_type(preset))
+        require_content_type(document, preset_media_type(preset))
 
     def problem_headers(self, selection: PresetSelection, headers: dict) -> dict:
         """The headers of a Problem Detail rendered after the selection: no preset parameters, no `RPP-Preset`."""

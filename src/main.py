@@ -7,6 +7,7 @@ from dataclasses import dataclass
 
 from core.capabilities.backend_profile import BackendProfile
 from core.session.session_pool import SessionPool
+from api_docs.docs_app import DocsApp
 from registry_adapter.common.transport.tcp_client import LENGTH_OF_PAYLOAD, TCPClient
 from registry_adapter.common.transport.tls import new_tls_context
 from registry_adapter.epp.gateways.epp_backend import EppBackend
@@ -22,6 +23,7 @@ from registry_adapter.sqlite.sqlite_database import SqliteDatabase
 from registration import ExtensionRegistry
 from registry_setup import backend_profile, load_registry
 from rpp.http.app import create_app
+from rpp.http.rpp_app import RppApp
 from settings.load_settings import load_settings
 from settings.settings import Settings
 
@@ -54,7 +56,8 @@ class Composition:
     new_epp_client: Callable
     new_backend: Callable
     sessions: SessionPool
-    app: object
+    app: object  # what is served: the documents and the UI (api_docs) in front of rpp_app (#205)
+    rpp_app: RppApp
     registry: ExtensionRegistry
 
 
@@ -101,11 +104,11 @@ def compose(settings: Settings) -> Composition:
     }
     new_backend = backends[settings.backend]()
     sessions = SessionPool(new_backend)
-    app = create_app(sessions, profile, discovery_settings=settings.discovery,
-                     signalling=settings.preset_signalling, registry=registry, openapi_settings=settings.openapi)
+    rpp_app = create_app(sessions, profile, discovery_settings=settings.discovery,
+                         signalling=settings.preset_signalling, registry=registry, openapi_settings=settings.openapi)
     return Composition(settings=settings, profile=profile, tls_context=tls_context, idn_tables=idn_tables,
-                       new_epp_client=new_epp_client, new_backend=new_backend, sessions=sessions, app=app,
-                       registry=registry)
+                       new_epp_client=new_epp_client, new_backend=new_backend, sessions=sessions,
+                       app=DocsApp(rpp_app, rpp_app.openapi_documents()), rpp_app=rpp_app, registry=registry)
 
 
 # The app of the settings loaded once (RPP_CONFIG_FILE, else config.yaml), which uvicorn serves as `main:app`.
@@ -117,3 +120,4 @@ profile = default.profile
 new_epp_client = default.new_epp_client
 new_backend = default.new_backend
 app = default.app
+rpp_app = default.rpp_app

@@ -7,6 +7,7 @@ import json
 import sqlite3
 
 import pytest
+from starlette.testclient import TestClient
 
 from tests.helper.demo_app import demo_composition
 
@@ -35,7 +36,7 @@ def app(composition):
         for table in connection.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT IN "
                                         "('schema_versions') AND name NOT LIKE 'sqlite_%'").fetchall():
             connection.execute(f"DELETE FROM {table[0]}")
-    return Demo(composition.app.test_client())
+    return Demo(TestClient(composition.app))
 
 
 class Demo:
@@ -287,7 +288,7 @@ def typed(key):
 @pytest.fixture(scope="module")
 def media_type_app(tmp_path_factory):
     composition = demo_composition(tmp_path_factory.mktemp("demo") / "demo.db", signalling="media-type")
-    yield composition.app.test_client()
+    yield TestClient(composition.app)
     composition.sessions.close()
 
 
