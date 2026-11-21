@@ -1,16 +1,16 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Optional
 
 __NAMESPACE__ = "http://registry.denic.de/dnsentry/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DnsentryBaseType:
     class Meta:
         name = "dnsentryBaseType"
 
-    owner: Optional[str] = field(
-        default=None,
+    owner: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/dnsentry/5.0",
@@ -18,143 +18,131 @@ class DnsentryBaseType:
             "min_length": 1,
             "max_length": 254,
             "pattern": r"([*a-zA-Z0-9\-]+\.)+[*a-zA-Z0-9\-]*|(\.)",
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class A(DnsentryBaseType):
-    rdata: Optional["A.Rdata"] = field(
-        default=None,
+    rdata: A.Rdata = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/dnsentry/5.0",
             "required": True,
-        },
+        }
     )
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Rdata:
-        address: Optional[str] = field(
-            default=None,
+        address: str = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
                 "min_length": 3,
                 "max_length": 39,
-            },
+            }
         )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Aaaa(DnsentryBaseType):
     class Meta:
         name = "AAAA"
 
-    rdata: Optional["Aaaa.Rdata"] = field(
-        default=None,
+    rdata: Aaaa.Rdata = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/dnsentry/5.0",
             "required": True,
-        },
+        }
     )
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Rdata:
-        address: Optional[str] = field(
-            default=None,
+        address: str = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
                 "min_length": 3,
                 "max_length": 39,
-            },
+            }
         )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Dnskey(DnsentryBaseType):
     class Meta:
         name = "DNSKEY"
 
-    rdata: Optional["Dnskey.Rdata"] = field(
-        default=None,
+    rdata: Dnskey.Rdata = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/dnsentry/5.0",
             "required": True,
-        },
+        }
     )
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Rdata:
-        flags: Optional[int] = field(
-            default=None,
+        flags: int = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
-            },
+            }
         )
-        protocol: Optional[int] = field(
-            default=None,
+        protocol: int = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
-            },
+            }
         )
-        algorithm: Optional[int] = field(
-            default=None,
+        algorithm: int = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
-            },
+            }
         )
-        public_key: Optional[bytes] = field(
-            default=None,
+        public_key: bytes = field(
             metadata={
                 "name": "publicKey",
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
                 "format": "base64",
-            },
+            }
         )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Mx(DnsentryBaseType):
     class Meta:
         name = "MX"
 
-    rdata: Optional["Mx.Rdata"] = field(
-        default=None,
+    rdata: Mx.Rdata = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/dnsentry/5.0",
             "required": True,
-        },
+        }
     )
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Rdata:
-        preference: Optional[int] = field(
-            default=None,
+        preference: int = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
                 "required": True,
                 "min_inclusive": 0,
                 "max_inclusive": 999,
-            },
+            }
         )
-        exchange: Optional[str] = field(
-            default=None,
+        exchange: str = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
@@ -162,28 +150,26 @@ class Mx(DnsentryBaseType):
                 "min_length": 1,
                 "max_length": 254,
                 "pattern": r"([*a-zA-Z0-9\-]+\.)+[*a-zA-Z0-9\-]*|(\.)",
-            },
+            }
         )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Ns(DnsentryBaseType):
     class Meta:
         name = "NS"
 
-    rdata: Optional["Ns.Rdata"] = field(
-        default=None,
+    rdata: Ns.Rdata = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/dnsentry/5.0",
             "required": True,
-        },
+        }
     )
 
-    @dataclass
+    @dataclass(kw_only=True)
     class Rdata:
-        nameserver: Optional[str] = field(
-            default=None,
+        nameserver: str = field(
             metadata={
                 "type": "Element",
                 "namespace": "http://registry.denic.de/dnsentry/5.0",
@@ -191,7 +177,7 @@ class Ns(DnsentryBaseType):
                 "min_length": 1,
                 "max_length": 254,
                 "pattern": r"([*a-zA-Z0-9\-]+\.)+[*a-zA-Z0-9\-]*|(\.)",
-            },
+            }
         )
         address: list[str] = field(
             default_factory=list,
@@ -214,7 +200,7 @@ class Ns(DnsentryBaseType):
         )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Dnsentry(DnsentryBaseType):
     class Meta:
         name = "dnsentry"

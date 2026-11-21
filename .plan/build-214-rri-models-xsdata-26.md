@@ -17,7 +17,13 @@ are never staged.
 - F4 A static scan of every construction of a generated class in `registry_adapter/rri` and `tests` finds no other
   missing required field; the constructions with `**kwargs` are covered by the passing unit tests.
 - F5 Risk: a reply without an element the XSD requires parsed with `None` before and may fail now; only replies from
-  MTEST show it.
+  MTEST show it. The full MTEST run shows no such reply (F7).
+- F6 A first full MTEST run was void: `config.rri-mtest.local.yaml` (untracked, not from this branch) appeared during
+  it and pointed rri-mtest to a local RRI at 172.17.0.9 (connection refused). Renamed to `.off` for the rerun on the
+  maintainer's word, restored afterwards.
+- F7 Full `rri-mtest` run: 249 passed, 2 failed, 4215 skipped. Both failures also fail with main's models and code:
+  `limits_contact/test16-email_without_at` (500 from `83000000004`, #139) and
+  `preset_signalling_media_type/test2-base_refuses_the_rri_specifics` (400 `02001` where the case expects 501, #221).
 
 ## Decisions (maintainer, 2026-11-20)
 
@@ -29,9 +35,10 @@ are never staged.
 ## Tasks
 
 - [x] Regenerate; the 3 failing tests (F2); the queue fix
-- [~] Checks: lint-imports, unit tests, smoke (MTEST reachable first), test_python_versions.sh
-- [ ] Full `rri-mtest` run
-- [ ] Draft PR
+- [x] Checks: lint-imports (29 kept), unit tests (2904 passed), MTEST reachable, smoke in every environment (190
+  passed, 440 skipped), test_python_versions.sh (3.11-3.15 pass)
+- [x] Full `rri-mtest` run (F7)
+- [~] Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Open questions

@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 from xsdata.models.datatype import XmlDateTime
 
@@ -11,24 +12,23 @@ from registry_adapter.rri.xml.generated.verification_5_0 import (
 __NAMESPACE__ = "http://registry.denic.de/contact/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CheckInfoType:
     class Meta:
         name = "checkInfoType"
 
-    handle: Optional[str] = field(
+    handle: None | str = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
-            "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*\-[\-\.a-zA-Z0-9]+",
         },
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Handle:
     class Meta:
         name = "handle"
@@ -44,7 +44,7 @@ class Handle:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NormalizedStringPrivacyType:
     class Meta:
         name = "normalizedStringPrivacyType"
@@ -69,7 +69,7 @@ class StatusType(Enum):
     INVALID = "invalid"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TokenPrivacyType:
     class Meta:
         name = "tokenPrivacyType"
@@ -82,113 +82,111 @@ class TokenPrivacyType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class AddressType(NormalizedStringPrivacyType):
     class Meta:
         name = "addressType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Check(CheckInfoType):
     class Meta:
         name = "check"
         namespace = "http://registry.denic.de/contact/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CheckDataType:
     class Meta:
         name = "checkDataType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*\-[\-\.a-zA-Z0-9]+",
-        },
+        }
     )
-    status: Optional[StatusType] = field(
-        default=None,
+    status: StatusType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CityType(NormalizedStringPrivacyType):
     class Meta:
         name = "cityType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CountryCodeType(TokenPrivacyType):
     class Meta:
         name = "countryCodeType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class EmailType(TokenPrivacyType):
     class Meta:
         name = "emailType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Info(CheckInfoType):
     class Meta:
         name = "info"
         namespace = "http://registry.denic.de/contact/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NameType(NormalizedStringPrivacyType):
     class Meta:
         name = "nameType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class OrganisationType(NormalizedStringPrivacyType):
     class Meta:
         name = "organisationType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PhoneType(NormalizedStringPrivacyType):
     class Meta:
         name = "phoneType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PostalCodeType(TokenPrivacyType):
     class Meta:
         name = "postalCodeType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TypeType(TokenPrivacyType):
     class Meta:
         name = "typeType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class UriTemplateType(NormalizedStringPrivacyType):
     class Meta:
         name = "uriTemplateType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CheckData(CheckDataType):
     class Meta:
         name = "checkData"
         namespace = "http://registry.denic.de/contact/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NillablePostalType:
     class Meta:
         name = "nillablePostalType"
@@ -201,35 +199,32 @@ class NillablePostalType:
             "min_occurs": 1,
         },
     )
-    postal_code: Optional[PostalCodeType] = field(
-        default=None,
+    postal_code: PostalCodeType = field(
         metadata={
             "name": "postalCode",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    city: Optional[CityType] = field(
-        default=None,
+    city: CityType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    country_code: Optional[CountryCodeType] = field(
-        default=None,
+    country_code: CountryCodeType = field(
         metadata={
             "name": "countryCode",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PostalType:
     class Meta:
         name = "postalType"
@@ -242,59 +237,54 @@ class PostalType:
             "min_occurs": 1,
         },
     )
-    postal_code: Optional[PostalCodeType] = field(
-        default=None,
+    postal_code: PostalCodeType = field(
         metadata={
             "name": "postalCode",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    city: Optional[CityType] = field(
-        default=None,
+    city: CityType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    country_code: Optional[CountryCodeType] = field(
-        default=None,
+    country_code: CountryCodeType = field(
         metadata={
             "name": "countryCode",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CreateType:
     class Meta:
         name = "createType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*\-[\-\.a-zA-Z0-9]+",
-        },
+        }
     )
-    type_value: Optional[TypeType] = field(
-        default=None,
+    type_value: TypeType = field(
         metadata={
             "name": "type",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    name: Optional[NameType] = field(
+    name: None | NameType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -308,7 +298,7 @@ class CreateType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    postal: Optional[PostalType] = field(
+    postal: None | PostalType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -322,14 +312,14 @@ class CreateType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    phone: Optional[PhoneType] = field(
+    phone: None | PhoneType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    uri_template: Optional[UriTemplateType] = field(
+    uri_template: None | UriTemplateType = field(
         default=None,
         metadata={
             "name": "uri-template",
@@ -348,29 +338,27 @@ class CreateType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class InfoDataType:
     class Meta:
         name = "infoDataType"
 
-    handle: Optional[Handle] = field(
-        default=None,
+    handle: Handle = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    type_value: Optional[TypeType] = field(
-        default=None,
+    type_value: TypeType = field(
         metadata={
             "name": "type",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    name: Optional[NameType] = field(
+    name: None | NameType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -384,7 +372,7 @@ class InfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    postal: Optional[NillablePostalType] = field(
+    postal: None | NillablePostalType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -398,14 +386,14 @@ class InfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    phone: Optional[PhoneType] = field(
+    phone: None | PhoneType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    dispute_reference: Optional[bool] = field(
+    dispute_reference: None | bool = field(
         default=None,
         metadata={
             "name": "disputeReference",
@@ -413,7 +401,7 @@ class InfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    uri_template: Optional[UriTemplateType] = field(
+    uri_template: None | UriTemplateType = field(
         default=None,
         metadata={
             "name": "uri-template",
@@ -421,7 +409,7 @@ class InfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    changed: Optional[XmlDateTime] = field(
+    changed: None | XmlDateTime = field(
         default=None,
         metadata={
             "type": "Element",
@@ -439,31 +427,29 @@ class InfoDataType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class UpdateType:
     class Meta:
         name = "updateType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*\-[\-\.a-zA-Z0-9]+",
-        },
+        }
     )
-    type_value: Optional[TypeType] = field(
-        default=None,
+    type_value: TypeType = field(
         metadata={
             "name": "type",
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
             "required": True,
-        },
+        }
     )
-    name: Optional[NameType] = field(
+    name: None | NameType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -477,7 +463,7 @@ class UpdateType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    postal: Optional[PostalType] = field(
+    postal: None | PostalType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -491,14 +477,14 @@ class UpdateType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    phone: Optional[PhoneType] = field(
+    phone: None | PhoneType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    uri_template: Optional[UriTemplateType] = field(
+    uri_template: None | UriTemplateType = field(
         default=None,
         metadata={
             "name": "uri-template",
@@ -517,21 +503,21 @@ class UpdateType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Create(CreateType):
     class Meta:
         name = "create"
         namespace = "http://registry.denic.de/contact/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class InfoData(InfoDataType):
     class Meta:
         name = "infoData"
         namespace = "http://registry.denic.de/contact/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Update(UpdateType):
     class Meta:
         name = "update"
