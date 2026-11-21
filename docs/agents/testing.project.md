@@ -364,7 +364,7 @@ The proxy supports every Python in bugfix or security status ([devguide.python.o
 3.11 to 3.15 on 2026-11-20 (#213). [test_python_versions.sh](../../test_python_versions.sh) installs `requirements-dev.txt`
 in a `python:<version>-slim` container of each, which has no compiler, so a pin without a wheel for that Python fails,
 and runs the unit tests marked `pyversions`. The workflow `.github/workflows/python-versions.yml` runs it on every push
-to `main` and every PR. The marker is on one test per native or version-sensitive dependency: EPP XML (`lxml`,
+to `main`, every PR and weekly. The marker is on one test per native or version-sensitive dependency: EPP XML (`lxml`,
 `xsdata`), RRI XML, the app (Connexion, Starlette, `jsonschema`, `rpds-py`), the SQLite backend (SQLAlchemy,
 `greenlet`), the settings (PyYAML) and TLS (`ssl`); a new such dependency gets a test marked too. When a Python
 version is released or reaches its end of life, update the default list of the script and this section.

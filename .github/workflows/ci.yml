@@ -1,0 +1,48 @@
+# The checks that need no live backend: the module boundaries, the unit tests and a Trivy scan. Runs on every PR (it
+# gates the automerge of Renovate's PRs, renovate.json), on every push to main and weekly, so a dependency or
+# vulnerability database that changes under an unchanged tree is caught too.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Module boundaries
+        run: PYTHONPATH=src lint-imports
+      - name: Unit tests
+        run: pytest -n 4 tests/unit
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      # The pinned dependencies, the Dockerfiles and the Ansible roles, and committed secrets. .docker/Dockerfile is the
+      # development image, which runs as root by design (DS-0002); deploy/docker/Dockerfile is the hardened one.
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          skip-files: .docker/Dockerfile
+          trivyignores: .trivyignore
+          exit-code: '1'

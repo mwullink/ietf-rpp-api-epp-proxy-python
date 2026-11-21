@@ -1,0 +1,4 @@
+# Findings CI's Trivy scan (.github/workflows/ci.yml) accepts, each with the issue that removes it.
+# Starlette, fixed only in 1.x (#226).
+CVE-2026-48818
+CVE-2026-54283
