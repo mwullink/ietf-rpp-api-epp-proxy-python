@@ -5,6 +5,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 5 * * 1'   # weekly: new Python patch releases and refreshed base images
   workflow_dispatch:
 
 permissions:
