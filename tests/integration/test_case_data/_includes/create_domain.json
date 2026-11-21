@@ -1,0 +1,176 @@
+{
+  "comment": "Creates a domain name; expects 201 01000 with the domain, its name, status and registrant. The preparation of a case that needs a domain.",
+  "parameters": {
+    "registrar": {
+      "comment": "The slot of the registrar that sends the request, a or b.",
+      "default": "a"
+    },
+    "url": {
+      "comment": "The URL of the request, a select where the response is to show the authInfo (?includeElements=authInfo).",
+      "default": "/domainNames"
+    },
+    "name": {
+      "comment": "The domain name, e.g. t1-{random_name}.{tld}."
+    },
+    "registrant": {
+      "comment": "The registrant member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "contacts": {
+      "comment": "The contacts member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "authInfo": {
+      "comment": "The authInfo member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "dns": {
+      "comment": "The dns member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "nameservers": {
+      "comment": "The nameservers member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "abuse": {
+      "comment": "The abuse member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "generalRequest": {
+      "comment": "The generalRequest member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "lgr": {
+      "comment": "The lgr member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    },
+    "uName": {
+      "comment": "The uName member of the domain. Left out by default.",
+      "default": {
+        "select": [
+          {
+            "omit": true
+          }
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "comment": "Creates the domain; expects 201 01000.",
+      "request": {
+        "method": "POST",
+        "url": "{param:url}",
+        "headers": {
+          "Authorization": "{auth:{param:registrar}}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "domainName",
+          "name": "{param:name}",
+          "uName": "{param:uName}",
+          "lgr": "{param:lgr}",
+          "registrant": "{param:registrant}",
+          "contacts": "{param:contacts}",
+          "abuse": "{param:abuse}",
+          "generalRequest": "{param:generalRequest}",
+          "nameservers": "{param:nameservers}",
+          "dns": "{param:dns}",
+          "authInfo": "{param:authInfo}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "domainName",
+          "name": "{param:name}",
+          "status": [
+            {
+              "@type": "domainStatus",
+              "label": "{env:domainName.processes.create.success_status}"
+            }
+          ],
+          "registrant": "{param:registrant}",
+          "contacts": "{param:contacts}"
+        },
+        "fields": {
+          "provMetadata.spClientId": {
+            "type": "not_null"
+          },
+          "provMetadata.repositoryId": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.metadata": {
+                    "contains": "repositoryId"
+                  }
+                },
+                "then": {
+                  "type": "not_null"
+                }
+              },
+              {
+                "omit": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

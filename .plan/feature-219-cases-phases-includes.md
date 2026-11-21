@@ -20,7 +20,7 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
   unchanged needs the response as a parameter.
 - F5 `includes.py` substitutes `{param:…}` in values only, not in keys: a capture name in an include is fixed.
 
-## Design (proposed, awaiting acceptance)
+## Design (accepted 2026-11-21, answers to Q1 to Q4 below)
 
 - Phases from the comment markers: the leading `Setup:` steps go to `setup`, the trailing `Cleanup` steps to
   `teardown`, the rest stays in `steps`. A script does it (scratch, not committed), so it is mechanical.
@@ -33,20 +33,36 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
 - Outcomes: a full run per environment before (on `main`) and after, compared from junit (case id → pass, skip,
   fail, error), with an error of a setup counted as the failure it was before.
 
-## Open questions
+## Decisions
 
-- Q1 Setup assertions (F4): keep every assertion exactly (response as include parameter, verbose), or one assertion
-  set per include (status and `@type`, plus what all its uses share)?
-- Q2 `domain_update/test30`, `test31` (F2): only the leading setup and nothing in teardown, the rest stays in steps?
-- Q3 Comments: drop the `Setup:`/`Cleanup` marker sentence from the moved steps, since the phase states it?
-- Q4 Baseline runs: which environments for the before/after full runs (MTEST full run is long, rate-limited)?
+- D1 (Q1) Superset per include: each include asserts the union of what its uses asserted (201 `01000`,
+  `application/rpp+json`, `@type`, id or name; a domain's status, registrant, contacts, `spClientId`, `repositoryId`
+  by selector; a request contact's `uriTemplate`, `spClientId`). A setup step only gains assertions, never loses one.
+- D2 (Q2) `domain_update/test30` and `test31`: the second part (host objects, epp-docker only) is independent and no
+  other case covers it, so it is split into `test70-put_of_host_objects_by_another_client` and
+  `test71-patch_of_a_host_object_by_another_client`, with the case-level `when` the steps had.
+- D3 (Q3) The `Setup: ` / `Cleanup: ` marker is dropped from the comments; the rest of the comment stays.
+- D4 (Q4) Full before/after runs in every environment with credentials, MTEST included.
+- D5 Left as inline setup or teardown steps (single uses, or the subject of the case): the preset headers of
+  `preset_signalling_header/test1`, `preset_signalling_media_type/test1`, `test8`; the draft example domains of
+  `draft_patch/test1`, `test3` (they send and assert `processes`); the transfer requests in `message/test6`'s setup;
+  `draft_contact/test6` (contact delete), `draft_host/test6` (host delete).
+
+## Results
+
+- R1 Converter (scratch `convert.py`): 372 files changed; include uses: `create_contact` 336, `create_domain` 138,
+  `create_host` 124, `delete_domain` 76, `create_request_contact` 31, `cancel_transfer` 17; 11 steps inline (D5).
+- R2 Compare (scratch `compare.py`, every case in every environment, selects resolved, includes expanded): 0 errors,
+  requests identical in order, test steps' responses identical, 808 setup/teardown steps with assertions added.
+  A mutation check (a request, a test response and an include changed) is reported by it.
+- R3 Every case loads (640) and none runs nowhere.
 
 ## Tasks
 
-- [~] T1 Plan, questions to the maintainer
-- [ ] T2 Baseline full runs on `main`, junit kept in scratch
-- [ ] T3 Includes and the conversion script; convert all cases
-- [ ] T4 Compare script: requests and assertions unchanged (apart from the accepted differences)
-- [ ] T5 Docs: testing.project.md (the includes, how a case states its phases)
+- [x] T1 Plan, questions to the maintainer
+- [~] T2 Baseline full run on the snapshot of `main`'s cases, junit kept in scratch
+- [x] T3 Includes and the conversion script; convert all cases
+- [x] T4 Compare script: requests and assertions unchanged (apart from D1)
+- [x] T5 Docs: testing.project.md (the includes, how a case states its phases)
 - [ ] T6 Checks: lint-imports, unit, smoke; after-runs compared to T2
 - [ ] T7 Draft PR
