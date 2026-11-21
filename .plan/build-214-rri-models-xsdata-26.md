@@ -38,7 +38,8 @@ are never staged.
 - [x] Checks: lint-imports (29 kept), unit tests (2904 passed), MTEST reachable, smoke in every environment (190
   passed, 440 skipped), test_python_versions.sh (3.11-3.15 pass)
 - [x] Full `rri-mtest` run (F7)
-- [~] Draft PR
+- [x] Draft PR #222
+- [~] Maintainer review
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Open questions
