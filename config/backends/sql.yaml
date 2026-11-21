@@ -40,3 +40,8 @@ rpp_tlds:
 # them still answer 501 (#204).
 rpp_openapi_omit_unheld_objects: true
 rpp_openapi_omit_unimplemented: true
+
+# The facts (config/common.yaml): the demo holds none of the drafts' domains and contacts, so only the session's.
+rpp_protocol_config:
+  session:
+    cltrid_reuse_supported: true       # a reused client transaction id is taken

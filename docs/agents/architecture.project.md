@@ -647,7 +647,9 @@ keys. The file is resolved by [settings/layered_yaml.py](../../src/settings/laye
 [config/README.md](../../config/README.md)): its `include:` layers in order, then the file, then the untracked
 `<name>.local.yaml` of each layer; mappings merge, other values replace, and a top-level key that resolves to `null` is
 absent. A key the proxy does not know is ignored, with a warning naming the file for an `rpp_*` one. The test helper
-resolves the test environment descriptors with the same module.
+resolves the test environment descriptors with the same module. `rpp_protocol_config` (`Settings.protocol_config`) is
+what the registry does where its protocol leaves the choice to the server; the proxy keeps it but does not use it, and
+the integration suite reads it as the facts of its selectors.
 `main.py` loads it once and passes each section on; nothing else imports `settings`. `rpp_backend_profile` is the
 server's profile, see [Backend profile](#backend-profile). The EPP backend host and port
 come from `rpp_epp_host` and `rpp_epp_port`, and `new_epp_client` in [main.py](../../src/main.py) uses them to open

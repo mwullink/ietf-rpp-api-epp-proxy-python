@@ -15,3 +15,77 @@ rpp_preset_signalling: header
 rpp_base_url: https://localhost:8000
 # Operational status ("production", "test", "development") of this server
 rpp_environment_status: test
+
+# What the registry does where its protocol leaves the choice to the server, as the integration suite needs to know it:
+# its cases select on these (`env.<path>`) and time their waits by the periods (docs/agents/testing.project.md#selectors).
+# The proxy does not use them. Every path is stated here as null, "not known" (an environment states every fact); the
+# protocol, the backend and the environment state what they know. `<object>.<field>.<leaf>` and
+# `<object>.processes.<process>.<leaf>`, objects and fields by their RPP names. A test environment descriptor keeps
+# only its singular exceptions in its own `facts`: the defects of its server (`bugs`).
+rpp_protocol_config:
+  session:
+    cltrid_reuse_supported: null       # whether a reused client transaction id is taken
+  domainName:
+    name:
+      lgr:
+        required_for_idn: null         # whether an IDN without an lgr is refused
+        ascii_supported: null          # whether an lgr on a name that is not an IDN is taken
+        latn_enye_supported: null      # whether the repertoire of latn-1.0 has ñ
+        latn_comma_below_supported: null  # whether it has ș (s with comma below)
+    authInfo:
+      min_length: null
+      upper_and_digit_required: null   # whether it needs an upper case letter and a digit
+      ambiguous_supported: null        # whether it may hold I, O, l, o, 0 and 1
+      min_count: null                  # 0: a create without authInfo is taken
+    contacts:
+      foreign_supported: null          # whether a domain can name a contact of another registrar
+    dns:
+      dnskey_supported: null           # whether DNSKEY records are taken
+    # Periods are ISO 8601 durations, the longest a transition takes (null: the server has none).
+    processes:
+      create:
+        success_status: null           # what a domain reads with right after its create: one of these
+        failed_dns_status: null        # what it reads with when its name servers do not serve it (null: not checked)
+        failed_dns_period: null        # how long a failed domain lasts before it is deleted
+        add_grace_period: null         # a delete within it purges the domain
+      update:
+        dns_checked: null              # whether the name servers of an update are checked
+      renew:
+        grace_period: null
+        expiry_grace_period: null      # how long an expired domain lasts before redemption
+      transfer:
+        pending_period: null           # how long a pending transfer waits for the server's approval
+        grace_period: null
+      delete:
+        readable_after: null           # whether a domain deleted right after its create is read in redemption
+        redemption_period: null        # then pendingDelete
+        pending_delete_period: null    # then purged
+      restore:
+        pending_period: null           # how long a pendingRestore without a report lasts
+  contact:
+    processes:
+      transfer:
+        pending_period: null
+    id:
+      max_length: null
+    name:
+      min_count: null
+      min_length: null
+      charset_restricted: null         # whether only letters, digits, space and . , - are taken
+      digits_only_supported: null      # whether a name of digits only, or of specials only, is taken
+    email:
+      min_count: null
+    street:
+      min_count: null
+      max_count: null
+    city:
+      max_length: null
+    region:
+      lower_case_supported: null       # whether a region starting in lower case is taken
+    postcode:
+      min_count: null
+      lower_case_supported: null
+      format_by_country: null          # whether the postcode is checked against the format of its country
+    phone:
+      subscriber:
+        min_length: null               # digits after the country code

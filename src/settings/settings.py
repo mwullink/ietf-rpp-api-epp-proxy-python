@@ -31,6 +31,10 @@ class Settings:
     profile_layers: tuple[dict, ...] = ()
     preset_signalling: str = "header"
     openapi: OpenApiSettings = field(default_factory=OpenApiSettings)
+    # What the registry does where its protocol leaves the choice to the server (`rpp_protocol_config`): authInfo
+    # rules, contact limits, transition periods. The proxy does not use it; the integration suite selects its cases
+    # and times its waits by it (docs/agents/testing.project.md#selectors).
+    protocol_config: dict = field(default_factory=dict)
 
     def __post_init__(self):
         if self.backend not in BACKENDS:

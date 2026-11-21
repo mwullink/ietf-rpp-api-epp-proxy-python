@@ -22,7 +22,7 @@ PROFILES = Path(__file__).resolve().parent / "profiles"
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "environments" / "epp-docker.yaml"
 SECTIONS = (EppSettings, DiscoverySettings, RriSettings, SqliteSettings, OpenApiSettings)
 # The keys load_settings reads besides the fields of the sections.
-TOP_LEVEL_KEYS = ("rpp_backend", "rpp_backend_profile", "rpp_extensions", "rpp_preset_signalling")
+TOP_LEVEL_KEYS = ("rpp_backend", "rpp_backend_profile", "rpp_extensions", "rpp_preset_signalling", "rpp_protocol_config")
 KNOWN_KEYS = frozenset(TOP_LEVEL_KEYS) | {f.name for section in SECTIONS for f in fields(section)}
 
 
@@ -67,4 +67,13 @@ def load_settings(config_path: str | None = None) -> Settings:
         epp=_section(EppSettings, data), discovery=_section(DiscoverySettings, data), rri=_section(RriSettings, data),
         sqlite=_section(SqliteSettings, data), extensions=_extensions(data), backend=backend, profile_layers=_profile_layers(data, backend) if backend in BACKENDS else (),
         preset_signalling=data.get("rpp_preset_signalling", "header"), openapi=_section(OpenApiSettings, data),
+        protocol_config=_protocol_config(data),
     )
+
+
+def _protocol_config(data: dict) -> dict:
+    """`rpp_protocol_config`: a mapping, which the proxy keeps but does not use."""
+    value = data.get("rpp_protocol_config") or {}
+    if not isinstance(value, dict):
+        raise ValueError("rpp_protocol_config must be a mapping")
+    return value

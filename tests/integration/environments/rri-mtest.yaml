@@ -13,13 +13,3 @@ registrars:                            # the slots the cases name, each naming i
     user: TEST_RRI_REGACC2
     password: TEST_RRI_REGACC2_PASSWORD
     prefix: TEST_RRI_REGACC2_PREFIX
-
-facts:
-  domainName:
-    processes:
-      create:
-        failed_dns_status:             # what it reads with when its name servers do not serve it (null: not checked)
-          - inactive                   # RRI `failed`, with a `due`: deleted after a day unless fixed
-        failed_dns_period: P1D         # a failed domain is deleted after a day on MTEST (30 days in production)
-      update:
-        dns_checked: true              # the delegation of an update is checked: name servers that do not serve the zone are refused

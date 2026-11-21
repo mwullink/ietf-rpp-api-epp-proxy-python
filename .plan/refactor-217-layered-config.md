@@ -26,12 +26,12 @@ Same branch `refactor/217-layered-config` and PR #220 (back to draft), at the ma
 
 ## Tasks
 
-- [~] `rpp_protocol_config` in Settings and KNOWN_KEYS; the test helper merges it with the descriptor's facts
-- [ ] Move the facts into the layers; descriptors keep `bugs` only; remove environments/common/rri.yaml
-- [ ] Verify: merged facts equal the baseline but for the sqlite-demo nulls (listed); collection outcome identical
-- [ ] Docs: config/README.md, testing.project.md (facts, selectors), architecture.project.md (the key)
-- [ ] Checks: lint-imports, unit, smoke (MTEST first)
-- [ ] PR #220 description; ready; `git rm` this plan; release the mutex
+- [x] `rpp_protocol_config` in Settings and KNOWN_KEYS; the test helper merges it with the descriptor's facts
+- [x] Move the facts into the layers; descriptors keep `bugs` only. environments/common/rri.yaml stays: it holds what rri-mtest and rri-local share of the run (preset, workers, regacc, unknown user, bugs)
+- [x] Verify: merged facts equal the baseline but for 35 sqlite-demo nulls per demo environment; run/skip of all 4466 items identical (sqlite skips name more unmet facts). A null fact now meets no min/max and has no member (selectors.py), else 6 cases failed to load against the sqlite nulls
+- [x] Docs: config/README.md, testing.project.md (facts, selectors), architecture.project.md (the key)
+- [x] Checks: lint-imports 29 kept; unit 2932 passed; MTEST reachable; smoke 190 passed, 440 skipped
+- [~] PR #220 description; maintainer accepts; ready; `git rm` this plan; release the mutex
 
 ## Open questions
 

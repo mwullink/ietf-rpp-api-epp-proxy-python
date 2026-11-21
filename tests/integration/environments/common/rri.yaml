@@ -1,5 +1,5 @@
-# What a DENIC RRI server does, which rri-mtest and rri-local include: each states its credentials, its rate and the
-# facts of its predelegation check (create.failed_dns_*, update.dns_checked).
+# What rri-mtest and rri-local share of how the suite runs against a DENIC RRI server; each states its credentials
+# and its rate. The facts of the server are in the configuration (config/protocols/rri.yaml, config/backends/rri.yaml).
 preset: rri                           # the RPP preset the `{rpp:*}` placeholders stand for (a key of src/rpp/schema/schemas/presets)
 max_workers: 4                         # MTEST allows 4 sessions per RegAcc
 regacc: login_prefix                   # the sponsor id is the RegAccId the login starts with
@@ -9,75 +9,9 @@ unknown_user:
   user: ghost
   password: nope
 
-# What this server does where the protocol leaves the choice to it (docs/agents/testing.project.md#selectors).
-# `<object>.<field>.<leaf>` and `<object>.processes.<process>.<leaf>`, objects and fields by their RPP names.
-# null: the field is not there, or the limit is not known.
+# The facts of its server are those of its configuration (`rpp_protocol_config`, config/common.yaml); the
+# descriptor states its singular exceptions only.
 facts:
-  session:
-    cltrid_reuse_supported: true       # a reused client transaction id is taken
-  domainName:
-    name:
-      lgr:
-        required_for_idn: false        # an IDN without an lgr is taken
-        ascii_supported: true          # an lgr on a name that is not an IDN is taken
-        latn_enye_supported: true      # DENIC's repertoire has ñ
-        latn_comma_below_supported: false  # DENIC's repertoire lacks ș (s with comma below)
-    authInfo:
-      min_length: 8
-      upper_and_digit_required: false
-      ambiguous_supported: false       # it may not hold I, O, l, o, 0 and 1
-      min_count: 0                     # a create without authInfo is taken
-    contacts:
-      foreign_supported: false         # a domain cannot name a contact of another RegAcc
-    dns:
-      dnskey_supported: true           # DNSKEY records are dnsentry records; RRI has no secDNS, DENIC computes the DS
-    # Periods are ISO 8601 durations, the longest a transition takes (null: the server has none). DENIC states some as
-    # a time of day (docs/rri/rri-5.0-reference.md §2.5, §6), so the period is the longest it can be.
-    processes:
-      create:
-        success_status:                # what a domain reads with right after its create: one of these
-          - pendingCreate              # the predelegation check is still running
-          - ok                         # it passed (RRI `connect`): which of the two depends on timing
-        add_grace_period: PT0S         # none: a domain deleted right after its create goes to redemption
-      renew:
-        grace_period: null             # no renew
-        expiry_grace_period: null      # a domain runs until it is deleted
-      transfer:
-        pending_period: null           # CHPROV is not exposed (gap Q3)
-        grace_period: null
-      delete:
-        readable_after: true           # a domain deleted right after its create is read in its redemption period
-        redemption_period: P1DT14H     # the RGP lasts a day on MTEST and ends between 10:00 and 12:00
-        pending_delete_period: PT16H   # purged between 02:00 and 04:00 the day after the RGP ends
-      restore:
-        pending_period: null           # RESTORE is one step
-  contact:
-    processes:
-      transfer:
-        pending_period: null
-    id:
-      max_length: 32
-    name:
-      min_count: 1
-      min_length: 3
-      charset_restricted: false
-      digits_only_supported: false     # a name of digits only, or of specials only, is refused
-    email:
-      min_count: 1
-    street:
-      min_count: 1
-      max_count: null
-    city:
-      max_length: 80
-    region:
-      lower_case_supported: null       # an RRI contact has no region
-    postcode:
-      min_count: 1
-      lower_case_supported: true
-      format_by_country: true          # the postcode is checked against the format of its country
-    phone:
-      subscriber:
-        min_length: 4                  # digits after the country code
   # Defects of this server, which the cases it breaks do not run on.
   bugs:
     over_max_length_cut: false

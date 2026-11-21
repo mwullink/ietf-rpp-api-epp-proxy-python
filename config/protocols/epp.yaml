@@ -29,3 +29,23 @@ rpp_epp_ns_map:
   secDNS: "urn:ietf:params:xml:ns:secDNS-1.1"
   rgp: "urn:ietf:params:xml:ns:rgp-1.0"
   idn: "urn:ietf:params:xml:ns:idn-1.0"
+
+# What RFC 5730 to 5733 fix of the facts (config/common.yaml); a server states the rest.
+rpp_protocol_config:
+  domainName:
+    authInfo:
+      min_count: 1                     # a create without authInfo is refused (RFC 5731)
+  contact:
+    id:
+      max_length: 16                   # clIDType, 3 to 16 characters (RFC 5730)
+    name:
+      min_count: 1                     # postalInfo has a name (RFC 5733)
+    email:
+      min_count: 1                     # a contact has an email (RFC 5733)
+    street:
+      min_count: 0                     # 0 to 3 street lines (RFC 5733)
+      max_count: 3
+    city:
+      max_length: 255                  # postalLineType (RFC 5733)
+    postcode:
+      min_count: 0                     # the postcode is optional (RFC 5733)

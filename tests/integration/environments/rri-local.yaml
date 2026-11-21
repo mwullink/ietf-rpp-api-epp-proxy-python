@@ -13,12 +13,3 @@ registrars:                            # the slots the cases name, each naming i
     user: TEST_RRI_LOCAL_REGACC2
     password: TEST_RRI_LOCAL_REGACC2_PASSWORD
     prefix: TEST_RRI_LOCAL_REGACC2_PREFIX
-
-facts:
-  domainName:
-    processes:
-      create:
-        failed_dns_status: null        # not checked: the local predelegation check passes every name
-        failed_dns_period: null
-      update:
-        dns_checked: false             # the local predelegation check passes every update

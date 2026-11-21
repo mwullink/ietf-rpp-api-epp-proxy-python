@@ -30,3 +30,59 @@ rpp_idn_lgr_tables:
 # TLDs served (placeholder)
 rpp_tlds:
   - example
+
+# What this server does of what EPP leaves to it (config/common.yaml).
+rpp_protocol_config:
+  session:
+    cltrid_reuse_supported: false      # a reused client transaction id is refused, also on a read
+  domainName:
+    name:
+      lgr:
+        required_for_idn: true         # an IDN without an lgr is refused
+        ascii_supported: false         # an lgr on a name that is not an IDN is refused
+        latn_enye_supported: false     # the IDN table of latn-1.0 lacks ñ
+    authInfo:
+      min_length: 6
+      upper_and_digit_required: true   # it needs an upper case letter and a digit
+      ambiguous_supported: true        # it may hold I, O, l, o, 0 and 1
+    contacts:
+      foreign_supported: false         # a domain cannot name a contact of another registrar
+    dns:
+      dnskey_supported: false          # secDNS takes DS records only, no DNSKEY (RFC 5910 §4)
+    # The RGP_* and TRANSFER_* minutes of the server (EPP-server-docker#5); a cron job runs the transitions every
+    # minute, so one it runs is a minute longer than its setting.
+    processes:
+      create:
+        success_status:
+          - ok
+        add_grace_period: PT2M         # a delete within it purges the domain; checked by the delete itself
+      update:
+        dns_checked: false             # the name servers of an update are not checked
+      renew:
+        grace_period: PT6M
+        expiry_grace_period: PT10M     # an expired domain goes to redemptionPeriod (auto-renew is off)
+      transfer:
+        pending_period: PT6M           # a pending transfer is approved by the server (serverApproved)
+        grace_period: PT8M
+      delete:
+        readable_after: false          # a domain deleted right after its create is purged, not read in redemption
+        redemption_period: PT6M        # then pendingDelete
+        pending_delete_period: PT5M    # then purged
+      restore:
+        pending_period: PT4M           # a pendingRestore without a report goes back to redemptionPeriod
+  contact:
+    processes:
+      transfer:
+        pending_period: PT6M           # a pending transfer is approved by the server (serverApproved)
+    name:
+      min_length: 5
+      charset_restricted: true         # letters, digits, space and . , - only: no ', nothing outside the BMP
+      digits_only_supported: true      # a name of digits only, or of specials only, is taken
+    region:
+      lower_case_supported: false      # a region starting in lower case is refused
+    postcode:
+      lower_case_supported: false
+      format_by_country: false         # the postcode is not checked against its country
+    phone:
+      subscriber:
+        min_length: 1

@@ -107,7 +107,9 @@ first environment `RPP_TEST_ENV` names, default `epp-docker` (`tests/conftest.py
 before any test module imports `main`). The descriptor holds the config file of the app under test (by default
 `config/environments/<name>.yaml`, the config of the same name; `config:` names another), the most workers it
 allows, the requests a minute per registrar (`rpp_requests_per_minute`, paced
-by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend does not know, and its `facts`. The
+by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend does not know, and its `facts`: only
+the singular exceptions of its server, its defects (`bugs`). The other facts are the config's `rpp_protocol_config`,
+which the descriptor's `facts` merge over (see [Selectors](#selectors)). The
 `BackendProfile`, the TLD, the environment name and the LGRs are read from that config, as the app reads them, and not
 repeated. A run with more workers than an environment it tests allows does not start.
 
@@ -164,7 +166,8 @@ into the `Authorization` header when it sends the request, never into the case, 
 [config/environments/sqlite-demo.yaml](../../config/environments/sqlite-demo.yaml), with a database in memory per worker. It needs no credentials and no server:
 the descriptor marks its registrars `literal`, so `user`, `password` and `prefix` are the values themselves, the DEMO
 values of the config (they are no secrets). It has four registrars: `a` and `b` for the cases, and `c` and `d` for the
-cases of the message queue only, so that no other case adds to those queues. Its `facts` are those of `epp-docker`, which
+cases of the message queue only, so that no other case adds to those queues. Its facts are null but the session's (it
+holds no domains or contacts), and its `bugs` those of `epp-docker`, which
 no selector of its cases reads: every group of the drafts' objects has a `_group.json` with
 `{"when": {"profile.objects": {"contains": "contact"}}}` (or the object), so that those groups run where the backend holds
 them. The extension registers its RPP preset `planets`, which the descriptor names: `load` registers the extensions of the
@@ -262,9 +265,10 @@ not run), and that it allows 2000 RPP requests a minute per registrar.
 
 A case file says which backends a case, a step or an expected value is for (implemented in
 [selectors.py](../../tests/helper/selectors.py)). A selector is an object whose keys name facts and which holds when
-every key holds. `profile.<path>` is a leaf of the `BackendProfile` of the app under test, `env.<path>` one of the
-environment's `facts`, by a dotted path. A value holds when the fact equals it; `{"contains": x}`, `{"min": n}`, `{"max": n}` and
-`{"not": v}` test a collection, a number or the opposite. A list of selectors holds when one of them does. There is
+every key holds. `profile.<path>` is a leaf of the `BackendProfile` of the app under test, `env.<path>` one of the facts:
+the `rpp_protocol_config` of its config with the descriptor's `facts` merged over it, by a dotted path. A value holds when the fact equals it; `{"contains": x}`, `{"min": n}`, `{"max": n}` and
+`{"not": v}` test a collection, a number or the opposite; a `null` fact has no member and meets no bound. A list of
+selectors holds when one of them does. There is
 no selector on the backend's name: a difference is stated as the fact it comes from. What the proxy checks before
 any command is a profile fact ([Backend profile](architecture.project.md#backend-profile)); what only the server
 decides, and the tests read, is an environment fact.
@@ -281,7 +285,10 @@ an object. A leaf means the same wherever it is:
 | `<what>_required` | whether a value must have it, such as `upper_and_digit_required` |
 | `changeable`, `removable` | whether an update can change or clear the field |
 
-`null` says the field is not there or the limit is not known. Every environment states the same facts, with `null` for one it does not know: a
+`null` says the field is not there or the limit is not known. Every environment states the same facts, with `null` for one it does not know
+([config/common.yaml](../../config/common.yaml) states every path as `null`, and each layer what it knows: the protocol
+what its specification fixes, or DENIC's rules for RRI, the backend its server's policy and periods, the environment
+what is its own): a
 case's selectors are checked against every environment when it loads (`test_every_environment_states_the_same_facts`). A defect of a server that breaks cases is a fact under
 `bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`). A `when` names the fact the case depends on,
 not another that happens to go with it on today's backends (`aaaa` records do not stand in for "no host objects").
@@ -309,9 +316,9 @@ no known environment would run is not written.
 
 ## Waiting for a period
 
-The lifecycle periods of a server are facts of its environment, ISO 8601 durations under the process they belong to:
+The lifecycle periods of a server are facts of its backend (`rpp_protocol_config`), ISO 8601 durations under the process they belong to:
 `domainName.processes.create.add_grace_period`, `…delete.redemption_period`, `…delete.pending_delete_period`,
-`…restore.pending_period`, `…transfer.pending_period`, `…renew.grace_period` and the others in the environment
+`…restore.pending_period`, `…transfer.pending_period`, `…renew.grace_period` and the others in the config
 files, and `contact.processes.transfer.pending_period`. A period is the longest the transition takes there: a server
 that runs it by cron adds its interval, one stated as a time of day its longest case. `null` says the server has no
 such transition, `PT0S` that it is immediate.

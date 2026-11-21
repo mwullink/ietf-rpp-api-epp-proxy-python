@@ -8,7 +8,13 @@ the proxy reads `environments/epp-docker.yaml`.
 | `protocols/` | How the proxy speaks to a registry: `rpp_backend` and the protocol's client settings | `rri.yaml`: port 51131, TLS |
 | `backends/` | What one registry server holds: its profile and presets, LGRs, TLDs; includes its protocol | `rri.yaml`: DENIC |
 | `environments/` | One deployment of a backend: host, TLS verification, discovery; includes `common.yaml` and its backend | `rri-mtest.yaml` |
-| `common.yaml` | What every test deployment shares: the default signalling and the discovery placeholders | |
+| `common.yaml` | What every test deployment shares: the default signalling, the discovery placeholders, and every path of `rpp_protocol_config` as null | |
+
+`rpp_protocol_config` is what the registry does where its protocol leaves the choice to the server: authInfo rules,
+contact limits, transition periods. The proxy does not use it; the integration suite selects its cases and times its
+waits by it ([testing.project.md](../docs/agents/testing.project.md#selectors)). Each layer states what it knows: the
+protocol what its specification fixes (for RRI, DENIC's rules), the backend its server's policy and periods, the
+environment what is its own. A test environment descriptor keeps only a server's defects (`facts.bugs`).
 
 A file may start with `include: [<path>, ...]` (relative to the file). A file resolves to its includes in order, then
 itself, then the untracked `<name>.local.yaml` next to it (`*.local.yaml` is in `.gitignore`), so any layer can be

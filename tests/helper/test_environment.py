@@ -14,7 +14,7 @@ from pathlib import Path
 
 from core.capabilities.backend_profile import BackendProfile
 from registry_setup import backend_profile, load_registry
-from settings.layered_yaml import LayerError, is_local, load_layered
+from settings.layered_yaml import LayerError, is_local, load_layered, merge
 from settings.load_settings import load_settings
 from rpp.http import preset_header
 from rpp.schema.definitions import Definitions
@@ -149,8 +149,10 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
     if rpp_preset not in definitions.presets:
         raise EnvironmentError(
             f"Test environment {name!r}: `preset` is one of {', '.join(definitions.presets)}, not {rpp_preset!r}")
-    # What the config states, which the cases read as facts too: `{tld}` and `{env:environment_name}`.
-    facts = {**(data.get("facts") or {}), "tld": (settings.discovery.rpp_tlds or [""])[0],
+    # The facts: the config's `rpp_protocol_config`, with the descriptor's own (its bugs, a singular exception) merged
+    # over it, and what the config states besides, which the cases read as facts too: `{tld}` and
+    # `{env:environment_name}`.
+    facts = {**merge(settings.protocol_config, data.get("facts") or {}), "tld": (settings.discovery.rpp_tlds or [""])[0],
              "environment_name": settings.discovery.rpp_environment_name,
              "preset_signalling": settings.preset_signalling}
     return TestEnvironment(
