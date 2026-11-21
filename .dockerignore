@@ -1,0 +1,4 @@
+# One machine's overrides of the configurations (config/README.md) stay out of the images.
+**/*.local.yaml
+.env
+.env.*

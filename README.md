@@ -23,9 +23,12 @@ cd src
 uvicorn main:app
 ```
 
-The proxy reads `config.yaml` from the working directory (`src/config.yaml` is a link to the one in the repository
-root), or the file `RPP_CONFIG_FILE` names. An untracked `<name>.local.yaml` next to that file replaces the top-level
-keys it has, for one machine's settings.
+The proxy reads the file `RPP_CONFIG_FILE` names, else [config/environments/epp-docker.yaml](config/environments/epp-docker.yaml).
+The configurations in [config/](config/README.md) are composed of layers, protocol, backend and environment, which a
+file names with `include:`. An untracked `<name>.local.yaml` next to any layer changes it for one machine: its
+mappings merge, its other values replace, and a top-level `null` unsets a key. For example
+`config/environments/rri-mtest.local.yaml` with `rpp_rri_host: 172.17.0.9` points the MTEST environment at another
+server.
 
 The proxy speaks EPP to the registry by default; see [EPP or RRI behind the API](#epp-or-rri-behind-the-api) for
 DENIC RRI.
@@ -54,9 +57,9 @@ header with a new value.
 
 | `rpp_backend` | Registry protocol | Settings it reads | Example config |
 |---|---|---|---|
-| `epp` (the default when the key is absent) | EPP (RFC 5730 ff.) over TCP | `rpp_epp_*` | [config.yaml](config.yaml) |
-| `rri` | DENIC RRI 5.0 (XML) over TCP | `rpp_rri_*` | [config.rri-mtest.yaml](config.rri-mtest.yaml) |
-| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml), and [extended](config.demo-extended.yaml), [bound](config.demo-bound.yaml), [inherit](config.demo-inherit.yaml) |
+| `epp` (the default when the key is absent) | EPP (RFC 5730 ff.) over TCP | `rpp_epp_*` | [epp-docker](config/environments/epp-docker.yaml) |
+| `rri` | DENIC RRI 5.0 (XML) over TCP | `rpp_rri_*` | [rri-mtest](config/environments/rri-mtest.yaml), [rri-local](config/environments/rri-local.yaml) |
+| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [sqlite-demo](config/environments/sqlite-demo.yaml), and [extended](config/environments/sqlite-demo-extended.yaml), [bound](config/environments/sqlite-demo-bound.yaml), [inherit](config/environments/sqlite-demo-inherit.yaml) |
 
 One process speaks one protocol: the one `rpp_backend` names is on, the other is off and its settings are ignored.
 The RPP API is the same for both. With RRI, what RPP has no place for is in the `de.denic.rpp.rri` extension
@@ -74,9 +77,10 @@ The clients are `rpp_sqlite_clients`, a user and the `scrypt` hash of its passwo
 (`echo -n secret | python -m registry_adapter.sqlite.hash_password`, from `src/`); the user is the sponsoring client.
 ```
 cd src
-RPP_CONFIG_FILE=../config.demo.yaml uvicorn main:app          # clients demo-a and demo-b, passwords demo-a-password ...
-# the demo compositions: config.demo.yaml (bare: the planets preset), config.demo-extended.yaml (all three extensions, no binding),
-# config.demo-bound.yaml (the server binds profiles to presets), config.demo-inherit.yaml (presets and profiles with several bases)
+RPP_CONFIG_FILE=../config/environments/sqlite-demo.yaml uvicorn main:app   # clients demo-a and demo-b, passwords demo-a-password ...
+# the demo compositions in config/environments/: sqlite-demo (bare: the planets preset), sqlite-demo-extended (all three
+# extensions, no binding), sqlite-demo-bound (the server binds profiles to presets), sqlite-demo-inherit (presets and
+# profiles with several bases)
 ```
 
 A config for RRI states at least:
@@ -112,15 +116,15 @@ proxies, each with its own config and port:
 
 ```
 cd src
-uvicorn main:app --port 8000                                             # EPP, config.yaml
-RPP_CONFIG_FILE=../config.rri-mtest.yaml uvicorn main:app --port 8001     # RRI
+uvicorn main:app --port 8000                                                          # EPP, epp-docker
+RPP_CONFIG_FILE=../config/environments/rri-mtest.yaml uvicorn main:app --port 8001     # RRI
 ```
 
-In docker, mount the config (see [Running docker](#running-docker)):
+In docker, name the config of the image (see [Running docker](#running-docker)):
 ```
 docker run -d --name rpp-epp -p 8000:8091 --network epptest_epp_net pawelk/rpp_server_epp_proxy
-docker run -d --name rpp-rri -p 8001:8091 -v "$PWD/config.rri-mtest.yaml:/config/config.yaml:ro" \
-  -e RPP_CONFIG_FILE=/config/config.yaml pawelk/rpp_server_epp_proxy
+docker run -d --name rpp-rri -p 8001:8091 -e RPP_CONFIG_FILE=/config/environments/rri-mtest.yaml \
+  pawelk/rpp_server_epp_proxy
 ```
 
 ## Local EPP server
@@ -137,9 +141,9 @@ docker compose -p epptest --profile setup down
 docker compose -p epptest --profile run up -d
 ```
 
-Use the project name `epptest` with every compose command: [config.yaml](config.yaml) reaches the server as
-`epp-server` on TLS port 743, a name that resolves only on the compose network `epptest_epp_net`. From the docker
-host the server is on `localhost:7043` (TLS) instead. Its certificate is self-signed, so `config.yaml` sets
+Use the project name `epptest` with every compose command: [epp-docker](config/environments/epp-docker.yaml) reaches
+the server as `epp-server` on TLS port 743, a name that resolves only on the compose network `epptest_epp_net`. From the
+docker host the server is on `localhost:7043` (TLS) instead. Its certificate is self-signed, so the config sets
 `rpp_epp_tls_insecure_skip_verify`; never set it against a real registry.
 
 It provisions two registrars, `foo`/`bar` and `baz`/`qux`, with the contact id prefixes `FO-` and `BZ-`, and
@@ -152,11 +156,11 @@ To run the proxy against it:
   ```
   docker network connect epptest_epp_net $(cat /etc/hostname)
   ```
-- **On the docker host:** put the host's address of the server in an untracked `config.local.yaml` in the repository
-  root, and point the proxy at the root `config.yaml`, so the local file next to it applies:
+- **On the docker host:** put the host's address of the server in an untracked
+  `config/environments/epp-docker.local.yaml`, which the default config takes:
   ```
-  printf 'rpp_epp_host: localhost\nrpp_epp_port: 7043\n' > config.local.yaml
-  cd src && RPP_CONFIG_FILE=../config.yaml uvicorn main:app
+  printf 'rpp_epp_host: localhost\nrpp_epp_port: 7043\n' > config/environments/epp-docker.local.yaml
+  cd src && uvicorn main:app
   ```
 - **In docker:** see [Running docker](#running-docker).
 
@@ -179,7 +183,9 @@ test server, TLS terminated by nginx), see [deploy/README.md](deploy/README.md).
 docker build . -f ./.docker/Dockerfile -t pawelk/rpp_server_epp_proxy
 ```
 
-The image holds [config.yaml](config.yaml) as it is at build time.
+The image holds [config/](config/README.md) at `/config` as it is at build time, and reads
+`/config/environments/epp-docker.yaml` unless `RPP_CONFIG_FILE` names another. The `*.local.yaml` files stay out of
+the image ([.dockerignore](.dockerignore)).
 
 ## Running docker
 ```
@@ -189,12 +195,12 @@ docker run --rm -p 8000:8091 pawelk/rpp_server_epp_proxy
 The proxy listens on 8091 in the container, so the API documentation is at http://127.0.0.1:8000/ui/.
 
 Against the [local EPP server](#local-epp-server), join the container to its network, where the built-in
-`config.yaml` finds it:
+epp-docker config finds it:
 ```
 docker run --rm -p 8000:8091 --network epptest_epp_net pawelk/rpp_server_epp_proxy
 ```
 
-With a config of your own, mount it and name it in `RPP_CONFIG_FILE`:
+With a config of your own, one file without `include:`, mount it and name it in `RPP_CONFIG_FILE`:
 ```
 docker run --rm -p 8000:8091 -v "$PWD/my-config.yaml:/config/config.yaml:ro" \
   -e RPP_CONFIG_FILE=/config/config.yaml pawelk/rpp_server_epp_proxy

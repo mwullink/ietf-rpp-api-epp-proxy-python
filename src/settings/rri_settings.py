@@ -4,7 +4,7 @@ from typing import Optional
 
 @dataclass(frozen=True)
 class RriSettings:
-    """The connection to a DENIC RRI server. The names are the keys of config.yaml.
+    """The connection to a DENIC RRI server. The names are the keys of the configuration (config/README.md).
 
     `rpp_rri_lgr` is the one LGR name a client may give for the IDN repertoire of DENIC, none when no `lgr` is taken.
     """

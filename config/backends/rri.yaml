@@ -1,0 +1,30 @@
+# DENIC's RRI server, in MTEST or a local test server of the same behaviour. An environment states where it is.
+include:
+  - ../protocols/rri.yaml
+
+rpp_preset_signalling: media-type
+
+# The profile of this server (see backends/epp.yaml): DENIC's, src/settings/profiles/rri.yaml.
+rpp_backend_profile:
+  extends: rri
+  # The RPP presets offered (src/rpp/schema/schemas/presets), and the one a request gets when it names none.
+  presets:
+    - base
+    - rri
+  default_preset: rri
+rpp_rri_lgr: latn-1.0   # the one LGR name a client may give for DENIC's IDN repertoire (gap Q11)
+
+rpp_tlds:
+  - de
+
+# The periods of the facts (config/common.yaml) on MTEST, which a local test server keeps too. DENIC states some as a
+# time of day (docs/rri/rri-5.0-reference.md §2.5, §6), so the period is the longest it can be. Production differs: a
+# failed domain lasts 30 days there.
+rpp_protocol_config:
+  domainName:
+    processes:
+      create:
+        failed_dns_period: P1D         # a failed domain is deleted after a day on MTEST
+      delete:
+        redemption_period: P1DT14H     # the RGP lasts a day on MTEST and ends between 10:00 and 12:00
+        pending_delete_period: PT16H   # purged between 02:00 and 04:00 the day after the RGP ends

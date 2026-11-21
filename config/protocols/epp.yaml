@@ -1,0 +1,51 @@
+# EPP (RFC 5730 ff.) over TCP: what any EPP server is spoken to with. A backend states its host, port and extensions.
+rpp_backend: epp
+
+# optional settings
+# timeout (secs) for requests sent to EPP server
+#rpp_epp_timeout: 5
+
+# By default, the RPP server does NOT cache the TCP connection to the EPP server.
+# This means for every request, a new EPP connection is created: login, send command, logout.
+# This is stateless and simple, but less performant.
+#
+# For better performance, you can enable connection caching by setting rpp_epp_connection_cache to true.
+# When enabled, the EPP connection is kept open and reused for multiple requests.
+# Note: Enabling caching makes the server stateful.
+# rpp_epp_connection_cache: false
+
+#  EPP objects this EPP client must advertise to EPP server
+rpp_epp_objects:
+  - "urn:ietf:params:xml:ns:contact-1.0"
+  - "urn:ietf:params:xml:ns:host-1.0"
+  - "urn:ietf:params:xml:ns:domain-1.0"
+
+# used to map EPP namespaces to readable names
+rpp_epp_ns_map:
+  epp: "urn:ietf:params:xml:ns:epp-1.0"
+  domain: "urn:ietf:params:xml:ns:domain-1.0"
+  contact: "urn:ietf:params:xml:ns:contact-1.0"
+  host: "urn:ietf:params:xml:ns:host-1.0"
+  secDNS: "urn:ietf:params:xml:ns:secDNS-1.1"
+  rgp: "urn:ietf:params:xml:ns:rgp-1.0"
+  idn: "urn:ietf:params:xml:ns:idn-1.0"
+
+# What RFC 5730 to 5733 fix of the facts (config/common.yaml); a server states the rest.
+rpp_protocol_config:
+  domainName:
+    authInfo:
+      min_count: 1                     # a create without authInfo is refused (RFC 5731)
+  contact:
+    id:
+      max_length: 16                   # clIDType, 3 to 16 characters (RFC 5730)
+    name:
+      min_count: 1                     # postalInfo has a name (RFC 5733)
+    email:
+      min_count: 1                     # a contact has an email (RFC 5733)
+    street:
+      min_count: 0                     # 0 to 3 street lines (RFC 5733)
+      max_count: 3
+    city:
+      max_length: 255                  # postalLineType (RFC 5733)
+    postcode:
+      min_count: 0                     # the postcode is optional (RFC 5733)

@@ -92,8 +92,8 @@ domainName:
   - path: /lgr
     kind: enum
     rpp: {defined: true, rule: "name registered in the IANA IDN Tables registry"}
-    epp-docker: {values: [latn-1.0], source: code, ref: "config.yaml rpp_idn_lgr_tables"}
-    rri-mtest: {values: [latn-1.0], source: code, ref: "config.rri-mtest.yaml rpp_rri_lgr"}
+    epp-docker: {values: [latn-1.0], source: code, ref: "config/backends/epp.yaml rpp_idn_lgr_tables"}
+    rri-mtest: {values: [latn-1.0], source: code, ref: "config/backends/rri.yaml rpp_rri_lgr"}
     probe: [domain_create/test28-lgr_without_idn_table]
     verified: {epp-docker: "passed", rri-mtest: "passed"}
 

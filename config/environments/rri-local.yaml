@@ -1,0 +1,20 @@
+# The proxy in front of a local RRI test server, for the integration suite (RPP_TEST_ENV=rri-local).
+# Another host or port goes in an untracked rri-local.local.yaml next to this file (e.g. `rpp_rri_host: localhost`).
+include:
+  - ../common.yaml
+  - ../backends/rri.yaml
+
+rpp_rri_host: 172.17.0.8   # the local RRI server's container on Docker's default bridge network
+rpp_rri_tls_insecure_skip_verify: true   # its certificate is self-signed
+
+rpp_environment_name: rpp-rri-proxy.example
+
+# The facts (config/common.yaml): its predelegation check passes every name.
+rpp_protocol_config:
+  domainName:
+    processes:
+      create:
+        failed_dns_status: null        # not checked
+        failed_dns_period: null
+      update:
+        dns_checked: false             # every update passes

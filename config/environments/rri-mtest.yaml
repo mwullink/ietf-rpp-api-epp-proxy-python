@@ -1,0 +1,10 @@
+# The proxy in front of DENIC's RRI test environment (MTEST), for the integration suite (RPP_TEST_ENV=rri-mtest).
+# Another host (a local RRI server that stands in for MTEST) goes in an untracked rri-mtest.local.yaml next to this file.
+include:
+  - ../common.yaml
+  - ../backends/rri.yaml
+
+rpp_rri_host: rri.test.denic.de
+rpp_rri_tls_insecure_skip_verify: false
+
+rpp_environment_name: rpp-rri-proxy.example

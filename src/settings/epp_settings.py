@@ -4,7 +4,7 @@ from typing import List, Optional
 
 @dataclass(frozen=True)
 class EppSettings:
-    """The connection to the EPP server and how the proxy speaks EPP. The names are the keys of config.yaml."""
+    """The connection to the EPP server and how the proxy speaks EPP. The names are the keys of the configuration (config/README.md)."""
     rpp_epp_host: Optional[str] = None
     rpp_epp_port: Optional[int] = 700
     rpp_epp_use_tls: Optional[bool] = True

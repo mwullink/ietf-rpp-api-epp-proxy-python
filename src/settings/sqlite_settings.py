@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class SqliteSettings:
-    """The database and the clients of the SQLite demo backend. The names are the keys of config.yaml.
+    """The database and the clients of the SQLite demo backend. The names are the keys of the configuration (config/README.md).
 
     `rpp_sqlite_url` is a SQLAlchemy URL: a file (`sqlite:///demo.db`) or, by default, a database in memory
     (`sqlite://`). `rpp_sqlite_clients` maps each client (the user of the Basic authentication, and the sponsor id of

@@ -17,7 +17,7 @@ The system `python --version` is 3.9, but the code uses 3.10+ syntax (`str | Non
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt     # requirements.txt plus the development tools
 
-# Run the server (from src/: config.yaml is read relative to the working directory)
+# Run the server (without RPP_CONFIG_FILE: config/environments/epp-docker.yaml)
 cd src && uvicorn main:app        # API documentation (Scalar) at http://127.0.0.1:8000/ui/
 
 # Docker
@@ -32,12 +32,13 @@ image built (`docker build -f deploy/docker/Dockerfile .`).
 ## Configurations
 
 The configurations a change of a key `rpp_*` (or of its values) updates ([process.md](process.md#general-rules), rule
-5): the repository's `config*.yaml`, and the templates of the example inventory,
-`deploy/ansible/inventory/example/configs/*.yaml.j2`. Each template is made from the repository configuration its
-header names and takes its keys and values, except the instance's own (`{{ instance.* }}`, the vault's). The keys the
-proxy does not know are ignored, so a stale key goes unnoticed at startup: `tests/unit/test_deploy_config_templates.py`
-renders each template and checks it states no key its repository configuration lacks, the same signalling and profile,
-and that the proxy starts with it. A change of keys also tells the maintainer to update the inventories outside git
+5): the layers of the repository's `config/` tree ([config/README.md](../../config/README.md)), each key in the
+layer it belongs to (protocol, backend or environment), and the templates of the example inventory,
+`deploy/ansible/inventory/example/configs/*.yaml.j2`. Each template is one flat file made from the repository
+environment its header names (`config/environments/<name>.yaml`, with its includes) and takes its keys and values,
+except the instance's own (`{{ instance.* }}`, the vault's). The keys the proxy does not know are ignored, with a
+warning for an `rpp_*` one: `tests/unit/test_deploy_config_templates.py` renders each template and checks it states no
+key its resolved repository environment lacks, the same signalling and profile, and that the proxy starts with it. A change of keys also tells the maintainer to update the inventories outside git
 (`deploy/ansible/inventory/<name>/`, and any other copy of the templates).
 
 ## Checks before done

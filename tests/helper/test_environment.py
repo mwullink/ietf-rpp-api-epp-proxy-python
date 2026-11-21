@@ -12,10 +12,9 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import yaml
-
 from core.capabilities.backend_profile import BackendProfile
 from registry_setup import backend_profile, load_registry
+from settings.layered_yaml import LayerError, is_local, load_layered, merge
 from settings.load_settings import load_settings
 from rpp.http import preset_header
 from rpp.schema.definitions import Definitions
@@ -25,6 +24,7 @@ from tests.helper.selectors import env_fact
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 ENVIRONMENTS = REPOSITORY / "tests" / "integration" / "environments"
+CONFIGS = REPOSITORY / "config" / "environments"
 DEFAULT_ENVIRONMENT = "epp-docker"
 
 
@@ -61,7 +61,8 @@ class TestEnvironment:
 
 
 def environment_names() -> list[str]:
-    return sorted(p.stem for p in ENVIRONMENTS.glob("*.yaml"))
+    """The descriptors of `environments/`, not their untracked local files or the layers of `common/`."""
+    return sorted(p.stem for p in ENVIRONMENTS.glob("*.yaml") if not is_local(p))
 
 
 def selected_names(environ=None) -> list[str]:
@@ -82,15 +83,21 @@ def selected_name(environ=None) -> str:
 
 
 def _descriptor(name: str) -> dict:
+    """The descriptor `name` with its includes and the untracked `<name>.local.yaml` of every layer
+    (settings/layered_yaml.py). `config` is the app's configuration of the same name unless it states another."""
     path = ENVIRONMENTS / f"{name}.yaml"
-    if not path.exists():
+    if is_local(path) or not path.exists():
         raise EnvironmentError(f"No test environment {name!r}: known are {', '.join(environment_names())}")
-    with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    try:
+        data = load_layered(path).data
+    except LayerError as e:
+        raise EnvironmentError(f"Test environment {name!r}: {e}") from None
+    data.setdefault("config", (CONFIGS / f"{name}.yaml").relative_to(REPOSITORY).as_posix())
+    return data
 
 
 def config_file(name: str) -> str:
-    """The `RPP_CONFIG_FILE` of the app under test, relative to the repository root."""
+    """The `RPP_CONFIG_FILE` of the app under test."""
     return str(REPOSITORY / _descriptor(name)["config"])
 
 
@@ -142,8 +149,10 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
     if rpp_preset not in definitions.presets:
         raise EnvironmentError(
             f"Test environment {name!r}: `preset` is one of {', '.join(definitions.presets)}, not {rpp_preset!r}")
-    # What the config states, which the cases read as facts too: `{tld}` and `{env:environment_name}`.
-    facts = {**(data.get("facts") or {}), "tld": (settings.discovery.rpp_tlds or [""])[0],
+    # The facts: the config's `rpp_protocol_config`, with the descriptor's own (its bugs, a singular exception) merged
+    # over it, and what the config states besides, which the cases read as facts too: `{tld}` and
+    # `{env:environment_name}`.
+    facts = {**merge(settings.protocol_config, data.get("facts") or {}), "tld": (settings.discovery.rpp_tlds or [""])[0],
              "environment_name": settings.discovery.rpp_environment_name,
              "preset_signalling": settings.preset_signalling}
     return TestEnvironment(

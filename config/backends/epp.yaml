@@ -1,0 +1,88 @@
+# The EPP test server of EPP-server-docker (docs/agents/testing.project.md#backend). An environment states where it is.
+include:
+  - ../protocols/epp.yaml
+
+#  EPP extensions this EPP client must advertise to EPP server
+rpp_epp_extensions:
+  - "urn:ietf:params:xml:ns:secDNS-1.1"
+  - "urn:ietf:params:xml:ns:idn-1.0"
+
+# The profile of this server: what it holds, which the proxy checks before any command. It extends the generic profile
+# of its protocol (src/settings/profiles/epp.yaml, or rri.yaml) and states only what this server differs in: a map
+# merges, a list or a value replaces. Another EPP server starts from `extends: epp` alone.
+rpp_backend_profile:
+  extends: epp
+  # The EPP test server of EPP-server-docker holds all of RFC 5730 to 5733: nothing differs, but for the RPP presets
+  # it offers (src/rpp/schema/schemas/presets) and the one a request gets when it names none. A server binds its own
+  # profiles to a preset with `bound_profiles: {<preset>: [<profile>]}`.
+  presets:
+    - base
+    - epp-compatible
+  default_preset: epp-compatible
+
+# Maps an LGR name, which json §6.4 asks for in `lgr`, to the IDN table id of the EPP IDN extension
+# (urn:ietf:params:xml:ns:idn-1.0), one to one. A create with an `lgr` not listed is a 400. A domain whose table is not
+# listed reads without `uName` and `lgr`. Without this map no `lgr` can be sent. The entry below fits the test backend,
+# whose tables are `de` and `es`.
+rpp_idn_lgr_tables:
+  latn-1.0: de
+
+# TLDs served (placeholder)
+rpp_tlds:
+  - example
+
+# What this server does of what EPP leaves to it (config/common.yaml).
+rpp_protocol_config:
+  session:
+    cltrid_reuse_supported: false      # a reused client transaction id is refused, also on a read
+  domainName:
+    name:
+      lgr:
+        required_for_idn: true         # an IDN without an lgr is refused
+        ascii_supported: false         # an lgr on a name that is not an IDN is refused
+        latn_enye_supported: false     # the IDN table of latn-1.0 lacks ñ
+    authInfo:
+      min_length: 6
+      upper_and_digit_required: true   # it needs an upper case letter and a digit
+      ambiguous_supported: true        # it may hold I, O, l, o, 0 and 1
+    contacts:
+      foreign_supported: false         # a domain cannot name a contact of another registrar
+    dns:
+      dnskey_supported: false          # secDNS takes DS records only, no DNSKEY (RFC 5910 §4)
+    # The RGP_* and TRANSFER_* minutes of the server (EPP-server-docker#5); a cron job runs the transitions every
+    # minute, so one it runs is a minute longer than its setting.
+    processes:
+      create:
+        success_status:
+          - ok
+        add_grace_period: PT2M         # a delete within it purges the domain; checked by the delete itself
+      update:
+        dns_checked: false             # the name servers of an update are not checked
+      renew:
+        grace_period: PT6M
+        expiry_grace_period: PT10M     # an expired domain goes to redemptionPeriod (auto-renew is off)
+      transfer:
+        pending_period: PT6M           # a pending transfer is approved by the server (serverApproved)
+        grace_period: PT8M
+      delete:
+        readable_after: false          # a domain deleted right after its create is purged, not read in redemption
+        redemption_period: PT6M        # then pendingDelete
+        pending_delete_period: PT5M    # then purged
+      restore:
+        pending_period: PT4M           # a pendingRestore without a report goes back to redemptionPeriod
+  contact:
+    processes:
+      transfer:
+        pending_period: PT6M           # a pending transfer is approved by the server (serverApproved)
+    name:
+      min_length: 5
+      charset_restricted: true         # letters, digits, space and . , - only: no ', nothing outside the BMP
+      digits_only_supported: true      # a name of digits only, or of specials only, is taken
+    region:
+      lower_case_supported: false      # a region starting in lower case is refused
+    postcode:
+      lower_case_supported: false
+      format_by_country: false         # the postcode is not checked against its country
+    phone:
+      subscriber:
+        min_length: 1

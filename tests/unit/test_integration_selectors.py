@@ -284,3 +284,22 @@ def test_contains_on_a_map_leaf_holds_for_a_key():
     assert selectors.holds({"profile.bound_profiles": {"contains": "planets"}}, facts)
     assert not selectors.holds({"profile.bound_profiles": {"contains": "catalogued-planets"}}, facts)
     assert selectors.holds({"profile.bound_profiles": {"not": {"contains": "catalogued-planets"}}}, facts)
+
+
+def test_a_fact_that_is_not_known_meets_no_bound_and_has_no_member():
+    facts = Facts(EPP_PROFILE, {"contact": {"name": {"min_count": None}}, "domainName": {"status": None}})
+
+    assert not selectors.holds({"env.contact.name.min_count": {"min": 1}}, facts)
+    assert not selectors.holds({"env.contact.name.min_count": {"max": 1}}, facts)
+    assert not selectors.holds({"env.domainName.status": {"contains": "ok"}}, facts)
+    assert selectors.holds({"env.contact.name.min_count": {"not": {"min": 1}}}, facts)
+    assert selectors.holds({"env.contact.name.min_count": None}, facts)
+
+
+def test_the_facts_are_the_configs_with_the_descriptors_bugs_over_them():
+    env = load("rri-local", with_credentials=False)
+
+    assert env.facts["domainName"]["authInfo"]["min_length"] == 8  # config/protocols/rri.yaml
+    assert env.facts["domainName"]["processes"]["delete"]["redemption_period"] == "P1DT14H"  # config/backends/rri.yaml
+    assert env.facts["domainName"]["processes"]["update"]["dns_checked"] is False  # config/environments/rri-local.yaml
+    assert env.facts["bugs"]["queue_del_no_msgcnt"] is True  # the descriptor

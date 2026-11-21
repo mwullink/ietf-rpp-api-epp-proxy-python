@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
-# The configuration of instance {{ instance.name }}, made from config.demo.yaml of the repository.
+# The configuration of instance {{ instance.name }}, made from config/environments/sqlite-demo.yaml of the repository.
 # The proxy over the SQLite demo backend (rpp_backend: sqlite): bare RPP with the demo objects Planet and Satellite of
 # the extension org.example.rpp.extension.planets (docs/demo/planets-extension.md). It runs without a registry.
 rpp_backend: sqlite
@@ -9,7 +9,7 @@ rpp_sqlite_url: sqlite:////data/{{ instance.sqlite_file | default('demo.db') }}
 
 # The clients: the user of the Basic authentication, and the hash of its password (`scrypt$...`, made by
 # `python -m registry_adapter.sqlite.hash_password`). The user is the sponsoring client of what it creates. From the
-# vault, never the demo hashes of config.demo.yaml.
+# vault, never the demo hashes of config/backends/sql.yaml.
 rpp_sqlite_clients:
 {% for user, hash in instance.sqlite_clients | dictsort %}
   {{ user }}: {{ hash | to_json }}

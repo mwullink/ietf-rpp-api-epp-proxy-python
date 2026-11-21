@@ -18,8 +18,7 @@ RUN /opt/venv/bin/pip uninstall -y pytest pytest-xdist execnet iniconfig pluggy 
     && /opt/venv/bin/pip uninstall -y pip setuptools
 COPY src /app
 # The root file system is read-only at run time: compile the bytecode now.
-RUN rm -f /app/config.yaml \
-    && find /app -name __pycache__ -prune -exec rm -rf {} + \
+RUN find /app -name __pycache__ -prune -exec rm -rf {} + \
     && python -m compileall -q /app /opt/venv
 
 FROM ${PYTHON_IMAGE}

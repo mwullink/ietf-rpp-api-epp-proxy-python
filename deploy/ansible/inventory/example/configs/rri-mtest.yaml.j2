@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
-# The configuration of instance {{ instance.name }}, made from config.rri-mtest.yaml of the repository.
+# The configuration of instance {{ instance.name }}, made from config/environments/rri-mtest.yaml of the repository.
 # The proxy in front of DENIC's RRI test environment (MTEST). The credentials are the clients' own: HTTP Basic is passed
 # through as the RRI LOGIN, so the deployment holds none. MTEST admits the host's address only once DENIC has it on the
 # allowlist of the RegAcc.
@@ -13,7 +13,7 @@ rpp_rri_tls_insecure_skip_verify: false
 # request that names none gets default_preset below.
 rpp_preset_signalling: media-type
 
-# The profile of this server (see config.yaml): DENIC's, src/settings/profiles/rri.yaml.
+# The profile of this server (see config/backends/epp.yaml): DENIC's, src/settings/profiles/rri.yaml.
 rpp_backend_profile:
   extends: rri
   # The RPP presets offered (src/rpp/schema/schemas/presets), and the one a request gets when it names none.

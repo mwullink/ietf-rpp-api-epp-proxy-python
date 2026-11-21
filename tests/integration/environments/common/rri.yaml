@@ -1,0 +1,20 @@
+# What rri-mtest and rri-local share of how the suite runs against a DENIC RRI server; each states its credentials
+# and its rate. The facts of the server are in the configuration (config/protocols/rri.yaml, config/backends/rri.yaml).
+preset: rri                           # the RPP preset the `{rpp:*}` placeholders stand for (a key of src/rpp/schema/schemas/presets)
+max_workers: 4                         # MTEST allows 4 sessions per RegAcc
+regacc: login_prefix                   # the sponsor id is the RegAccId the login starts with
+# Not a secret: a user the server does not know, for the failed logins. No case logs in to a test account with a wrong
+# password: on MTEST 10 failed LOGINs lock a user for an hour.
+unknown_user:
+  user: ghost
+  password: nope
+
+# The facts of its server are those of its configuration (`rpp_protocol_config`, config/common.yaml); the
+# descriptor states its singular exceptions only.
+facts:
+  # Defects of this server, which the cases it breaks do not run on.
+  bugs:
+    over_max_length_cut: false
+    long_label_cut: false
+    host_attr_without_address_refused: false
+    queue_del_no_msgcnt: true          # QUEUE-DELMSG states no remaining count, so no RPP-Queue-Size (#172)

@@ -68,7 +68,7 @@ target/
 # Agent branch mutex (see docs/agents/process.md)
 .agent-sync.yml
 
-# Per-machine overrides of config.yaml (see src/config.py)
+# One machine's overrides of a configuration layer or a test environment descriptor (config/README.md)
 *.local.yaml
 
 # Local credentials, for example of the RRI test environment (MTEST)

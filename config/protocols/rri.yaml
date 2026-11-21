@@ -1,0 +1,74 @@
+# DENIC RRI 5.0 (XML over TCP). The credentials are the clients' own: HTTP Basic is passed through as the RRI LOGIN,
+# so a configuration holds none.
+rpp_backend: rri
+rpp_rri_port: 51131
+rpp_rri_use_tls: true
+
+# DENIC's rules of the facts (config/common.yaml): RRI is DENIC's protocol only, so they are the protocol's. The
+# periods of a server are its backend's.
+rpp_protocol_config:
+  session:
+    cltrid_reuse_supported: true       # a reused client transaction id is taken
+  domainName:
+    name:
+      lgr:
+        required_for_idn: false        # an IDN without an lgr is taken
+        ascii_supported: true          # an lgr on a name that is not an IDN is taken
+        latn_enye_supported: true      # DENIC's repertoire has ñ
+        latn_comma_below_supported: false  # DENIC's repertoire lacks ș (s with comma below)
+    authInfo:
+      min_length: 8
+      upper_and_digit_required: false
+      ambiguous_supported: false       # it may not hold I, O, l, o, 0 and 1
+      min_count: 0                     # a create without authInfo is taken
+    contacts:
+      foreign_supported: false         # a domain cannot name a contact of another RegAcc
+    dns:
+      dnskey_supported: true           # DNSKEY records are dnsentry records; RRI has no secDNS, DENIC computes the DS
+    processes:
+      create:
+        success_status:                # what a domain reads with right after its create: one of these
+          - pendingCreate              # the predelegation check is still running
+          - ok                         # it passed (RRI `connect`): which of the two depends on timing
+        failed_dns_status:             # what it reads with when its name servers do not serve it
+          - inactive                   # RRI `failed`, with a `due`: deleted after a while unless fixed
+        add_grace_period: PT0S         # none: a domain deleted right after its create goes to redemption
+      update:
+        dns_checked: true              # the delegation of an update is checked: name servers that do not serve the zone are refused
+      renew:
+        grace_period: null             # no renew
+        expiry_grace_period: null      # a domain runs until it is deleted
+      transfer:
+        pending_period: null           # CHPROV is not exposed (gap Q3)
+        grace_period: null
+      delete:
+        readable_after: true           # a domain deleted right after its create is read in its redemption period
+      restore:
+        pending_period: null           # RESTORE is one step
+  contact:
+    processes:
+      transfer:
+        pending_period: null
+    id:
+      max_length: 32
+    name:
+      min_count: 1
+      min_length: 3
+      charset_restricted: false
+      digits_only_supported: false     # a name of digits only, or of specials only, is refused
+    email:
+      min_count: 1
+    street:
+      min_count: 1
+      max_count: null
+    city:
+      max_length: 80
+    region:
+      lower_case_supported: null       # an RRI contact has no region
+    postcode:
+      min_count: 1
+      lower_case_supported: true
+      format_by_country: true          # the postcode is checked against the format of its country
+    phone:
+      subscriber:
+        min_length: 4                  # digits after the country code

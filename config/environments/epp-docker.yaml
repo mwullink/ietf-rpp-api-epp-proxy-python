@@ -1,0 +1,20 @@
+# The proxy in front of the EPP test server of EPP-server-docker, for the integration suite (RPP_TEST_ENV=epp-docker),
+# and the configuration the proxy reads without RPP_CONFIG_FILE.
+include:
+  - ../common.yaml
+  - ../backends/epp.yaml
+
+# hostname of the backend EPP server to use
+# the compose service name of the test backend, which resolves on its <project>_epp_net
+# docker network once the devcontainer is attached to it (see docs/agents/testing.project.md)
+rpp_epp_host: epp-server
+# container-internal EPP TLS port (published on the docker host as 7043, but we
+# reach the container directly on the shared network here)
+rpp_epp_port: 743
+rpp_epp_use_tls: true
+# Accepts any certificate for any name, so a man-in-the-middle goes unnoticed.
+# For test backends only: this one is self-signed and rpp_epp_host is not in its SANs.
+rpp_epp_tls_insecure_skip_verify: true
+
+# Name of this server (placeholder)
+rpp_environment_name: rpp-epp-proxy.example

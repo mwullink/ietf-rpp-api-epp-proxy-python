@@ -83,6 +83,8 @@ def _value_holds(actual, expected) -> bool:
         if len(expected) != 1:
             raise SelectorError(f"a condition has exactly one of contains, min, max, not: {expected!r}")
         (op, operand), = expected.items()
+        if actual is None and op in ("contains", "min", "max"):
+            return False  # a fact that is not known (null) has no member and meets no bound
         if op == "contains":
             if not isinstance(actual, (tuple, list, set, frozenset, dict)):
                 raise SelectorError(f"contains needs a collection, the fact is {actual!r}")

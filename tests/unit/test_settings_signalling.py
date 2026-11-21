@@ -27,6 +27,6 @@ def test_an_unknown_method_stops_the_server(tmp_path):
         load_settings(write(tmp_path, "rpp_preset_signalling: cookie\n"))
 
 
-@pytest.mark.parametrize("config, method", [("config.yaml", "header"), ("config.rri-mtest.yaml", "media-type")])
+@pytest.mark.parametrize("config, method", [("config/environments/epp-docker.yaml", "header"), ("config/environments/rri-mtest.yaml", "media-type")])
 def test_the_configs_of_the_test_environments_use_both_methods(config, method):
     assert load_settings(config).preset_signalling == method

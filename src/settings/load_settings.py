@@ -1,3 +1,4 @@
+import logging
 import os
 from dataclasses import fields
 from pathlib import Path
@@ -6,13 +7,23 @@ import yaml
 
 from settings.discovery_settings import DiscoverySettings
 from settings.epp_settings import EppSettings
+from settings.layered_yaml import load_layered
 from settings.openapi_settings import OpenApiSettings
 from settings.rri_settings import RriSettings
 from settings.sqlite_settings import SqliteSettings
 from settings.settings import BACKENDS, Settings
 
+logger = logging.getLogger(__name__)
+
 # The generic profile of each protocol, which the profile of a server extends.
 PROFILES = Path(__file__).resolve().parent / "profiles"
+# The configuration without RPP_CONFIG_FILE: the EPP test server of the repository's config/ tree. In the development
+# image src/ is /app, so this is /config/environments/epp-docker.yaml there.
+DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "environments" / "epp-docker.yaml"
+SECTIONS = (EppSettings, DiscoverySettings, RriSettings, SqliteSettings, OpenApiSettings)
+# The keys load_settings reads besides the fields of the sections.
+TOP_LEVEL_KEYS = ("rpp_backend", "rpp_backend_profile", "rpp_extensions", "rpp_preset_signalling", "rpp_protocol_config")
+KNOWN_KEYS = frozenset(TOP_LEVEL_KEYS) | {f.name for section in SECTIONS for f in fields(section)}
 
 
 def _section(section, data: dict):
@@ -41,19 +52,28 @@ def _extensions(data: dict) -> tuple[str, ...]:
 
 
 def load_settings(config_path: str | None = None) -> Settings:
-    """Reads `config_path`, else the file `RPP_CONFIG_FILE` names, else config.yaml. An untracked <name>.local.yaml
-    next to it replaces the top-level keys it has, for one machine's settings. Keys the proxy does not know are
-    ignored."""
-    config_path = config_path or os.getenv("RPP_CONFIG_FILE", "./config.yaml")
-    with open(config_path) as f:
-        data = yaml.safe_load(f)
-    local_path = os.path.splitext(config_path)[0] + ".local.yaml"
-    if os.path.exists(local_path):
-        with open(local_path) as f:
-            data.update(yaml.safe_load(f) or {})
+    """Reads `config_path`, else the file `RPP_CONFIG_FILE` names, else `DEFAULT_CONFIG`, with its includes and the
+    untracked `<name>.local.yaml` of every layer (settings/layered_yaml.py). A top-level key whose value is null is
+    absent, so a local file unsets a key with null. A key the proxy does not know is ignored, with a warning for one
+    that looks like the proxy's (`rpp_*`)."""
+    config_path = config_path or os.getenv("RPP_CONFIG_FILE") or str(DEFAULT_CONFIG)
+    layered = load_layered(config_path)
+    data = {key: value for key, value in layered.data.items() if value is not None}
+    for key in sorted(data):
+        if key.startswith("rpp_") and key not in KNOWN_KEYS:
+            logger.warning("Unknown configuration key %s in %s: ignored", key, layered.sources[key])
     backend = data.get("rpp_backend", "epp")
     return Settings(
         epp=_section(EppSettings, data), discovery=_section(DiscoverySettings, data), rri=_section(RriSettings, data),
         sqlite=_section(SqliteSettings, data), extensions=_extensions(data), backend=backend, profile_layers=_profile_layers(data, backend) if backend in BACKENDS else (),
         preset_signalling=data.get("rpp_preset_signalling", "header"), openapi=_section(OpenApiSettings, data),
+        protocol_config=_protocol_config(data),
     )
+
+
+def _protocol_config(data: dict) -> dict:
+    """`rpp_protocol_config`: a mapping, which the proxy keeps but does not use."""
+    value = data.get("rpp_protocol_config") or {}
+    if not isinstance(value, dict):
+        raise ValueError("rpp_protocol_config must be a mapping")
+    return value

@@ -109,7 +109,7 @@ def test_the_backend_maps_lgr_to_the_configured_idn_tables():
 
 
 def test_compose_builds_an_app_for_other_settings():
-    rri = main.compose(load_settings(str(REPOSITORY / "config.rri-mtest.yaml")))
+    rri = main.compose(load_settings(str(REPOSITORY / "config/environments/rri-mtest.yaml")))
 
     assert rri.settings.backend == "rri"
     assert rri.app is not main.app
