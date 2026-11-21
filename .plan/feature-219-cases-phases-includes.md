@@ -93,4 +93,4 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
 - [x] T4 Compare script: requests and assertions unchanged (apart from D1)
 - [x] T5 Docs: testing.project.md (the includes, how a case states its phases)
 - [x] T6 Checks: lint-imports, unit; full after run compared to T2 (R4)
-- [~] T7 Draft PR
+- [x] T7 Draft PR #231, awaiting the maintainer
