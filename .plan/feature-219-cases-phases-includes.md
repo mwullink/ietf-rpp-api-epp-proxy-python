@@ -79,6 +79,11 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
   requests identical in order, test steps' responses identical, 808 setup/teardown steps with assertions added.
   A mutation check (a request, a test response and an include changed) is reported by it.
 - R3 Every case loads (640) and none runs nowhere.
+- R4 Full after run on the final cases (every environment, MTEST included): 10 failed, 1020 passed, 3449 skipped,
+  1 error, no teardown warnings. Per case against T2: the same 10 failures; test70 and test71 pass on epp-docker and
+  are skipped elsewhere; one difference, `rri-mtest::preset_signalling_media_type::test1` an error (MTEST answered
+  500 to its first setup step, an inline step whose request did not change), which passes when run again.
+- R5 lint-imports 29 kept; unit 2978 passed.
 
 ## Tasks
 
@@ -87,5 +92,5 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
 - [x] T3 Includes and the conversion script; convert all cases
 - [x] T4 Compare script: requests and assertions unchanged (apart from D1)
 - [x] T5 Docs: testing.project.md (the includes, how a case states its phases)
-- [~] T6 Checks: lint-imports, unit, smoke; after-runs compared to T2
-- [ ] T7 Draft PR
+- [x] T6 Checks: lint-imports, unit; full after run compared to T2 (R4)
+- [~] T7 Draft PR
