@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 from xsdata.models.datatype import XmlDateTime
 
@@ -12,7 +13,7 @@ class VerificationResultType(Enum):
     FAILED = "failed"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class VerifiedClaimsType:
     class Meta:
         name = "verifiedClaimsType"
@@ -27,37 +28,35 @@ class VerifiedClaimsType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class VerificationInfoBaseType:
     class Meta:
         name = "verificationInfoBaseType"
 
-    verified_claims: Optional[VerifiedClaimsType] = field(
-        default=None,
+    verified_claims: VerifiedClaimsType = field(
         metadata={
             "name": "verifiedClaims",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )
-    verification_result: Optional[VerificationResultType] = field(
-        default=None,
+    verification_result: VerificationResultType = field(
         metadata={
             "name": "verificationResult",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainVerificationInformationType(VerificationInfoBaseType):
     class Meta:
         name = "domainVerificationInformationType"
 
-    verification_reference: Optional[str] = field(
+    verification_reference: None | str = field(
         default=None,
         metadata={
             "name": "verificationReference",
@@ -65,7 +64,7 @@ class DomainVerificationInformationType(VerificationInfoBaseType):
             "namespace": "http://registry.denic.de/verification/5.0",
         },
     )
-    verification_timestamp: Optional[XmlDateTime] = field(
+    verification_timestamp: None | XmlDateTime = field(
         default=None,
         metadata={
             "name": "verificationTimestamp",
@@ -73,7 +72,7 @@ class DomainVerificationInformationType(VerificationInfoBaseType):
             "namespace": "http://registry.denic.de/verification/5.0",
         },
     )
-    verification_evidence: Optional[str] = field(
+    verification_evidence: None | str = field(
         default=None,
         metadata={
             "name": "verificationEvidence",
@@ -81,7 +80,7 @@ class DomainVerificationInformationType(VerificationInfoBaseType):
             "namespace": "http://registry.denic.de/verification/5.0",
         },
     )
-    verification_method: Optional[str] = field(
+    verification_method: None | str = field(
         default=None,
         metadata={
             "name": "verificationMethod",
@@ -89,7 +88,7 @@ class DomainVerificationInformationType(VerificationInfoBaseType):
             "namespace": "http://registry.denic.de/verification/5.0",
         },
     )
-    trust_framework: Optional[str] = field(
+    trust_framework: None | str = field(
         default=None,
         metadata={
             "name": "trustFramework",
@@ -99,60 +98,55 @@ class DomainVerificationInformationType(VerificationInfoBaseType):
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class VerificationInformation(VerificationInfoBaseType):
     class Meta:
         name = "verificationInformation"
         namespace = "http://registry.denic.de/verification/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class VerificationInformationType(VerificationInfoBaseType):
     class Meta:
         name = "verificationInformationType"
 
-    verification_reference: Optional[str] = field(
-        default=None,
+    verification_reference: str = field(
         metadata={
             "name": "verificationReference",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )
-    verification_timestamp: Optional[XmlDateTime] = field(
-        default=None,
+    verification_timestamp: XmlDateTime = field(
         metadata={
             "name": "verificationTimestamp",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )
-    verification_evidence: Optional[str] = field(
-        default=None,
+    verification_evidence: str = field(
         metadata={
             "name": "verificationEvidence",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )
-    verification_method: Optional[str] = field(
-        default=None,
+    verification_method: str = field(
         metadata={
             "name": "verificationMethod",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )
-    trust_framework: Optional[str] = field(
-        default=None,
+    trust_framework: str = field(
         metadata={
             "name": "trustFramework",
             "type": "Element",
             "namespace": "http://registry.denic.de/verification/5.0",
             "required": True,
-        },
+        }
     )

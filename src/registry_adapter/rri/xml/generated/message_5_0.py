@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 from xsdata.models.datatype import XmlDateTime
 
@@ -12,24 +13,23 @@ from registry_adapter.rri.xml.generated.transaction_5_0 import (
 __NAMESPACE__ = "http://registry.denic.de/msg/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactType:
     class Meta:
         name = "contactType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*\-[\-\.a-zA-Z0-9]+",
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactsType:
     class Meta:
         name = "contactsType"
@@ -47,13 +47,12 @@ class ContactsType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainType:
     class Meta:
         name = "domainType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
@@ -61,10 +60,9 @@ class DomainType:
             "min_length": 4,
             "max_length": 66,
             "pattern": r"[\p{IsBasicLatin}\p{IsLatin-1Supplement}\p{IsLatinExtended-A}]*",
-        },
+        }
     )
-    ace: Optional[str] = field(
-        default=None,
+    ace: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
@@ -72,17 +70,16 @@ class DomainType:
             "min_length": 1,
             "max_length": 254,
             "pattern": r"[0-9a-zA-Z][0-9a-zA-Z\-]{0,62}\.[dD][eE]",
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainWithExpireType:
     class Meta:
         name = "domainWithExpireType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
@@ -90,10 +87,9 @@ class DomainWithExpireType:
             "min_length": 4,
             "max_length": 66,
             "pattern": r"[\p{IsBasicLatin}\p{IsLatin-1Supplement}\p{IsLatinExtended-A}]*",
-        },
+        }
     )
-    ace: Optional[str] = field(
-        default=None,
+    ace: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
@@ -101,15 +97,14 @@ class DomainWithExpireType:
             "min_length": 1,
             "max_length": 254,
             "pattern": r"[0-9a-zA-Z][0-9a-zA-Z\-]{0,62}\.[dD][eE]",
-        },
+        }
     )
-    expire: Optional[XmlDateTime] = field(
-        default=None,
+    expire: XmlDateTime = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
@@ -135,7 +130,7 @@ class MsgTypeType(Enum):
     CONTACT_VERIFICATION_REQUIRED = "contactVerificationRequired"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class VerifiedClaimsType:
     class Meta:
         name = "verifiedClaimsType"
@@ -150,18 +145,17 @@ class VerifiedClaimsType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class AuthInfo2DeleteType:
     class Meta:
         name = "authInfo2DeleteType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -173,87 +167,80 @@ class AuthInfo2DeleteType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class AuthInfo2NotifyType:
     class Meta:
         name = "authInfo2NotifyType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class AuthInfoExpireType:
     class Meta:
         name = "authInfoExpireType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    authinfoexpire: Optional[XmlDateTime] = field(
-        default=None,
+    authinfoexpire: XmlDateTime = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ChprovAuthInfoType:
     class Meta:
         name = "chprovAuthInfoType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    new: Optional[str] = field(
-        default=None,
+    new: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    old: Optional[str] = field(
-        default=None,
+    old: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactUpdateType:
     class Meta:
         name = "contactUpdateType"
 
-    contact: Optional[ContactType] = field(
-        default=None,
+    contact: ContactType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -265,42 +252,39 @@ class ContactUpdateType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactsDeleteType:
     class Meta:
         name = "contactsDeleteType"
 
-    handles: Optional[ContactsType] = field(
-        default=None,
+    handles: ContactsType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DeleteType:
     class Meta:
         name = "deleteType"
 
-    value: Optional[EmptyType] = field(
-        default=None,
+    value: EmptyType = field(
         metadata={
             "required": True,
-        },
+        }
     )
-    msgid: Optional[str] = field(
-        default=None,
+    msgid: str = field(
         metadata={
             "type": "Attribute",
             "required": True,
             "min_length": 3,
             "max_length": 64,
-        },
+        }
     )
-    msg_type: Optional[MsgTypeType] = field(
+    msg_type: None | MsgTypeType = field(
         default=None,
         metadata={
             "name": "msgType",
@@ -309,18 +293,17 @@ class DeleteType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainDeleteType:
     class Meta:
         name = "domainDeleteType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -332,36 +315,33 @@ class DomainDeleteType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainStatusUpdateType:
     class Meta:
         name = "domainStatusUpdateType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    holders: Optional[ContactsType] = field(
-        default=None,
+    holders: ContactsType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    status: Optional[StatusType] = field(
-        default=None,
+    status: StatusType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    verification_deadline_before_dedelegation: Optional[XmlDateTime] = field(
+    verification_deadline_before_dedelegation: None | XmlDateTime = field(
         default=None,
         metadata={
             "name": "verificationDeadlineBeforeDedelegation",
@@ -369,7 +349,7 @@ class DomainStatusUpdateType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    verification_deadline_before_deletion: Optional[XmlDateTime] = field(
+    verification_deadline_before_deletion: None | XmlDateTime = field(
         default=None,
         metadata={
             "name": "verificationDeadlineBeforeDeletion",
@@ -386,18 +366,17 @@ class DomainStatusUpdateType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainTransitType:
     class Meta:
         name = "domainTransitType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -409,18 +388,17 @@ class DomainTransitType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainUpdateType:
     class Meta:
         name = "domainUpdateType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -432,7 +410,7 @@ class DomainUpdateType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DomainWithExpireListType:
     class Meta:
         name = "domainWithExpireListType"
@@ -447,66 +425,61 @@ class DomainWithExpireListType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class EarliestDomainBeforeDedelegationType:
     class Meta:
         name = "earliestDomainBeforeDedelegationType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    verification_deadline: Optional[XmlDateTime] = field(
-        default=None,
+    verification_deadline: XmlDateTime = field(
         metadata={
             "name": "verificationDeadline",
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class EarliestDomainBeforeDeletionType:
     class Meta:
         name = "earliestDomainBeforeDeletionType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    verification_deadline: Optional[XmlDateTime] = field(
-        default=None,
+    verification_deadline: XmlDateTime = field(
         metadata={
             "name": "verificationDeadline",
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class LockCreateType:
     class Meta:
         name = "lockCreateType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -518,18 +491,17 @@ class LockCreateType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class LockDeleteType:
     class Meta:
         name = "lockDeleteType"
 
-    domain: Optional[DomainType] = field(
-        default=None,
+    domain: DomainType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -541,18 +513,17 @@ class LockDeleteType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ReadType:
     class Meta:
         name = "readType"
 
-    value: Optional[EmptyType] = field(
-        default=None,
+    value: EmptyType = field(
         metadata={
             "required": True,
-        },
+        }
     )
-    msg_type: Optional[MsgTypeType] = field(
+    msg_type: None | MsgTypeType = field(
         default=None,
         metadata={
             "name": "msgType",
@@ -561,49 +532,46 @@ class ReadType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactDelete(ContactsDeleteType):
     class Meta:
         name = "contactDelete"
         namespace = "http://registry.denic.de/msg/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactVerificationRequiredType:
     class Meta:
         name = "contactVerificationRequiredType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*\-[\-\.a-zA-Z0-9]+",
-        },
+        }
     )
-    verification_claims: Optional[VerifiedClaimsType] = field(
-        default=None,
+    verification_claims: VerifiedClaimsType = field(
         metadata={
             "name": "verificationClaims",
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    number_of_referenced_domains_total: Optional[int] = field(
-        default=None,
+    number_of_referenced_domains_total: int = field(
         metadata={
             "name": "numberOfReferencedDomainsTotal",
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
-    earliest_domain_for_dedelegation: Optional[
-        EarliestDomainBeforeDedelegationType
-    ] = field(
+    earliest_domain_for_dedelegation: (
+        None | EarliestDomainBeforeDedelegationType
+    ) = field(
         default=None,
         metadata={
             "name": "earliestDomainForDedelegation",
@@ -611,16 +579,13 @@ class ContactVerificationRequiredType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    earliest_domain_for_deletion: Optional[
-        EarliestDomainBeforeDeletionType
-    ] = field(
-        default=None,
+    earliest_domain_for_deletion: EarliestDomainBeforeDeletionType = field(
         metadata={
             "name": "earliestDomainForDeletion",
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
             "required": True,
-        },
+        }
     )
     message: list[Transaction50MessageType] = field(
         default_factory=list,
@@ -632,26 +597,26 @@ class ContactVerificationRequiredType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Delete(DeleteType):
     class Meta:
         name = "delete"
         namespace = "http://registry.denic.de/msg/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class QueueRead(ReadType):
     class Meta:
         name = "queue-read"
         namespace = "http://registry.denic.de/msg/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class MessageType:
     class Meta:
         name = "messageType"
 
-    expire_warning: Optional[DomainWithExpireListType] = field(
+    expire_warning: None | DomainWithExpireListType = field(
         default=None,
         metadata={
             "name": "expireWarning",
@@ -659,14 +624,14 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    expire: Optional[DomainWithExpireListType] = field(
+    expire: None | DomainWithExpireListType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    auth_info_expire: Optional[AuthInfoExpireType] = field(
+    auth_info_expire: None | AuthInfoExpireType = field(
         default=None,
         metadata={
             "name": "authInfoExpire",
@@ -674,7 +639,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    auth_info2_notify: Optional[AuthInfo2NotifyType] = field(
+    auth_info2_notify: None | AuthInfo2NotifyType = field(
         default=None,
         metadata={
             "name": "authInfo2Notify",
@@ -682,7 +647,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    chprov_auth_info: Optional[ChprovAuthInfoType] = field(
+    chprov_auth_info: None | ChprovAuthInfoType = field(
         default=None,
         metadata={
             "name": "chprovAuthInfo",
@@ -690,7 +655,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    domain_delete: Optional[DomainDeleteType] = field(
+    domain_delete: None | DomainDeleteType = field(
         default=None,
         metadata={
             "name": "domainDelete",
@@ -698,7 +663,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    auth_info2_delete: Optional[AuthInfo2DeleteType] = field(
+    auth_info2_delete: None | AuthInfo2DeleteType = field(
         default=None,
         metadata={
             "name": "authInfo2Delete",
@@ -706,7 +671,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    lock_create: Optional[LockCreateType] = field(
+    lock_create: None | LockCreateType = field(
         default=None,
         metadata={
             "name": "lockCreate",
@@ -714,7 +679,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    lock_delete: Optional[LockDeleteType] = field(
+    lock_delete: None | LockDeleteType = field(
         default=None,
         metadata={
             "name": "lockDelete",
@@ -722,7 +687,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    domain_update: Optional[DomainUpdateType] = field(
+    domain_update: None | DomainUpdateType = field(
         default=None,
         metadata={
             "name": "domainUpdate",
@@ -730,7 +695,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    domain_transit: Optional[DomainTransitType] = field(
+    domain_transit: None | DomainTransitType = field(
         default=None,
         metadata={
             "name": "domainTransit",
@@ -738,7 +703,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    contact_update: Optional[ContactUpdateType] = field(
+    contact_update: None | ContactUpdateType = field(
         default=None,
         metadata={
             "name": "contactUpdate",
@@ -746,7 +711,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    contact_delete: Optional[ContactsDeleteType] = field(
+    contact_delete: None | ContactsDeleteType = field(
         default=None,
         metadata={
             "name": "contactDelete",
@@ -754,7 +719,7 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    domain_status_update: Optional[DomainStatusUpdateType] = field(
+    domain_status_update: None | DomainStatusUpdateType = field(
         default=None,
         metadata={
             "name": "domainStatusUpdate",
@@ -762,41 +727,39 @@ class MessageType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    contact_verification_required: Optional[
-        ContactVerificationRequiredType
-    ] = field(
-        default=None,
-        metadata={
-            "name": "contactVerificationRequired",
-            "type": "Element",
-            "namespace": "http://registry.denic.de/msg/5.0",
-        },
+    contact_verification_required: None | ContactVerificationRequiredType = (
+        field(
+            default=None,
+            metadata={
+                "name": "contactVerificationRequired",
+                "type": "Element",
+                "namespace": "http://registry.denic.de/msg/5.0",
+            },
+        )
     )
-    msgid: Optional[str] = field(
-        default=None,
+    msgid: str = field(
         metadata={
             "type": "Attribute",
             "required": True,
             "min_length": 3,
             "max_length": 64,
-        },
+        }
     )
-    msgcnt: Optional[int] = field(
+    msgcnt: None | int = field(
         default=None,
         metadata={
             "type": "Attribute",
         },
     )
-    msgtime: Optional[XmlDateTime] = field(
-        default=None,
+    msgtime: XmlDateTime = field(
         metadata={
             "type": "Attribute",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Message(MessageType):
     class Meta:
         name = "message"

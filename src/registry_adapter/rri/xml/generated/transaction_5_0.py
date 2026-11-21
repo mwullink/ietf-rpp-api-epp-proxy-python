@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 __NAMESPACE__ = "http://registry.denic.de/transaction/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class DataType:
     class Meta:
         name = "dataType"
@@ -31,18 +32,17 @@ class ResultType(Enum):
     EXCEPTION = "exception"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class MessageType:
     class Meta:
         name = "messageType"
 
-    text: Optional[str] = field(
-        default=None,
+    text: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/transaction/5.0",
             "required": True,
-        },
+        }
     )
     argument: list[str] = field(
         default_factory=list,
@@ -51,35 +51,33 @@ class MessageType:
             "namespace": "http://registry.denic.de/transaction/5.0",
         },
     )
-    level: Optional[LevelType] = field(
-        default=None,
+    level: LevelType = field(
         metadata={
             "type": "Attribute",
             "required": True,
-        },
+        }
     )
-    code: Optional[int] = field(
-        default=None,
+    code: int = field(
         metadata={
             "type": "Attribute",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Message(MessageType):
     class Meta:
         name = "message"
         namespace = "http://registry.denic.de/transaction/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TransactionType:
     class Meta:
         name = "transactionType"
 
-    stid: Optional[str] = field(
+    stid: None | str = field(
         default=None,
         metadata={
             "type": "Element",
@@ -88,7 +86,7 @@ class TransactionType:
             "max_length": 64,
         },
     )
-    ctid: Optional[str] = field(
+    ctid: None | str = field(
         default=None,
         metadata={
             "type": "Element",
@@ -97,13 +95,12 @@ class TransactionType:
             "max_length": 64,
         },
     )
-    result: Optional[ResultType] = field(
-        default=None,
+    result: ResultType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/transaction/5.0",
             "required": True,
-        },
+        }
     )
     message: list[MessageType] = field(
         default_factory=list,
@@ -112,7 +109,7 @@ class TransactionType:
             "namespace": "http://registry.denic.de/transaction/5.0",
         },
     )
-    data: Optional[DataType] = field(
+    data: None | DataType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -121,7 +118,7 @@ class TransactionType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Transaction(TransactionType):
     class Meta:
         name = "transaction"

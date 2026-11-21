@@ -8,7 +8,7 @@ from core.model.message.queue_message import QueueMessage
 from core.result.error_response import ErrorResponse
 from core.result.result_code import ResultCode
 from registry_adapter.rri.commands.shared.rri_command import data_of, run
-from registry_adapter.rri.xml.generated.message_5_0 import Delete, Message, QueueRead
+from registry_adapter.rri.xml.generated.message_5_0 import Delete, EmptyType, Message, QueueRead
 
 HEADER = ("msgid", "msgcnt", "msgtime")
 
@@ -51,7 +51,8 @@ def _queue(transaction) -> MessageQueue:
 def rri_queue_read(client, client_transaction_id=None):
     """The oldest message of the queue, and how many there are. The answer has the result code an RPP client knows
     from a poll: 1301 with a message, 1300 without."""
-    resp = run(client, client_transaction_id, write=False, payload_of=_queue, queue_read=QueueRead())
+    resp = run(client, client_transaction_id, write=False, payload_of=_queue,
+               queue_read=QueueRead(value=EmptyType.VALUE))
     if isinstance(resp, ErrorResponse):
         return resp
     resp.code = (ResultCode.COMMAND_COMPLETED_ACK_TO_DEQUEUE if resp.payload.message is not None
@@ -62,4 +63,4 @@ def rri_queue_read(client, client_transaction_id=None):
 def rri_queue_delete(client, message_id: str, client_transaction_id=None):
     """Deletes a message. RRI deletes only the oldest one (63650063607)."""
     return run(client, client_transaction_id, write=False, payload_of=lambda t: MessageQueue(queue_size=None),
-               registry_denic_de_msg_5_0_delete=Delete(msgid=message_id))
+               registry_denic_de_msg_5_0_delete=Delete(value=EmptyType.VALUE, msgid=message_id))

@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 from registry_adapter.rri.xml.generated.contact_5_0 import (
     Check as ContactCheck,
@@ -50,26 +51,24 @@ from registry_adapter.rri.xml.generated.transaction_5_0 import Transaction
 __NAMESPACE__ = "http://registry.denic.de/global/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class LoginType:
     class Meta:
         name = "loginType"
 
-    user: Optional[str] = field(
-        default=None,
+    user: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/global/5.0",
             "required": True,
-        },
+        }
     )
-    password: Optional[str] = field(
-        default=None,
+    password: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/global/5.0",
             "required": True,
-        },
+        }
     )
 
 
@@ -77,54 +76,54 @@ class LogoutType(Enum):
     VALUE = ""
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RequestType:
     class Meta:
         name = "requestType"
 
-    login: Optional[LoginType] = field(
+    login: None | LoginType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/global/5.0",
         },
     )
-    logout: Optional[LogoutType] = field(
+    logout: None | LogoutType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/global/5.0",
         },
     )
-    create: Optional[ContactCreate] = field(
+    create: None | ContactCreate = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    update: Optional[ContactUpdate] = field(
+    update: None | ContactUpdate = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    check: Optional[ContactCheck] = field(
+    check: None | ContactCheck = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    info: Optional[ContactInfo] = field(
+    info: None | ContactInfo = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    registry_denic_de_domain_5_0_create: Optional[DomainCreate] = field(
+    registry_denic_de_domain_5_0_create: None | DomainCreate = field(
         default=None,
         metadata={
             "name": "create",
@@ -132,7 +131,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    registry_denic_de_domain_5_0_update: Optional[DomainUpdate] = field(
+    registry_denic_de_domain_5_0_update: None | DomainUpdate = field(
         default=None,
         metadata={
             "name": "update",
@@ -140,28 +139,28 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    chholder: Optional[Chholder] = field(
+    chholder: None | Chholder = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    delete: Optional[DomainDelete] = field(
+    delete: None | DomainDelete = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    restore: Optional[Restore] = field(
+    restore: None | Restore = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    registry_denic_de_domain_5_0_check: Optional[DomainCheck] = field(
+    registry_denic_de_domain_5_0_check: None | DomainCheck = field(
         default=None,
         metadata={
             "name": "check",
@@ -169,7 +168,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    info_1: Optional[DomainInfo] = field(
+    info_1: None | DomainInfo = field(
         default=None,
         metadata={
             "name": "info",
@@ -177,21 +176,21 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    chprov: Optional[Chprov] = field(
+    chprov: None | Chprov = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    transit: Optional[Transit] = field(
+    transit: None | Transit = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    create_auth_info1: Optional[CreateAuthInfo1] = field(
+    create_auth_info1: None | CreateAuthInfo1 = field(
         default=None,
         metadata={
             "name": "createAuthInfo1",
@@ -199,7 +198,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    delete_auth_info1: Optional[DeleteAuthInfo1] = field(
+    delete_auth_info1: None | DeleteAuthInfo1 = field(
         default=None,
         metadata={
             "name": "deleteAuthInfo1",
@@ -207,7 +206,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    create_auth_info2: Optional[CreateAuthInfo2] = field(
+    create_auth_info2: None | CreateAuthInfo2 = field(
         default=None,
         metadata={
             "name": "createAuthInfo2",
@@ -215,7 +214,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/domain/5.0",
         },
     )
-    queue_read: Optional[QueueRead] = field(
+    queue_read: None | QueueRead = field(
         default=None,
         metadata={
             "name": "queue-read",
@@ -223,7 +222,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    registry_denic_de_msg_5_0_delete: Optional[MessageDelete] = field(
+    registry_denic_de_msg_5_0_delete: None | MessageDelete = field(
         default=None,
         metadata={
             "name": "delete",
@@ -231,7 +230,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/msg/5.0",
         },
     )
-    info_2: Optional[RegaccInfo] = field(
+    info_2: None | RegaccInfo = field(
         default=None,
         metadata={
             "name": "info",
@@ -239,7 +238,7 @@ class RequestType:
             "namespace": "http://registry.denic.de/regacc/5.0",
         },
     )
-    ctid: Optional[str] = field(
+    ctid: None | str = field(
         default=None,
         metadata={
             "type": "Element",
@@ -250,29 +249,28 @@ class RequestType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ResponseType:
     class Meta:
         name = "responseType"
 
-    transaction: Optional[Transaction] = field(
-        default=None,
+    transaction: Transaction = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/transaction/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RegistryRequest(RequestType):
     class Meta:
         name = "registry-request"
         namespace = "http://registry.denic.de/global/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class RegistryResponse(ResponseType):
     class Meta:
         name = "registry-response"

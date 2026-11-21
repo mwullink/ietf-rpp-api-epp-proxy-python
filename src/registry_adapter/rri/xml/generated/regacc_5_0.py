@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Optional
 
 from xsdata.models.datatype import XmlDateTime
 
@@ -26,24 +27,23 @@ from registry_adapter.rri.xml.generated.verification_5_0 import (
 __NAMESPACE__ = "http://registry.denic.de/regacc/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class InfoType:
     class Meta:
         name = "infoType"
 
-    handle: Optional[str] = field(
+    handle: None | str = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
-            "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*",
         },
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NormalizedStringPrivacyType:
     class Meta:
         name = "normalizedStringPrivacyType"
@@ -56,7 +56,7 @@ class NormalizedStringPrivacyType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class TokenPrivacyType:
     class Meta:
         name = "tokenPrivacyType"
@@ -69,24 +69,24 @@ class TokenPrivacyType:
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class AddressType(NormalizedStringPrivacyType):
     class Meta:
         name = "addressType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CityType(NormalizedStringPrivacyType):
     class Meta:
         name = "cityType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ContactInfoDataType:
     class Meta:
         name = "contactInfoDataType"
 
-    type_value: Optional[TypeType] = field(
+    type_value: None | TypeType = field(
         default=None,
         metadata={
             "name": "type",
@@ -94,7 +94,7 @@ class ContactInfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    name: Optional[Contact50NameType] = field(
+    name: None | Contact50NameType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -108,7 +108,7 @@ class ContactInfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    postal: Optional[NillablePostalType] = field(
+    postal: None | NillablePostalType = field(
         default=None,
         metadata={
             "type": "Element",
@@ -122,14 +122,14 @@ class ContactInfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    phone: Optional[Contact50PhoneType] = field(
+    phone: None | Contact50PhoneType = field(
         default=None,
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    dispute_reference: Optional[bool] = field(
+    dispute_reference: None | bool = field(
         default=None,
         metadata={
             "name": "disputeReference",
@@ -137,7 +137,7 @@ class ContactInfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    uri_template: Optional[UriTemplateType] = field(
+    uri_template: None | UriTemplateType = field(
         default=None,
         metadata={
             "name": "uri-template",
@@ -145,7 +145,7 @@ class ContactInfoDataType:
             "namespace": "http://registry.denic.de/contact/5.0",
         },
     )
-    changed: Optional[XmlDateTime] = field(
+    changed: None | XmlDateTime = field(
         default=None,
         metadata={
             "type": "Element",
@@ -161,59 +161,58 @@ class ContactInfoDataType:
             "max_occurs": 5,
         },
     )
-    role: Optional[RoleType] = field(
-        default=None,
+    role: RoleType = field(
         metadata={
             "type": "Attribute",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class CountryCodeType(TokenPrivacyType):
     class Meta:
         name = "countryCodeType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class EmailType(TokenPrivacyType):
     class Meta:
         name = "emailType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Info(InfoType):
     class Meta:
         name = "info"
         namespace = "http://registry.denic.de/regacc/5.0"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class NameType(NormalizedStringPrivacyType):
     class Meta:
         name = "nameType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PhoneType(TokenPrivacyType):
     class Meta:
         name = "phoneType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PostalCodeType(TokenPrivacyType):
     class Meta:
         name = "postalCodeType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class UrlType(NormalizedStringPrivacyType):
     class Meta:
         name = "urlType"
 
 
-@dataclass
+@dataclass(kw_only=True)
 class PostalType:
     class Meta:
         name = "postalType"
@@ -226,64 +225,58 @@ class PostalType:
             "min_occurs": 1,
         },
     )
-    postal_code: Optional[PostalCodeType] = field(
-        default=None,
+    postal_code: PostalCodeType = field(
         metadata={
             "name": "postalCode",
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
-    city: Optional[CityType] = field(
-        default=None,
+    city: CityType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
-    country_code: Optional[CountryCodeType] = field(
-        default=None,
+    country_code: CountryCodeType = field(
         metadata={
             "name": "countryCode",
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class InfoDataType:
     class Meta:
         name = "infoDataType"
 
-    handle: Optional[str] = field(
-        default=None,
+    handle: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*",
-        },
+        }
     )
-    name: Optional[NameType] = field(
-        default=None,
+    name: NameType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
-    postal: Optional[PostalType] = field(
-        default=None,
+    postal: PostalType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
     phone: list[PhoneType] = field(
         default_factory=list,
@@ -299,13 +292,12 @@ class InfoDataType:
             "namespace": "http://registry.denic.de/regacc/5.0",
         },
     )
-    email: Optional[EmailType] = field(
-        default=None,
+    email: EmailType = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
     url: list[UrlType] = field(
         default_factory=list,
@@ -314,15 +306,14 @@ class InfoDataType:
             "namespace": "http://registry.denic.de/regacc/5.0",
         },
     )
-    memberacc: Optional[str] = field(
-        default=None,
+    memberacc: str = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
             "max_length": 32,
             "pattern": r"[dD][eE][nN][iI][cC]\-[1-9][0-9]*",
-        },
+        }
     )
     contact: list[ContactInfoDataType] = field(
         default_factory=list,
@@ -332,17 +323,16 @@ class InfoDataType:
             "max_occurs": 2,
         },
     )
-    changed: Optional[XmlDateTime] = field(
-        default=None,
+    changed: XmlDateTime = field(
         metadata={
             "type": "Element",
             "namespace": "http://registry.denic.de/regacc/5.0",
             "required": True,
-        },
+        }
     )
 
 
-@dataclass
+@dataclass(kw_only=True)
 class InfoData(InfoDataType):
     class Meta:
         name = "infoData"
