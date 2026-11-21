@@ -2,7 +2,8 @@
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
-        "-rsP"
+        "-rsP",
+        "-n", "4"
     ],
     "testExplorer.useNativeTesting": true,
     "testExplorer.gutterDecoration": false,
