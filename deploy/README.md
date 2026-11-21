@@ -26,7 +26,8 @@ the host can reach it.
 |---|---|
 | [docker/Dockerfile](docker/Dockerfile) | The image: non-root UID 10001, read-only root, no pip, healthcheck on `/.well-known/rpp` |
 | [ansible/site.yml](ansible/site.yml) | The playbook: roles `rootless_docker`, `epp_server`, `rpp_proxy` |
-| [ansible/inventory/example/](ansible/inventory/example/) | An inventory to copy: host, instances, config templates, vault |
+| [ansible/configs/](ansible/configs/) | The configuration templates of the instances, one per repository environment |
+| [ansible/inventory/example/](ansible/inventory/example/) | An inventory to copy: host, instances, vault |
 | `ansible/roles/*/defaults/main.yml` | Every setting, with its default and meaning |
 
 On the host, under `/home/rpp`:
@@ -54,6 +55,9 @@ On the target host you need SSH access as a user with sudo, Python 3, and the ro
 isn't installed yet, the playbook installs Docker CE, which also starts the root daemon.
 
 ## Deploying
+
+`ansible.cfg` names no inventory: name it with `-i`, or with `ANSIBLE_INVENTORY`, which overrides `ansible.cfg`. A run
+that names none targets no host.
 
 Run the checks first. They change nothing on the host, and print what the role found and what it will do:
 
@@ -92,6 +96,21 @@ ansible-vault encrypt inventory/prod/group_vars/rpp_hosts/vault.yml
 ansible-playbook -i inventory/prod/hosts.yml site.yml --ask-vault-pass
 ```
 
+### An inventory in its own repository
+
+`inventory/<name>/` is ignored by git, so nothing keeps it. To keep it under version control, give it its own (private)
+repository: `hosts.yml` and `group_vars/` with the encrypted vault. Its instances use the repository's templates through
+`playbook_dir` (see [Instances](#instances)), so it holds no copy of them, and a template of its own only for a
+configuration the repository has none of. Run the playbook of this repository with it:
+
+```bash
+export ANSIBLE_INVENTORY=/path/to/the-inventory/hosts.yml   # or -i on each run
+cd deploy/ansible && ansible-playbook site.yml --ask-vault-pass
+```
+
+A small script in the inventory repository that sets `ANSIBLE_INVENTORY` and runs `ansible-playbook` from
+`deploy/ansible` saves typing it.
+
 Running the playbook again does nothing unless something changed. The changes it applies:
 
 - **A new `rpp_proxy_version`** builds a new image and recreates the instances.
@@ -116,13 +135,13 @@ cd src && ../.venv/bin/python -m registry_adapter.sqlite.hash_password
 ## Instances
 
 `rpp_proxy_instances` lists the instances, and nothing else in the roles names them. **To add an instance, add an
-entry**, and for most instances a config template next to the others:
+entry** with a config template: one of the repository's in [ansible/configs/](ansible/configs/), or the inventory's own.
 
 ```yaml
 rpp_proxy_instances:
   - name: epp-second            # [a-z0-9-], unique: the service and directory name
     port: 8094                  # unique, 1024 or above
-    config_template: configs/epp-second.yaml.j2   # relative to the inventory, sees this entry as `instance`
+    config_template: "{{ playbook_dir }}/configs/epp.yaml.j2"  # sees this entry as `instance`
     epp_network: true           # joins the EPP test server's network
     base_url: https://rpp-epp-second.example.net  # any further key is free for the template
 ```
@@ -132,7 +151,7 @@ The entry keys are:
 | Key | Meaning |
 |---|---|
 | `name`, `port` | Required |
-| `config_template` or `config` | Exactly one: a Jinja2 template of the proxy's `config.yaml`, or the configuration as a YAML mapping |
+| `config_template` or `config` | Exactly one: a Jinja2 template of the proxy's `config.yaml` (absolute, or relative to the inventory), or the configuration as a YAML mapping |
 | `data` | `true` mounts `instances/<name>/data` at `/data`, for `rpp_sqlite_url: sqlite:////data/<file>.db` |
 | `epp_network` | `true` attaches the instance to `rpp-epp`, where the EPP test server is `epp-server:743` |
 | `workers`, `mem_limit`, `cpus`, `pids_limit`, `tmpfs_size` | Override the defaults (3, `1g`, 2, 256, `64m`) |
@@ -144,9 +163,9 @@ The example has three instances:
 
 | Instance | Port | Configuration | Backend |
 |---|---|---|---|
-| `epp` | 8091 | [configs/epp.yaml.j2](ansible/inventory/example/configs/epp.yaml.j2) | The EPP test server, internal. Registrars `foo`/`bar` and `baz`/`qux`, as provisioned by EPP-server-docker |
-| `sqlite-demo` | 8092 | [configs/sqlite-demo.yaml.j2](ansible/inventory/example/configs/sqlite-demo.yaml.j2) | SQLite in `/data/demo.db`; clients from the vault |
-| `rri-mtest` | 8093 | [configs/rri-mtest.yaml.j2](ansible/inventory/example/configs/rri-mtest.yaml.j2) | DENIC RRI MTEST |
+| `epp` | 8091 | [configs/epp.yaml.j2](ansible/configs/epp.yaml.j2) | The EPP test server, internal. Registrars `foo`/`bar` and `baz`/`qux`, as provisioned by EPP-server-docker |
+| `sqlite-demo` | 8092 | [configs/sqlite-demo.yaml.j2](ansible/configs/sqlite-demo.yaml.j2) | SQLite in `/data/demo.db`; clients from the vault |
+| `rri-mtest` | 8093 | [configs/rri-mtest.yaml.j2](ansible/configs/rri-mtest.yaml.j2) | DENIC RRI MTEST |
 
 The `rri-mtest` instance passes HTTP Basic through as the RRI LOGIN, so the deployment holds no DENIC credentials.
 MTEST only admits the host's public address once DENIC has put it on the RegAcc's allowlist. RRI locks a user for an
@@ -191,6 +210,18 @@ arrives from inside the daemon's network namespace, so the peer address can't te
 
 If ufw is active, the playbook allows `rpp_proxy_ufw_allow_from` (default `172.16.0.0/12`, the root daemon's
 networks) to the published ports.
+
+### nginx on the host's loopback
+
+If nginx reaches the instances on the host's loopback instead (nginx on the host, or a container with
+`network_mode: host`), publish the ports there and open no firewall rule:
+
+```yaml
+rpp_proxy_bind_address: 127.0.0.1
+rpp_proxy_ufw_allow_from: []   # loopback needs no rule
+```
+
+nginx then proxies to `http://127.0.0.1:<port>`.
 
 ## Hardening
 

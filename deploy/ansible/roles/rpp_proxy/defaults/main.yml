@@ -33,8 +33,8 @@ rpp_proxy_ufw_allow_from: [172.16.0.0/12]
 # The instances: one container each, with its own configuration and port. Adding an instance is adding an entry.
 #   name             [a-z0-9-], unique: the compose service and the directory of the instance
 #   port             unique: published on rpp_proxy_bind_address
-#   config_template  a Jinja2 template of the proxy's config.yaml, relative to the inventory directory or absolute;
-#                    it sees the entry as `instance`
+#   config_template  a Jinja2 template of the proxy's config.yaml, relative to the inventory directory or absolute
+#                    (the repository's: "{{ playbook_dir }}/configs/<name>.yaml.j2"); it sees the entry as `instance`
 #   config           or the configuration itself, as a mapping
 #   data             true: a directory mounted at /data, for rpp_sqlite_url: sqlite:////data/<file>.db
 #   epp_network      true: on epp_server_network, to reach epp-server:743

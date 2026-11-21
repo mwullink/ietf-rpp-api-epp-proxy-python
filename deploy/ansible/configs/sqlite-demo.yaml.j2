@@ -31,6 +31,12 @@ rpp_backend_profile:
     - planets
   default_preset: planets
 
+# The OpenAPI document served shows only what the demo serves: not the operations on the drafts' objects, which the demo
+# backend does not hold, nor those no handler serves. Against the drafts' API contract, which lists them all; requests to
+# them still answer 501 (#204).
+rpp_openapi_omit_unheld_objects: true
+rpp_openapi_omit_unimplemented: true
+
 # What the discovery document states.
 rpp_base_url: {{ instance.base_url }}
 rpp_tlds: {{ instance.tlds | default(['example']) | to_json }}
