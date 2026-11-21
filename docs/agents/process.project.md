@@ -79,5 +79,5 @@ Use `bug` for defects, plus one `severity:*` label (`critical`, `high`, `medium`
 Renovate ([renovate.json](../../renovate.json)) opens its PRs on Monday mornings, for no release younger than 24 hours
 (`minimumReleaseAge`): one PR for the minor and patch updates of `requirements*.txt`, one for the GitHub Actions and
 images, and one per major update. The non-major PRs merge themselves once CI passes; a major one is merged by hand. The
-Python images stay on 3.11 (`allowedVersions`). A Trivy finding of HIGH or CRITICAL with a fix fails CI: update the pin,
-or wait for Renovate's PR.
+Python images stay on 3.11 (`allowedVersions`). A Trivy finding of HIGH or CRITICAL with a fix fails CI: update the pin.
+One that cannot be fixed yet goes in [.trivyignore](../../.trivyignore) with the issue that removes it.
