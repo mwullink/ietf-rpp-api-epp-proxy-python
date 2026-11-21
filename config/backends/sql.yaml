@@ -45,3 +45,6 @@ rpp_openapi_omit_unimplemented: true
 rpp_protocol_config:
   session:
     cltrid_reuse_supported: true       # a reused client transaction id is taken
+  message:
+    queue:
+      server_notices: false            # the demo backend queues only what a transfer causes

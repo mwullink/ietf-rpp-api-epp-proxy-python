@@ -12,23 +12,28 @@ import re
 import uuid
 from pathlib import Path
 
-import pytest
 from dotenv import load_dotenv
 from starlette.testclient import TestClient
 
 from main import compose
 from settings.load_settings import load_settings
-from tests.helper import durations, selectors
+from tests.helper import durations, includes, selectors
+from tests.helper.case_data import case_data_dir
 from tests.helper.idn_labels import replace_idn_placeholders
 from tests.helper.integration_api_test import endpoint_test, replace_pad_placeholders, replace_upper_placeholders
 from tests.helper.pacer import Pacer
+from tests.helper.run_directory import run_directory, run_once
+from tests.helper.step_runner import StepRunner
 from tests.helper.test_environment import (
     REPOSITORY, Credentials, EnvironmentError, TestEnvironment, environment_names, load, replace_fact, replace_values,
     selected_names, with_rpp_headers,
 )
 
-CASE_DATA = Path(__file__).parent / "test_case_data"
+CASE_DATA = case_data_dir()
 GROUP_FILE = "_group.json"
+INCLUDES = CASE_DATA / "_includes"
+RUN_HOOKS = CASE_DATA / "_run.json"
+RUN_SETUP = "run-setup"
 
 # The credentials of the test environments come from .env in the repository root, or from the process environment,
 # which wins. The proxy never reads .env.
@@ -90,6 +95,33 @@ class EnvironmentRun:
     def pacer(self):
         return Pacer(self.environment.rpp_requests_per_minute, workers, self.credentials.slot)
 
+    @functools.cached_property
+    def full_rate_pacer(self):
+        """The pacer of the run setup and teardown: the other workers of the environment wait for the run setup, and
+        the run teardown runs after them, so each has the registrar's whole rate."""
+        return Pacer(self.environment.rpp_requests_per_minute, 1, self.credentials.slot)
+
+    def ensure_run_setup(self) -> None:
+        """Runs the run setup of this environment, once per run across the workers; fails if it failed."""
+        failure = run_once(run_directory(), f"{self.name}.{RUN_SETUP}", lambda: self._run_hook("setup"))
+        if failure is not None:
+            raise RuntimeError(f"The run setup of {self.name} failed: {failure}")
+
+    def run_teardown(self) -> list[str]:
+        """Runs the run teardown of this environment; what failed in it."""
+        return self._run_hook("teardown")
+
+    def _run_hook(self, phase: str) -> list[str]:
+        items = load_run_hooks().get(phase, [])
+        hooks = {"test_group": "_run", "test_id": "run"}
+        with TestClient(self.app) as client:
+            runner = StepRunner(client, preparer(hooks, self, datetime.datetime.now(datetime.UTC)), "run",
+                                self.environment.preset_signalling, self.credentials, self.full_rate_pacer)
+            if phase == "teardown":
+                return runner.run_teardown(items)
+            runner.run(items, phase)
+            return []
+
 
 @functools.cache
 def environment_runs() -> dict[str, EnvironmentRun]:
@@ -113,7 +145,9 @@ def _read_json(path: Path):
 
 
 def groups() -> list[Path]:
-    return sorted((p for p in CASE_DATA.iterdir() if p.is_dir()), key=lambda p: p.name.lower())
+    """The group directories; `_includes` and any other name starting with `_` is not a group."""
+    return sorted((p for p in CASE_DATA.iterdir() if p.is_dir() and not p.name.startswith("_")),
+                  key=lambda p: p.name.lower())
 
 
 def case_files(group_dir: Path) -> list[Path]:
@@ -145,7 +179,7 @@ def load_case(path: Path):
     still shows up instead of vanishing. The case is shared by the environments and is not changed after this.
     """
     group_when = load_group_when(path.parent)
-    data = _read_json(path)
+    data = includes.expand(_read_json(path), INCLUDES)
     for env_facts in _all_facts():
         selectors.check(data, env_facts)
     data["test_group"] = path.parent.name
@@ -153,6 +187,21 @@ def load_case(path: Path):
     if group_when is not None:
         data["_group_when"] = group_when
     return data
+
+
+@functools.cache
+def load_run_hooks() -> dict:
+    """The run setup and teardown of `_run.json`, `{"setup": [items], "teardown": [items]}`, checked against every
+    environment; empty without the file."""
+    if not RUN_HOOKS.exists():
+        return {}
+    hooks = includes.expand(_read_json(RUN_HOOKS), INCLUDES)
+    unknown = set(hooks) - {"comment", "setup", "teardown"}
+    if unknown:
+        raise ValueError(f"{RUN_HOOKS.name}: unknown keys {sorted(unknown)}")
+    for env_facts in _all_facts():
+        selectors.check(hooks, env_facts)
+    return hooks
 
 
 def _case_selectors(case):
@@ -214,19 +263,17 @@ def _with_wait(step, facts):
     return step
 
 
-def select(case, facts):
-    """The case as the environment under test runs it: the steps whose `when` holds, each `select` resolved."""
-    steps = [_with_wait(selectors.resolve({k: v for k, v in step.items() if k != "when"}, facts), facts)
-             for step in case["steps"] if "when" not in step or selectors.holds(step["when"], facts)]
-    return {**{k: v for k, v in case.items() if k not in ("when", "_group_when")}, "steps": steps}
-
-
-def run_case(case, run: EnvironmentRun):
-    """Runs a loaded case in the environment, in a test client of its own."""
-    # The selectors are resolved first, then the placeholders, then the captures.
-    # {test_start} is the start of this case, so the time windows in the data do not depend on suite length.
-    with TestClient(run.app) as client:
-        selected = with_rpp_headers(select(case, run.facts), run.environment)
-        endpoint_test(client, process_placeholders(selected, run.environment,
-                                                   started=datetime.datetime.now(datetime.UTC)),
-                      credentials=run.credentials, pacer=run.pacer)
+def preparer(case, run: EnvironmentRun, started):
+    """What the step runner does to an item of the case right before it runs it, in the environment under test: None
+    where its `when` does not hold; a block or loop as it is; a step with its selects resolved, its wait in seconds,
+    its preset headers and then its placeholders replaced. The captures come last, in the runner."""
+    def prepare(item):
+        if "when" in item and not selectors.holds(item["when"], run.facts):
+            return None
+        item = {k: v for k, v in item.items() if k != "when"}
+        if "block" in item or "loop" in item:
+            return item
+        step = _with_wait(selectors.resolve(item, run.facts), run.facts)
+        step = with_rpp_headers({"steps": [step]}, run.environment)["steps"][0]
+        return process_placeholders(step, run.environment, obj=case, started=started)
+    return prepare

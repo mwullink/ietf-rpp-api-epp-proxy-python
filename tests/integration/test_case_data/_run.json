@@ -1,0 +1,35 @@
+{
+  "comment": "The run setup and teardown of every environment (docs/agents/testing.project.md): the message queues of the registrars start and end the run empty.",
+  "setup": [
+    {
+      "comment": "Drains the message queue of registrar a.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "a"
+      }
+    },
+    {
+      "comment": "Drains the message queue of registrar b.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "b"
+      }
+    }
+  ],
+  "teardown": [
+    {
+      "comment": "Drains the message queue of registrar a.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "a"
+      }
+    },
+    {
+      "comment": "Drains the message queue of registrar b.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "b"
+      }
+    }
+  ]
+}

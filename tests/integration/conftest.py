@@ -6,35 +6,93 @@ marked skipped there while collecting. A file that cannot be loaded, or a case t
 listed and fails when run, so it does not vanish. The environment and group nodes are `pytest.Class` nodes, because
 that is what the VS Code test explorer nests. The runner is in `file_cases.py`.
 
+A case runs in the phases of pytest (#218): its `setup` in the item's setup, so that a failure there is an error; its
+`steps` as the test, a failure; its `teardown` in the item's teardown, always, where a failure is only a warning in the
+`teardown warnings` section of the summary. The run setup of an environment runs before its first case, once across the
+xdist workers, which share the run's directory (`RPP_TEST_RUN_DIR`); the run teardown runs at the end, in the process
+that started the run.
+
 A case's path is its JSON file, so the editor opens it. VS Code runs a test as `<path>::<environment>::<group>::<case>`,
 so a case file named on the command line is collected as a tree of its own, of that one case; a run of a directory
 does not collect it, so no case runs twice.
 """
+import shutil
+import sys
 from pathlib import Path
 
 import pytest
 
+from tests.helper.case_data import case_data_dir
+from tests.helper.run_directory import keys_done, new_run_directory, run_directory
+
 CASE_TREE = Path(__file__).parent / "file_cases.py"
-CASE_DATA = Path(__file__).parent / "test_case_data"
+CASE_DATA = case_data_dir()
+TEARDOWN_WARNINGS = "teardown_warnings"
+RUN_TEARDOWN_WARNINGS = pytest.StashKey[list]()
 
 
 def pytest_collect_file(file_path: Path, parent: pytest.Collector):
     if file_path == CASE_TREE:
         return CaseTree.from_parent(parent, path=file_path)
     if (file_path.suffix == ".json" and file_path.parent.parent == CASE_DATA and file_path.name != "_group.json"
+            and not file_path.parent.name.startswith("_")
             and parent.session.isinitpath(file_path)):
         return CaseTree.from_parent(parent, path=file_path, only=file_path)
     return None
 
 
-def pytest_sessionfinish(session):
-    """Logs out the registry sessions of this process, in each xdist worker too, also after a Ctrl-C."""
-    import sys
+def _is_worker(config) -> bool:
+    return hasattr(config, "workerinput")
 
+
+def pytest_configure(config):
+    """The process that starts the run makes its directory; the xdist workers it starts inherit its name."""
+    if not _is_worker(config):
+        new_run_directory()
+
+
+def pytest_sessionfinish(session):
+    """Runs the run teardown of every environment whose run setup ran, in the process that started the run, after
+    every case; then logs out the registry sessions of this process, in each xdist worker too, also after a Ctrl-C."""
+    if not _is_worker(session.config):
+        session.config.stash[RUN_TEARDOWN_WARNINGS] = _run_teardowns()
     file_cases = sys.modules.get("tests.integration.file_cases")
     if file_cases is not None:
         for run in file_cases.environment_runs().values():
             run.close()
+
+
+def _run_teardowns() -> list[str]:
+    directory = run_directory()
+    done = [key.rpartition(".")[0] for key in keys_done(directory)]
+    warnings = []
+    if done:
+        from tests.integration import file_cases  # in the xdist controller, which collects no case, it is not loaded
+
+        runs = file_cases.environment_runs()
+        for name in done:
+            try:
+                warnings += [f"{name}: {w}" for w in runs[name].run_teardown()]
+            except Exception as exc:  # noqa: BLE001 - a run teardown never fails the run
+                warnings.append(f"{name}: run teardown: {type(exc).__name__}: {exc}")
+    shutil.rmtree(directory, ignore_errors=True)
+    return warnings
+
+
+def pytest_terminal_summary(terminalreporter, config):
+    """The `teardown warnings` section: what failed in the teardown of each case and in the run teardowns."""
+    lines = []
+    for reports in terminalreporter.stats.values():
+        for report in reports:
+            if getattr(report, "when", None) == "teardown":
+                for key, value in getattr(report, "user_properties", []):
+                    if key == TEARDOWN_WARNINGS:
+                        lines += [f"{report.nodeid}: {warning}" for warning in value]
+    lines += config.stash.get(RUN_TEARDOWN_WARNINGS, [])
+    if lines:
+        terminalreporter.section("teardown warnings", yellow=True)
+        for line in lines:
+            terminalreporter.write_line(line)
 
 
 class CaseTree(pytest.File):
@@ -103,6 +161,7 @@ class Case(pytest.Item):
         self.run = run
         self.extra_keyword_matches.add(f"{self.path.parent.name}-{self.name}")
         self.failure = None  # why the case fails without running
+        self.case_run = None
         try:
             for marker in (case or {}).get("markers", []):  # registered in pyproject.toml, as --strict-markers requires
                 self.add_marker(marker)
@@ -118,12 +177,28 @@ class Case(pytest.Item):
             if reason is not None:
                 self.add_marker(pytest.mark.skip(reason=reason))
 
+    def setup(self):
+        """The run setup and the case's `setup`: a failure is an error of the case."""
+        if self.failure is not None:
+            return
+        from tests.integration.case_run import CaseRun
+
+        self.case_run = CaseRun(self.case, self.run)
+        self.case_run.setup()
+
     def runtest(self):
         if self.failure is not None:
             pytest.fail(self.failure)
-        from tests.integration import file_cases
+        self.case_run.test()
 
-        file_cases.run_case(self.case, self.run)
+    def teardown(self):
+        """The case's `teardown`, also after an error or a failure. What fails in it is a warning, never a failure."""
+        if self.case_run is None:
+            return
+        warnings = self.case_run.teardown()
+        if warnings:
+            self.user_properties.append((TEARDOWN_WARNINGS, warnings))
+            self.add_report_section("teardown", "warnings", "\n".join(warnings))
 
     def reportinfo(self):
         return self.path, 0, f"{self.run.name}/{self.path.parent.name}/{self.name}"

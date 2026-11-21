@@ -1,0 +1,79 @@
+{
+  "comment": "Acknowledges the messages of the queue of a registrar, head by head, until the queue is empty. Used by the run setup and teardown, and by the setup of a case that reads a queue.",
+  "parameters": {
+    "registrar": {
+      "comment": "The slot of the registrar whose queue is drained, a or b."
+    }
+  },
+  "steps": [
+    {
+      "comment": "Reads the head and acknowledges it, until the queue reads empty.",
+      "loop": [
+        {
+          "comment": "Polls the message queue; expects 200 01300 when it is empty, which ends the loop, or 200 01301 with a message at the head.",
+          "request": {
+            "method": "GET",
+            "url": "/messages",
+            "headers": {
+              "Authorization": "{auth:{param:registrar}}",
+              "Accept": "{rpp:accept}",
+              "RPP-Preset": "{rpp:preset}",
+              "Content-Type": "{rpp:content-type}",
+              "RPP-Cltrid": "{unique_cltrid}"
+            }
+          },
+          "response": {
+            "any_of": [
+              {
+                "status": 200,
+                "body": [],
+                "headers": {
+                  "RPP-Code": "01300"
+                }
+              },
+              {
+                "status": 200,
+                "body": [
+                  {
+                    "@type": "message"
+                  }
+                ],
+                "headers": {
+                  "RPP-Code": "01301"
+                }
+              }
+            ]
+          },
+          "until": {
+            "headers": {
+              "RPP-Code": "01300"
+            }
+          },
+          "capture": {
+            "drained_head": "0.id"
+          }
+        },
+        {
+          "comment": "Acknowledges the head; expects 200 01000.",
+          "request": {
+            "method": "DELETE",
+            "url": "/messages/{capture:drained_head}",
+            "headers": {
+              "Authorization": "{auth:{param:registrar}}",
+              "Accept": "{rpp:accept}",
+              "RPP-Preset": "{rpp:preset}",
+              "Content-Type": "{rpp:content-type}",
+              "RPP-Cltrid": "{unique_cltrid}"
+            }
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "RPP-Code": "01000"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

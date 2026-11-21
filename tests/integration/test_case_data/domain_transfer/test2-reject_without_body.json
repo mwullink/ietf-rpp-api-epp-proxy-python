@@ -1,5 +1,8 @@
 {
   "test_id": "test2-reject_without_body",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates domain t2 with authInfo; expects 201. Setup: the domain the steps below work on.",

@@ -35,6 +35,9 @@ rpp_tlds:
 rpp_protocol_config:
   session:
     cltrid_reuse_supported: false      # a reused client transaction id is refused, also on a read
+  message:
+    queue:
+      server_notices: false            # the EPP test server queues only what a transfer causes
   domainName:
     name:
       lgr:

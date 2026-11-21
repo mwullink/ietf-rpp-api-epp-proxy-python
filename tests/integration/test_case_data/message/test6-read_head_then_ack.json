@@ -6,7 +6,17 @@
   },
   "comment": "Skipped where a domain cannot be transferred. On RRI the transfer is CHPROV with the de.denic.rpp.rri extension (#190): its steps say where they run.",
   "test_id": "test6-read_head_then_ack",
-  "steps": [
+  "exclusive": [
+    "message_queue"
+  ],
+  "setup": [
+    {
+      "comment": "Drains the message queue of registrar a. Setup: the queue the steps below read holds only what the case and the server cause.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "a"
+      }
+    },
     {
       "comment": "Creates contact HM6; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant.",
       "when": {
@@ -503,9 +513,98 @@
           }
         }
       }
+    }
+  ],
+  "steps": [
+    {
+      "comment": "Acknowledges every message at the head of the queue of registrar a that is not the one of the transfer above, until that one is the head. Where the server queues messages of its own (DENIC's notices), they come first.",
+      "loop": [
+        {
+          "comment": "Polls the message queue; expects 200 01301 with a message at the head, which ends the loop when it is the message of the transfer above.",
+          "request": {
+            "method": "GET",
+            "url": "/messages",
+            "headers": {
+              "Authorization": "{auth:a}",
+              "Accept": "{rpp:accept}",
+              "RPP-Preset": "{rpp:preset}",
+              "Content-Type": "{rpp:content-type}",
+              "RPP-Cltrid": "{unique_cltrid}"
+            }
+          },
+          "response": {
+            "status": 200,
+            "content_type": "application/rpp+json",
+            "body": [
+              {
+                "@type": "message"
+              }
+            ],
+            "headers": {
+              "RPP-Code": "01301"
+            }
+          },
+          "until": {
+            "body": {
+              "select": [
+                {
+                  "when": {
+                    "profile.extensions": {
+                      "contains": "de.denic.rpp.rri"
+                    }
+                  },
+                  "then": [
+                    {
+                      "@type": "message",
+                      "data": {
+                        "@type": "serviceNoticeMessage",
+                        "message": "RRI chprovAuthInfo: ms6-{random_name}.{tld}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "then": [
+                    {
+                      "@type": "message",
+                      "data": {
+                        "@type": "transferRequestMessage",
+                        "objectId": "ms6-{random_name}.{tld}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "capture": {
+            "foreign": "0.id"
+          }
+        },
+        {
+          "comment": "Acknowledges the message at the head, one the case did not cause; expects 200 01000.",
+          "request": {
+            "method": "DELETE",
+            "url": "/messages/{capture:foreign}",
+            "headers": {
+              "Authorization": "{auth:a}",
+              "Accept": "{rpp:accept}",
+              "RPP-Preset": "{rpp:preset}",
+              "Content-Type": "{rpp:content-type}",
+              "RPP-Cltrid": "{unique_cltrid}"
+            }
+          },
+          "response": {
+            "status": 200,
+            "headers": {
+              "RPP-Code": "01000"
+            }
+          }
+        }
+      ]
     },
     {
-      "comment": "Polls the message queue; expects 200 01301 with a message at the head (on a shared test queue an older one may come first). The operation this case checks. Keeps head for later steps.",
+      "comment": "Polls the message queue; expects 200 01301 with the message of the transfer above at the head: on RRI the chprovAuthInfo notice of the domain, else the transfer request; RPP-Queue-Size 1 where the server queues nothing of its own (message.queue.server_notices). The operation this case checks. Keeps head for later steps.",
       "request": {
         "method": "GET",
         "url": "/messages",
@@ -520,12 +619,48 @@
       "response": {
         "status": 200,
         "content_type": "application/rpp+json",
-        "body": [
-          {
-            "@type": "message",
-            "status": "queued"
-          }
-        ],
+        "body": {
+          "select": [
+            {
+              "when": {
+                "profile.extensions": {
+                  "contains": "de.denic.rpp.rri"
+                }
+              },
+              "then": [
+                {
+                  "@type": "message",
+                  "status": "queued",
+                  "data": {
+                    "@type": "serviceNoticeMessage",
+                    "message": "RRI chprovAuthInfo: ms6-{random_name}.{tld}"
+                  }
+                }
+              ]
+            },
+            {
+              "then": [
+                {
+                  "@type": "message",
+                  "status": "queued",
+                  "data": {
+                    "@type": "transferRequestMessage",
+                    "objectType": "domainName",
+                    "objectId": "ms6-{random_name}.{tld}",
+                    "status": "pending",
+                    "process": {
+                      "@type": "domainTransferProcess",
+                      "trStatus": "pending",
+                      "transferDir": "pull",
+                      "reqClientId": "{regacc:b}",
+                      "actClientId": "{regacc:a}"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
         "fields": {
           "0.id": {
             "type": "not_empty_string"
@@ -534,7 +669,19 @@
         "headers": {
           "RPP-Code": "01301",
           "RPP-Queue-Size": {
-            "type": "not_null"
+            "select": [
+              {
+                "when": {
+                  "env.message.queue.server_notices": false
+                },
+                "then": "1"
+              },
+              {
+                "then": {
+                  "type": "not_null"
+                }
+              }
+            ]
           }
         }
       },
@@ -599,6 +746,38 @@
         },
         "headers": {
           "RPP-Code": "02303"
+        }
+      }
+    }
+  ],
+  "teardown": [
+    {
+      "comment": "Cancels the transfer of domain ms6 as registrar b, the requester; expects 200 01000. Cleanup: a transfer left pending is approved by the server minutes later, which queues messages after the case released the queue mutex. Only where the transfer is EPP's.",
+      "when": {
+        "profile.extensions": {
+          "not": {
+            "contains": "de.denic.rpp.rri"
+          }
+        }
+      },
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/ms6-{random_name}.{tld}/processes/transferProcesses/latest",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "trStatus": "clientCancelled"
+        },
+        "headers": {
+          "RPP-Code": "01000"
         }
       }
     },

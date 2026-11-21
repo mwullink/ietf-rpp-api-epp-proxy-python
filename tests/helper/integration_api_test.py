@@ -152,13 +152,61 @@ def replace_pad_placeholders(value: str) -> str:
         return text + (DIGITS * (missing // len(DIGITS) + 1))[:missing]
     return PAD.sub(replace, value)
 
+def response_matches(expected, response, test_name, signalling="header") -> bool:
+    """Whether a response matches an `until`: the parts it states (status, body, fields, headers), and only those."""
+    try:
+        if "status" in expected:
+            statuses = expected["status"] if isinstance(expected["status"], list) else [expected["status"]]
+            assert response.status_code in statuses
+        if "body" in expected or "fields" in expected:
+            body = json.loads(response.text)
+            if "body" in expected:
+                recusive_compare_existing(test_name, "$", body, expected["body"], case_sensitive=False)
+            for field, test in expected.get("fields", {}).items():
+                assert evaluate_condition(field_value(body, field), test)
+        assert_headers(expected.get("headers", {}), response, test_name)
+    except (AssertionError, ValueError, TypeError):
+        return False
+    return True
+
+def send_step(client, step, test_name, signalling="header", credentials=None, pacer=None, sleep=time.sleep):
+    """Sends one prepared step (selectors, placeholders and captures resolved) and asserts its response, which it
+    returns. Its `capture` and `until` are for the caller."""
+    if step.get("delay_seconds"):
+        sleep(step["delay_seconds"])
+    headers = step["request"].get("headers", {})
+    if pacer is not None:
+        pacer.wait(headers)
+    sent_headers = credentials.headers(headers) if credentials is not None else headers
+    if "body_json" in step["request"]:
+        response = client.request(step["request"]["method"], step["request"]["url"],
+                                  json=step["request"]["body_json"], headers=sent_headers)
+    elif "body_raw" in step["request"]:
+        response = client.request(step["request"]["method"], step["request"]["url"],
+                                  content=step["request"]["body_raw"], headers=sent_headers)
+    else:
+        response = client.request(step["request"]["method"], step["request"]["url"], headers=sent_headers)
+    print(f"Test case: {test_name}: {response.status_code} - {response.headers} - {response.text}")
+
+    assert_rpp_headers(step["request"].get("headers", {}), response, test_name)
+    if "any_of" in step["response"]:
+        assert_any_response(step["response"]["any_of"], response, test_name, signalling)
+    else:
+        assert_response(step["response"], response, test_name, signalling)
+    return response
+
+def take_captures(step, response, captures):
+    """A step's "capture" maps a name to a dotted field of its response body, for {capture:name} in later steps."""
+    for name, path in step.get("capture", {}).items():
+        captures[name] = field_value(response.json(), path)
+
 def endpoint_test(client, case_sequence, sleep=time.sleep, credentials=None, pacer=None):
     """
-    Tests the POST /domains endpoint using the Flask test client.
+    Runs the steps of a case, each prepared already, against a test client.
 
     Args:
-        client: The Flask test client fixture.
-        cases: A sequence of test steps as parameterized test case dictionaries.
+        client: The test client.
+        case_sequence: The case, with its prepared steps.
         sleep: Waits for a step's "delay_seconds" before its request, for registry periods that must pass (the
             runner computes them from the step's `wait`; a case file does not write them).
         credentials: Replaces a `{auth:…}` header by the credential when the request is sent, so the case never
@@ -169,38 +217,7 @@ def endpoint_test(client, case_sequence, sleep=time.sleep, credentials=None, pac
         pytest.skip(reason=f"Skipping test case: {case_sequence['test_id']} - {case_sequence['skip']}")
     captures = {}
     signalling = credentials.env.preset_signalling if credentials is not None else "header"
-    for i, case in enumerate(case_sequence["steps"]):
-        case = substitute_captures(case, captures)
-        if case.get("delay_seconds"):
-            sleep(case["delay_seconds"])
-        headers = case["request"].get("headers", {})
-        if pacer is not None:
-            pacer.wait(headers)
-        sent_headers = credentials.headers(headers) if credentials is not None else headers
-        # --- Make HTTP Request ---
-        if "body_json" in case["request"]:
-            response = client.request(case["request"]["method"],
-                                    case["request"]["url"],
-                                    json=case["request"]["body_json"],
-                                    headers=sent_headers)
-        elif "body_raw" in case["request"]:
-            response = client.request(case["request"]["method"],
-                                    case["request"]["url"],
-                                    content=case["request"]["body_raw"],
-                                    headers=sent_headers)
-        else:
-            response = client.request(case["request"]["method"],
-                                    case["request"]["url"],
-                                    headers=sent_headers)
-        print(f"Test case: {case_sequence['test_id']}[{i}]: {response.status_code} - {response.headers} - {response.text}")
-
-        test_name = f"{case_sequence['test_id']}[{i}]"
-        assert_rpp_headers(case["request"]["headers"], response, test_name)
-        if "any_of" in case["response"]:
-            assert_any_response(case["response"]["any_of"], response, test_name, signalling)
-        else:
-            assert_response(case["response"], response, test_name, signalling)
-
-        # A step's "capture" maps a name to a dotted field of its response body, for {capture:name} in later steps.
-        for name, path in case.get("capture", {}).items():
-            captures[name] = field_value(response.json(), path)
+    for i, step in enumerate(case_sequence["steps"]):
+        step = substitute_captures(step, captures)
+        response = send_step(client, step, f"{case_sequence['test_id']}[{i}]", signalling, credentials, pacer, sleep)
+        take_captures(step, response, captures)

@@ -1,9 +1,30 @@
 {
-  "markers": ["smoke"],
+  "markers": [
+    "smoke"
+  ],
   "test_id": "test1-query_head",
+  "exclusive": [
+    "message_queue"
+  ],
+  "setup": [
+    {
+      "comment": "Drains the message queue of registrar a. Setup: the queue the first step reads starts empty.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "a"
+      }
+    },
+    {
+      "comment": "Drains the message queue of registrar b. Setup: the queue the second step reads starts empty.",
+      "include": "drain_queue",
+      "with": {
+        "registrar": "b"
+      }
+    }
+  ],
   "steps": [
     {
-      "comment": "Polls the message queue; expects one of 200 01300 or 200 01301. The operation this case checks.",
+      "comment": "Polls the message queue; expects 200 01300, empty with RPP-Queue-Size 0, where the server queues nothing of its own (message.queue.server_notices), else one of 200 01300 or 200 01301. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/messages",
@@ -16,37 +37,57 @@
         }
       },
       "response": {
-        "any_of": [
+        "select": [
           {
-            "status": 200,
-            "content_type": "application/rpp+json",
-            "body": [],
-            "headers": {
-              "RPP-Code": "01300",
-              "RPP-Queue-Size": "0"
+            "when": {
+              "env.message.queue.server_notices": false
+            },
+            "then": {
+              "status": 200,
+              "content_type": "application/rpp+json",
+              "body": [],
+              "headers": {
+                "RPP-Code": "01300",
+                "RPP-Queue-Size": "0"
+              }
             }
           },
           {
-            "status": 200,
-            "content_type": "application/rpp+json",
-            "body": [
-              {
-                "@type": "message",
-                "status": "queued"
-              }
-            ],
-            "headers": {
-              "RPP-Code": "01301",
-              "RPP-Queue-Size": {
-                "type": "not_null"
-              }
+            "then": {
+              "any_of": [
+                {
+                  "status": 200,
+                  "content_type": "application/rpp+json",
+                  "body": [],
+                  "headers": {
+                    "RPP-Code": "01300",
+                    "RPP-Queue-Size": "0"
+                  }
+                },
+                {
+                  "status": 200,
+                  "content_type": "application/rpp+json",
+                  "body": [
+                    {
+                      "@type": "message",
+                      "status": "queued"
+                    }
+                  ],
+                  "headers": {
+                    "RPP-Code": "01301",
+                    "RPP-Queue-Size": {
+                      "type": "not_null"
+                    }
+                  }
+                }
+              ]
             }
           }
         ]
       }
     },
     {
-      "comment": "Polls the message queue (type=transferRequestMessage) as registrar b; expects one of 200 01300 or 200 01301. Reads what the steps above created.",
+      "comment": "Polls the message queue (type=transferRequestMessage) as registrar b; expects 200 01300, empty, where the server queues nothing of its own, else one of 200 01300 or 200 01301. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/messages?type=transferRequestMessage",
@@ -59,30 +100,50 @@
         }
       },
       "response": {
-        "any_of": [
+        "select": [
           {
-            "status": 200,
-            "content_type": "application/rpp+json",
-            "body": [],
-            "headers": {
-              "RPP-Code": "01300",
-              "RPP-Queue-Size": "0"
+            "when": {
+              "env.message.queue.server_notices": false
+            },
+            "then": {
+              "status": 200,
+              "content_type": "application/rpp+json",
+              "body": [],
+              "headers": {
+                "RPP-Code": "01300",
+                "RPP-Queue-Size": "0"
+              }
             }
           },
           {
-            "status": 200,
-            "content_type": "application/rpp+json",
-            "body": [
-              {
-                "@type": "message",
-                "status": "queued"
-              }
-            ],
-            "headers": {
-              "RPP-Code": "01301",
-              "RPP-Queue-Size": {
-                "type": "not_null"
-              }
+            "then": {
+              "any_of": [
+                {
+                  "status": 200,
+                  "content_type": "application/rpp+json",
+                  "body": [],
+                  "headers": {
+                    "RPP-Code": "01300",
+                    "RPP-Queue-Size": "0"
+                  }
+                },
+                {
+                  "status": 200,
+                  "content_type": "application/rpp+json",
+                  "body": [
+                    {
+                      "@type": "message",
+                      "status": "queued"
+                    }
+                  ],
+                  "headers": {
+                    "RPP-Code": "01301",
+                    "RPP-Queue-Size": {
+                      "type": "not_null"
+                    }
+                  }
+                }
+              ]
             }
           }
         ]

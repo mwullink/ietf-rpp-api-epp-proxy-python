@@ -1,6 +1,9 @@
 {
   "test_id": "test1-approve_moves_the_domain",
   "markers": ["smoke"],
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates domain t1 with authInfo; expects 201. Setup: the domain the steps below work on.",

@@ -108,6 +108,13 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
   load errors; the case directory is given by `RPP_TEST_CASE_DATA` (default `test_case_data`). The lock is tested on its
   own with two processes.
 
+- F8 `planet_message/` already asserts exact messages: its registrars `c` and `d` read queues of a database in memory
+  per worker, which no other case and no other worker writes. Left as it is; the planet transfer cases need no mutex
+  either, as no reader of the queues of `a` and `b` runs on SQLite (`message/` needs contacts).
+- F9 EPP test server, 2026-11-21: after the drain the head of `a` is the transfer request of `message/test6` itself,
+  `RPP-Queue-Size` 1; its process is a `domainTransferProcess`, `objectType` `domainName`. The first run drained the
+  1529 messages of `a` in its run setup.
+
 ## Decisions
 
 - D1 (maintainer, in #218) per case and per run; until-loops without maximum; teardown warnings; setup errors; drain
@@ -125,11 +132,11 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
 
 - [x] T0 Design accepted by the maintainer
 - [x] T1 Probe MTEST and the EPP test server: which operations queue messages, and whether any arrive later (F5, F6)
-- [~] T2 Failing harness tests (pytester), stubs
-- [ ] T3 Include expansion and load checks
-- [ ] T4 Step runner: per-step placeholders, loops, phases, report sections
-- [ ] T5 Run setup/teardown and the mutex
-- [ ] T6 `_includes/drain_queue.json`, `_run.json`; readers and producers
+- [x] T2 Failing harness tests (pytester), stubs
+- [x] T3 Include expansion and load checks
+- [x] T4 Step runner: per-step placeholders, loops, phases, report sections
+- [x] T5 Run setup/teardown and the mutex
+- [~] T6 `_includes/drain_queue.json`, `_run.json`; readers and producers
 - [ ] T7 Docs: testing.project.md
 - [ ] T7b One-time MTEST drain (running since 2026-11-21)
 - [ ] T8 Checks: lint-imports, unit tests, smoke (MTEST reachable first)

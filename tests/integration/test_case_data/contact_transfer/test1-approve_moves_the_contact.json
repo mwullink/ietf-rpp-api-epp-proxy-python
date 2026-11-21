@@ -1,5 +1,8 @@
 {
   "test_id": "test1-approve_moves_the_contact",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact C1 with authInfo; expects 201. Setup: the contact the steps below work on.",

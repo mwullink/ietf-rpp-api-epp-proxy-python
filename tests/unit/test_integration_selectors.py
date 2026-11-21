@@ -303,3 +303,29 @@ def test_the_facts_are_the_configs_with_the_descriptors_bugs_over_them():
     assert env.facts["domainName"]["processes"]["delete"]["redemption_period"] == "P1DT14H"  # config/backends/rri.yaml
     assert env.facts["domainName"]["processes"]["update"]["dns_checked"] is False  # config/environments/rri-local.yaml
     assert env.facts["bugs"]["queue_del_no_msgcnt"] is True  # the descriptor
+
+
+GET = {"comment": "c", "request": {}, "response": {}}
+UNTIL = {**GET, "until": {"headers": {"RPP-Code": "01300"}}}
+
+
+@pytest.mark.parametrize("case", [
+    {"steps": [{"loop": [GET]}]},                                          # a loop without until never ends
+    {"steps": [{"loop": [UNTIL, UNTIL]}]},                                 # two untils
+    {"steps": [UNTIL]},                                                    # an until outside a loop
+    {"steps": [{"loop": [{**UNTIL, "when": {"env.tld": "x"}}]}]},          # an until that may be left out
+    {"setup": [{"block": [{**GET, "capture": {"id": "id"}}], "origin": "i", "when": {"env.tld": "x"}}]},
+    {"teardown": [{"when": {"env.nope": 1}, "block": [GET], "origin": "i"}]},
+    {"setup": [{**GET, "wait": "domainName.processes.create.add_grace_period"}]},  # a wait the case does not select
+    {"steps": [{"loop": [{"block": [UNTIL], "origin": "i"}, {"loop": [GET]}]}]},  # the inner loop has no until
+    {"exclusive": "message_queue", "steps": []},
+])
+def test_check_refuses_a_bad_phase_block_or_loop(case):
+    with pytest.raises(SelectorError):
+        selectors.check(case, FACTS)
+
+
+def test_check_accepts_phases_blocks_and_loops():
+    selectors.check({"exclusive": ["message_queue"], "setup": [
+        {"block": [{"loop": [{"block": [UNTIL], "origin": "i"}, {**GET, "capture": {"id": "id"}}]}], "origin": "o"},
+    ], "steps": [GET], "teardown": [{"when": {"env.tld": "x"}, "block": [GET], "origin": "i"}]}, FACTS)
