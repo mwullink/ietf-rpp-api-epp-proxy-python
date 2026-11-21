@@ -1,5 +1,8 @@
 {
   "test_id": "test8-wrong_client_acts",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates domain t8 with authInfo; expects 201. Setup: the domain the steps below work on.",
@@ -133,6 +136,31 @@
         },
         "headers": {
           "RPP-Code": "02201"
+        }
+      }
+    }
+  ],
+  "teardown": [
+    {
+      "comment": "Cancels the transfer requested above as registrar b, the requester; expects 200 01000. Cleanup: a transfer left pending is approved by the server minutes later, which queues messages after the case released the queue mutex.",
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/t8-{random_name}.{tld}/processes/transferProcesses/latest",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "{rpp:content-type}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "trStatus": "clientCancelled"
+        },
+        "headers": {
+          "RPP-Code": "01000"
         }
       }
     }

@@ -59,7 +59,8 @@ Neither reaches a live backend, so run these checks locally from the repository 
    ```bash
    RPP_TEST_ENV=rri-mtest pytest "tests/integration/file_cases.py::rri-mtest::domain_availability::test3-a_label"
    ```
-   It logs in and sends one RRI CHECK, and creates nothing. If it passes, the smoke run of step 3 covers MTEST (its
+   It logs in, drains the message queues of both RegAccs (the run setup and teardown, `_run.json`: the notices DENIC
+   queued since the last run, a few minutes) and sends one RRI CHECK, and creates nothing. If it passes, the smoke run of step 3 covers MTEST (its
    credentials are in `.env`): record in the plan that it ran. Only if it does not pass, because MTEST cannot be
    reached (no `TEST_RRI_*` in `.env`, a machine not on the allowlist of both RegAccs, a refused login), run
    `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration`, record the MTEST run as pending in the plan with

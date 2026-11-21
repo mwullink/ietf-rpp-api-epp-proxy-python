@@ -6,6 +6,9 @@
   },
   "comment": "Skipped on rri-mtest: RRI's transfer (CHPROV) is immediate, without a pending transfer to query, approve, cancel or reject.",
   "test_id": "test13-transfer_approve",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact HR13; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",

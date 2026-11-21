@@ -9,6 +9,9 @@
   },
   "comment": "Skipped on rri-mtest: RRI has no contact transfer.",
   "test_id": "test9-transfer_cancel",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact D9 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",

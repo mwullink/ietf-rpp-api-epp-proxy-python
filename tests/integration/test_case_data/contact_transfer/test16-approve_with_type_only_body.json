@@ -1,5 +1,8 @@
 {
   "test_id": "test16-approve_with_type_only_body",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact C16 with authInfo; expects 201. Setup: the contact the steps below work on.",

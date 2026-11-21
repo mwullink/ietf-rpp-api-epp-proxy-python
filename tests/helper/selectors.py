@@ -161,8 +161,10 @@ def _resolve(value, facts: Facts):
 
 
 def check(case: dict, facts: Facts) -> None:
-    """Checks every selector of a case when it is loaded: every key names a fact, every select ends in a default
-    without `when`, and a step with `when` captures nothing, since a later step could use the capture."""
+    """Checks every selector of a case when it is loaded, in each phase (`setup`, `steps`, `teardown`), block and
+    loop: every key names a fact, every select ends in a default without `when`, a step with `when` (or in a block with
+    one) captures nothing, since a later step could use the capture, and a loop has exactly one step with `until`,
+    which has no `when`, so that the loop can end."""
     def walk(value, path):
         if _is_select(value):
             entries = value["select"]
@@ -190,19 +192,59 @@ def check(case: dict, facts: Facts) -> None:
 
     if "when" in case:
         unmet(case["when"], facts)
+    exclusive = case.get("exclusive", [])
+    if not isinstance(exclusive, list) or not all(isinstance(name, str) for name in exclusive):
+        raise SelectorError(f"exclusive is a list of the names of shared resources: {exclusive!r}")
     waits = {key[len("wait."):] for key in (case.get("when") if isinstance(case.get("when"), dict) else {})
              if key.startswith("wait.")}
-    for i, step in enumerate(case.get("steps", [])):
-        if "delay_seconds" in step:
-            raise SelectorError(f"step {i}: a case waits for a period of the facts (wait), not for seconds")
-        for path in wait_paths(step):
+
+    def items(values, path, guarded, in_loop):
+        if not isinstance(values, list):
+            raise SelectorError(f"{path}: a list of steps")
+        for i, item in enumerate(values):
+            here = f"{path}[{i}]"
+            if not isinstance(item, dict):
+                raise SelectorError(f"{here}: a step, a block or a loop")
+            if "when" in item:
+                unmet(item["when"], facts)
+            if "block" in item:
+                items(item["block"], f"{here} > include {item.get('origin')}", guarded or "when" in item, in_loop)
+            elif "loop" in item:
+                if _untils(item["loop"]) != 1:
+                    raise SelectorError(f"{here}: a loop has exactly one step with until, which ends it")
+                items(item["loop"], f"{here} > loop", guarded or "when" in item, True)
+            else:
+                step(item, here, guarded or "when" in item, in_loop)
+
+    def step(item, here, guarded, in_loop):
+        if "delay_seconds" in item:
+            raise SelectorError(f"{here}: a case waits for a period of the facts (wait), not for seconds")
+        for path in wait_paths(item):
             if path not in waits:
-                raise SelectorError(f"step {i} waits for {path}, which the case's when does not select (wait.{path})")
-        if "when" in step:
-            unmet(step["when"], facts)
-            if step.get("capture"):
-                raise SelectorError(f"step {i} has a when and a capture, which a later step may need")
-        walk({k: v for k, v in step.items() if k != "when"}, f"steps[{i}]")
+                raise SelectorError(f"{here} waits for {path}, which the case's when does not select (wait.{path})")
+        if guarded and item.get("capture"):
+            raise SelectorError(f"{here} has a when (or is in a block with one) and a capture, which a later step "
+                                "may need")
+        if "until" in item:
+            if not in_loop:
+                raise SelectorError(f"{here}: until ends a loop and stands in one only")
+            if "when" in item:
+                raise SelectorError(f"{here}: the step with until has no when, or its loop could not end")
+        walk({k: v for k, v in item.items() if k != "when"}, here)
+
+    for phase in ("setup", "steps", "teardown"):
+        items(case.get(phase, []), phase, False, False)
+
+
+def _untils(values) -> int:
+    """The steps with `until` that end this loop: in it and in its blocks, not in a loop within it."""
+    count = 0
+    for item in values if isinstance(values, list) else []:
+        if isinstance(item, dict) and "block" in item:
+            count += _untils(item["block"])
+        elif isinstance(item, dict) and "loop" not in item and "until" in item:
+            count += 1
+    return count
 
 
 def wait_paths(step: dict) -> list[str]:

@@ -60,9 +60,13 @@ already holds even under another keyTag (pawel-kow/epp#20). It stores `domain:ho
 object, so a domain created with glue reads back with `nameservers`. Removing a host from a domain that does not have it succeeds, so "no element matches" is tested with `replace` and `match`, which reads the domain first.
 
 The message queue is shared per registrar, and other cases add to it (every transfer request queues a message for the
-losing registrar), so `message/` cases assert only the shape of the head and use `any_of` where the queue may be empty.
-To ack a real head, a case first requests a transfer, so the queue of `foo` is not empty, and captures `0.id` of
-`GET /messages` (`message/test6`). The backend returns the id of the acknowledged message in the `msgQ` of an ack reply.
+losing registrar). So the run setup and teardown drain the queues of `a` and `b` (`_run.json`, see
+[Phases, includes and loops](#phases-includes-and-loops)), every case whose transfer request succeeds takes the mutex
+`message_queue`, and one that ends with the transfer pending cancels it in its teardown, since the server approves it
+minutes later and queues messages then. A case that reads a queue takes the mutex too, drains the queue in its setup
+and asserts the message its own transfer queued, with the exact `RPP-Queue-Size` where the server queues nothing of
+its own (`env.message.queue.server_notices`, false here): `message/test1` reads empty queues, `message/test6` its own
+transfer request. The backend returns the id of the acknowledged message in the `msgQ` of an ack reply.
 
 A contact `chg` of a `postalInfo` form replaces it: the address members not sent again (`sp`, `pc`) are wiped, also when
 only `name` or `org` is sent, so the proxy sends every changed form complete (pawel-kow/epp#22). A `chg` of a form the contact does not have
@@ -249,7 +253,11 @@ would be (`env.session.cltrid_reuse_supported`); an `lgr` on an ASCII name is no
 (`env.contact.name.min_count`), where EPP cannot clear them and the proxy refuses with 501
 (`profile.contact.name.removable`). [config/environments/rri-mtest.yaml](../../config/environments/rri-mtest.yaml) offers `latn-1.0` as the
 LGR. QUEUE-DELMSG states no count of the messages left, so the proxy answers an acknowledge without `RPP-Queue-Size`
-(#172, `env.bugs.queue_del_no_msgcnt`, `message/test6`).
+(#172, `env.bugs.queue_del_no_msgcnt`, `message/test6`). DENIC queues notices of its own
+(`env.message.queue.server_notices`): a `domainStatusUpdate` of a domain some time after a case created it, a
+`contactDelete` of its housekeeping, so `message/test6` acknowledges the heads that are not its own until the
+`chprovAuthInfo` notice of its transfer is the head. A first run drained a backlog of about 2900 messages; the run setup
+drains at the registrar's whole rate, as the other workers of the environment wait for it.
 
 ### Local RRI
 
@@ -298,7 +306,7 @@ Facts are in block style, without `{}`.
 |---|---|---|
 | A group | `_group.json` in the group directory: `{"when": …}` | every case of the group is skipped where it does not hold |
 | A case | `"when"` at the top level | the case is skipped where it does not hold |
-| A step | `"when"` in the step | the step is left out. A step with `when` cannot `capture` |
+| A step, block or loop | `"when"` in it | it is left out. A step with `when`, or in a block with one, cannot `capture` |
 | Any value of a step | `{"select": [{"when": …, "then": …}, …, {"then": …}]}` | the `then` of the first entry that holds; the last entry is the default. An entry `{"omit": true}` instead of `then` leaves the member or list element out |
 
 A group or case `when` that skips it somewhere has a `"comment"` next to it, which says in which environment it is
@@ -376,10 +384,13 @@ version is released or reaches its end of life, update the default list of the s
 without `.json` by default), in a tree of `file_cases.py` › environment › group › case. A case whose selectors do not
 hold in an environment is marked skipped there while collecting, with the facts that did not hold. A file that cannot
 be loaded is still listed and fails. The runner is [file_cases.py](../../tests/integration/file_cases.py). Each file is a `steps` sequence (e.g. create →
-update → verify) run against a Flask test client.
+update → verify) run against a Flask test client, with an optional `setup` before and `teardown` after it (see
+[Phases, includes and loops](#phases-includes-and-loops)). `RPP_TEST_CASE_DATA` names another case directory, which
+the tests of the runner itself use ([test_case_phases.py](../../tests/unit/test_case_phases.py)).
 
 - Placeholders `{random_name}`, `{random_id_10}`, `{test_start}` (start of the case)
-  and `{unique_cltrid}` (new value per occurrence) keep tests idempotent against a
+  and `{unique_cltrid}` (new value per occurrence, and per run of a step a loop repeats: a step's placeholders are
+  replaced right before it runs) keep tests idempotent against a
   shared registry. A contact id is `{handle:a:SUFFIX}`, because the backend requires the prefix of its registrar. `{ulabel:TEXT}` is the U-label
   `TEXT-<random_id_10>` and `{alabel:TEXT}` its A-label, so an IDN case writes `{alabel:bücher-t24}.{tld}`.
   `{upper:TEXT}` is TEXT in upper case, after the other placeholders in it are replaced. The backend stores host
@@ -394,7 +405,7 @@ update → verify) run against a Flask test client.
   uppercase domain/host names and reorder list entries (see
   [RPP_IMPLEMENTATION_NOTES.md](../../RPP_IMPLEMENTATION_NOTES.md)).
 - A step's `response` can be `{"any_of": [...]}`, a list of responses of which one must match,
-  for behaviour the protocol leaves to the server, such as the head of a shared message queue. The alternatives are
+  for behaviour the protocol leaves to the server, such as whether a queue is empty. The alternatives are
   all successes or all refusals, never both (see *Selectors*).
 - A step's `capture` maps a name to a dotted field of its response body, where a number picks a list element (`0.id`). Later steps write `{capture:name}`
   in their request or expected response, and `{capture:name+Ny}` for that timestamp N years later. It is how
@@ -407,6 +418,43 @@ update → verify) run against a Flask test client.
 - `draft_domain/`, `draft_contact/`, `draft_host/`, `draft_patch/` and `draft_discovery/` hold the examples
   of the JSON draft (§8.1, §8.2, §8.3, §5.3.1, §8.7.1; the discovery one has the configured values). Examples for operations not implemented yet have the
   expected result written down and `"skip": "#<issue>"`.
+
+### Phases, includes and loops
+
+```json
+{"test_id": "...", "exclusive": ["message_queue"], "setup": [items], "steps": [items], "teardown": [items]}
+```
+
+- **Phases.** `setup` prepares, `steps` is the operation the case checks, `teardown` cleans up; `setup`, `teardown`
+  and `exclusive` are optional. A failure in `setup` is a pytest **error**, and the steps do not run; one in `steps`
+  a **failure**. `teardown` runs always, also after an error or failure, step by step: a failing step is a **warning**
+  in the `teardown warnings` section of the summary (and a section of the case's report), never a failure, and the
+  next step runs. Captures are one namespace across the phases; one a failed setup did not take fails the teardown
+  step that uses it, a warning. Every failure starts with where it happened:
+  `test6 setup[0] > include drain_queue[0] > loop iteration 7[1]: …`.
+- **Items.** An item of a phase is a step, an include or a loop, each with an optional `when`.
+- **Includes.** `test_case_data/_includes/<name>.json` is
+  `{"comment": …, "parameters": {"<name>": {"comment": …, "default": …}}, "steps": [items]}`; a parameter without
+  `default` is required. An item uses it as `{"comment": …, "include": "<name>", "with": {"<name>": value}}`. In the
+  include, `{param:<name>}` stands for the value: alone in a string any JSON value, within one as text
+  (`"{auth:{param:registrar}}"`). The case loads with every include expanded; an unknown include, a missing or unknown
+  parameter, a `{param:…}` the include does not declare and a cycle fail it at load, naming the include and the
+  parameter. An include may use includes, and a capture in it serves the later steps of the case. `drain_queue`
+  (`registrar`) acknowledges the messages of a queue until it is empty.
+- **Loops.** `{"comment": …, "loop": [items]}` runs its items again and again until the response of its one step with
+  `until` (in it or in its includes, not in a loop within it) matches the `until`, after it passed its `response`;
+  that step then takes no `capture`. `until` has the form of a `response` and checks only what it states
+  (`{"headers": {"RPP-Code": "01300"}}`). There is no maximum: a loop ends on its `until` or on a failing step. The step
+  with `until` has no `when`.
+- **Mutex.** `exclusive` names shared resources. Cases of one environment that name the same one never run at the same
+  time, also in different xdist workers: each holds a file lock from the start of its setup to the end of its
+  teardown. `message_queue` is the message queues of `a` and `b`.
+- **Run setup and teardown.** `test_case_data/_run.json` is `{"comment": …, "setup": [items], "teardown": [items]}`.
+  The run setup of an environment runs once per run, before its first case, in whichever worker gets there first,
+  while the others wait; if it fails, every case of the environment is an error naming it. The run teardown runs at
+  the end, in the process that started the run, for every environment whose run setup ran; a failure in it is a
+  warning. Both pace their requests at the registrar's whole rate. The workers share the run's directory,
+  `RPP_TEST_RUN_DIR`, which that process makes and removes.
 
 `authInfo` is `onDemand`, so a step that expects it in a response asks for it with `?includeElements=authInfo`. A PUT
 without it leaves the password alone and does not show it, so a GET that includes it follows to prove the password.

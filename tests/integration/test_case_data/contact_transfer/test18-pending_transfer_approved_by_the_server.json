@@ -5,6 +5,9 @@
   "comment": "Skipped on rri-mtest: it waits for contact.processes.transfer.pending_period, and the server has no such transition.",
   "test_id": "test18-pending_transfer_approved_by_the_server",
   "description": "A contact transfer nobody approves or rejects is approved by the server when its pending period ends.",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact C18 with authInfo; expects 201. Setup: the contact the steps below work on.",

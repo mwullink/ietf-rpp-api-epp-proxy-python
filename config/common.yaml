@@ -25,6 +25,9 @@ rpp_environment_status: test
 rpp_protocol_config:
   session:
     cltrid_reuse_supported: null       # whether a reused client transaction id is taken
+  message:
+    queue:
+      server_notices: null             # whether the server queues messages of its own, which no request caused
   domainName:
     name:
       lgr:

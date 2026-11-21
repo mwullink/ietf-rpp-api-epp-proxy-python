@@ -1,5 +1,8 @@
 {
   "test_id": "test13-cancel_by_requester",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact C13 with authInfo; expects 201. Setup: the contact the steps below work on.",

@@ -9,6 +9,9 @@ rpp_rri_use_tls: true
 rpp_protocol_config:
   session:
     cltrid_reuse_supported: true       # a reused client transaction id is taken
+  message:
+    queue:
+      server_notices: true             # DENIC queues notices of its own: a domain's status update, a contact deleted
   domainName:
     name:
       lgr:

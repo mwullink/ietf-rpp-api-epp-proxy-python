@@ -6,6 +6,9 @@
   },
   "comment": "Skipped on rri-mtest: RRI's transfer (CHPROV) is immediate, without a pending transfer to query, approve, cancel or reject.",
   "test_id": "test15-transfer_reject",
+  "exclusive": [
+    "message_queue"
+  ],
   "steps": [
     {
       "comment": "Creates contact HR15; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
@@ -209,6 +212,31 @@
         },
         "headers": {
           "RPP-Code": "02102"
+        }
+      }
+    }
+  ],
+  "teardown": [
+    {
+      "comment": "Cancels the transfer requested above as registrar b, the requester; expects 200 01000. Cleanup: a transfer left pending is approved by the server minutes later, which queues messages after the case released the queue mutex.",
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/ex15-{random_name}.{tld}/processes/transferProcesses/latest",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "{rpp:content-type}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "trStatus": "clientCancelled"
+        },
+        "headers": {
+          "RPP-Code": "01000"
         }
       }
     }
