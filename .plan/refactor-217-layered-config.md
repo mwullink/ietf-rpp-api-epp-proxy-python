@@ -49,14 +49,14 @@ at the maintainer's request: the main checkout holds #214 and its mutex. This wo
 - [x] Docs: README, config/README.md, process.project.md, architecture.project.md, testing.project.md,
       security.project.md, docs/testing/backend-limits.yaml, .gitignore comment (docs/rri/refactoring.md is the
       historic design and keeps its old example)
-- [~] Checks: lint-imports (29 kept); unit tests 2930 passed; MTEST reachable (domain_availability test3 passed);
+- [x] Checks: lint-imports (29 kept); unit tests 2930 passed; MTEST reachable (domain_availability test3 passed);
       smoke 170 passed, 440 skipped, 20 failed, all rri-mtest with RRI 73100000005 "The maximum number of permitted
       login is reached": a full integration run of another session (main checkout) held MTEST's sessions at the same
-      time. The 20 rerun once that run ends. Both images build; the dev image reads /config/environments/epp-docker.yaml
+      time. Rerun after that run ended: 20 passed, so the smoke run covers MTEST. Both images build; the dev image reads /config/environments/epp-docker.yaml
       by default. ansible-lint / --syntax-check: not installed here (only comments of the templates changed, which the
       unit test renders)
-- [~] Draft PR
-- [ ] Before merge: `git rm` this plan; release the mutex; maintainer moves `config.rri-mtest.local.yaml` to
+- [x] Draft PR #220
+- [~] Before merge (maintainer accepts D5 and the PR): `git rm` this plan; release the mutex; maintainer moves `config.rri-mtest.local.yaml` to
       `config/environments/rri-mtest.local.yaml`
 
 ## Open questions
