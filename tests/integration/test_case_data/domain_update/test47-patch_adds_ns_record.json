@@ -14,74 +14,21 @@
       "comment": "Creates host ns1.gu47 with dns records ns; expects 201. The host the steps below name.",
       "include": "create_host",
       "with": {
-        "name": "ns1.gu47-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.gu47-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns1.gu47-{random_name}.net"
       }
     },
     {
       "comment": "Creates host ns2.gu47 with dns records ns; expects 201. The host the steps below name.",
       "include": "create_host",
       "with": {
-        "name": "ns2.gu47-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns2.gu47-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns2.gu47-{random_name}.net"
       }
     },
     {
       "comment": "Creates domain gu47 with authInfo, dns records a (by backend); expects 201. The domain the steps below work on.",
       "include": "create_domain",
       "with": {
-        "name": "gu47-{random_name}.{tld}",
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "name": "gu47-{random_name}.{tld}"
       }
     }
   ],

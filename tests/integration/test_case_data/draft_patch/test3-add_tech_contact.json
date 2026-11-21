@@ -15,40 +15,14 @@
       "comment": "Creates host ns1.p3 with dns records ns; expects 201. A nameserver of the domain below.",
       "include": "create_host",
       "with": {
-        "name": "ns1.p3-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.p3-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns1.p3-{random_name}.net"
       }
     },
     {
       "comment": "Creates host ns2.p3 with dns records ns; expects 201. A nameserver of the domain below.",
       "include": "create_host",
       "with": {
-        "name": "ns2.p3-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns2.p3-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns2.p3-{random_name}.net"
       }
     },
     {
@@ -348,7 +322,8 @@
             ]
           }
         }
-      }
+      },
+      "with": {}
     }
   ],
   "steps": [

@@ -50,8 +50,7 @@
       },
       "include": "create_request_contact",
       "with": {
-        "id": "{handle:a:AM6}",
-        "uriTemplate": "mailto:abuse@example.com"
+        "id": "{handle:a:AM6}"
       }
     },
     {
@@ -59,24 +58,6 @@
       "include": "create_domain",
       "with": {
         "name": "ms6-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:HM6}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        },
         "abuse": {
           "select": [
             {
@@ -113,33 +94,7 @@
             }
           ]
         },
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "registrant_id": "{handle:a:HM6}"
       }
     },
     {
@@ -178,8 +133,7 @@
       "include": "create_request_contact",
       "with": {
         "registrar": "b",
-        "id": "{handle:b:AM6}",
-        "uriTemplate": "mailto:abuse@example.com"
+        "id": "{handle:b:AM6}"
       }
     },
     {
@@ -217,7 +171,8 @@
         "headers": {
           "RPP-Code": "01001"
         }
-      }
+      },
+      "with": {}
     },
     {
       "comment": "Transfers domain ms6 by CHPROV with registrant, generalRequest, abuse, dns as registrar b; expects 200 01000, serverApproved at once. A message for registrar a, the losing registrar, for the steps below; the shared MTEST queue holds older ones too. Only on RRI.",
@@ -288,7 +243,8 @@
             "type": "not_null"
           }
         }
-      }
+      },
+      "with": {}
     }
   ],
   "steps": [

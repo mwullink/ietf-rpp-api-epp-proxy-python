@@ -61,6 +61,15 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
   with `--contact-info --auth-info`: 0 errors; the wire changes in 20 more case runs, all on epp-docker, only in the
   domain password of the setup (domain_renew, domain_restore/test12, domain_transfer test4, test5, test10, draft_host,
   host_create, host_get, host_update). The contacts that gave no authInfo resolve to none where they run, as before.
+- D8 (maintainer, 2026-11-21) No argument an include's default covers. `includes.py`: a default may use the other
+  parameters (unit tests). `create_host`'s `dns` defaults to its own ns record (121 uses pass nothing now);
+  `create_domain` takes `registrant_id`, the registrant where the profile requires one (82 uses), and `dns` defaults to
+  the `a` record where the profile requires DNS data (93 uses); `create_request_contact`'s 14 `mailto:` URI templates,
+  which no step uses, take the default. A check that drops each remaining argument found none that leaves every
+  request unchanged. Compare with `--contact-info --auth-info --uri-template`: 0 errors; the wire changes only in the
+  `uriTemplate` of the setup's request contacts in 9 more RRI cases (domain_transfer_ext, domain_update/test37,
+  limits_domain/test20, message/test6).
+- D9 The full after run of the first version was stopped at 17% for D8, and runs again on the final cases.
 
 ## Results
 
@@ -74,9 +83,9 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
 ## Tasks
 
 - [x] T1 Plan, questions to the maintainer
-- [~] T2 Baseline full run on the snapshot of `main`'s cases, junit kept in scratch
+- [x] T2 Baseline full run on the snapshot of `main`'s cases: 10 failed, 1019 passed, 3437 skipped (1:17)
 - [x] T3 Includes and the conversion script; convert all cases
 - [x] T4 Compare script: requests and assertions unchanged (apart from D1)
 - [x] T5 Docs: testing.project.md (the includes, how a case states its phases)
-- [ ] T6 Checks: lint-imports, unit, smoke; after-runs compared to T2
+- [~] T6 Checks: lint-imports, unit, smoke; after-runs compared to T2
 - [ ] T7 Draft PR

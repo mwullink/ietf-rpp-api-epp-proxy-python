@@ -25,24 +25,7 @@
       "include": "create_domain",
       "with": {
         "name": "gu59-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:R59}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "registrant_id": "{handle:a:R59}"
       }
     }
   ],

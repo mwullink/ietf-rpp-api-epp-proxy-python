@@ -13,40 +13,14 @@
       "comment": "Creates host ns1.gu46 with dns records ns; expects 201. A nameserver of the domain below.",
       "include": "create_host",
       "with": {
-        "name": "ns1.gu46-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.gu46-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns1.gu46-{random_name}.net"
       }
     },
     {
       "comment": "Creates host ns2.gu46 with dns records ns; expects 201. A nameserver of the domain below.",
       "include": "create_host",
       "with": {
-        "name": "ns2.gu46-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns2.gu46-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns2.gu46-{random_name}.net"
       }
     },
     {
@@ -63,34 +37,7 @@
             "@type": "host",
             "hostName": "ns2.gu46-{random_name}.net"
           }
-        ],
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        ]
       }
     }
   ],

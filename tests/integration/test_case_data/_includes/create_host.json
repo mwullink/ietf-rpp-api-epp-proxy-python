@@ -9,11 +9,17 @@
       "comment": "The host name, e.g. ns1.u1-{random_name}.net."
     },
     "dns": {
-      "comment": "The dns data of the host: its ns record, which an external host needs, and addresses. Left out by default.",
+      "comment": "The dns data of the host. By default its own ns record, which an external host needs; a case passes it to add addresses.",
       "default": {
-        "select": [
+        "@type": "dnsData",
+        "records": [
           {
-            "omit": true
+            "@type": "dnsRecord",
+            "name": "@",
+            "type": "ns",
+            "rdata": {
+              "nsdname": "{param:name}."
+            }
           }
         ]
       }

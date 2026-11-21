@@ -5,20 +5,7 @@
       "comment": "Creates host t7.….net with dns records ns; expects 201 01000. The host the steps below work on.",
       "include": "create_host",
       "with": {
-        "name": "t7.{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "t7.{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "t7.{random_name}.net"
       }
     }
   ],

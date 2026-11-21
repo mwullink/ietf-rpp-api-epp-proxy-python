@@ -23,33 +23,6 @@
         "registrant": {
           "@type": "contact",
           "id": "{handle:a:L2}"
-        },
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
         }
       }
     }

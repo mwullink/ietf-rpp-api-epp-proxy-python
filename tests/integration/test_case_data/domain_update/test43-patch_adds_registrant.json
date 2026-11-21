@@ -17,34 +17,7 @@
       "comment": "Creates domain gu43 with authInfo, dns records a (by backend); expects 201. The domain the steps below work on.",
       "include": "create_domain",
       "with": {
-        "name": "gu43-{random_name}.{tld}",
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "name": "gu43-{random_name}.{tld}"
       }
     }
   ],

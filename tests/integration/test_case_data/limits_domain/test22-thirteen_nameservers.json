@@ -23,20 +23,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns1.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns1.n22-{random_name}.net"
       }
     },
     {
@@ -48,20 +35,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns2.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns2.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns2.n22-{random_name}.net"
       }
     },
     {
@@ -73,20 +47,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns3.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns3.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns3.n22-{random_name}.net"
       }
     },
     {
@@ -98,20 +59,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns4.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns4.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns4.n22-{random_name}.net"
       }
     },
     {
@@ -123,20 +71,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns5.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns5.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns5.n22-{random_name}.net"
       }
     },
     {
@@ -148,20 +83,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns6.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns6.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns6.n22-{random_name}.net"
       }
     },
     {
@@ -173,20 +95,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns7.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns7.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns7.n22-{random_name}.net"
       }
     },
     {
@@ -198,20 +107,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns8.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns8.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns8.n22-{random_name}.net"
       }
     },
     {
@@ -223,20 +119,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns9.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns9.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns9.n22-{random_name}.net"
       }
     },
     {
@@ -248,20 +131,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns10.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns10.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns10.n22-{random_name}.net"
       }
     },
     {
@@ -273,20 +143,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns11.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns11.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns11.n22-{random_name}.net"
       }
     },
     {
@@ -298,20 +155,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns12.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns12.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns12.n22-{random_name}.net"
       }
     },
     {
@@ -323,20 +167,7 @@
       },
       "include": "create_host",
       "with": {
-        "name": "ns13.n22-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns13.n22-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns13.n22-{random_name}.net"
       }
     },
     {
@@ -349,24 +180,6 @@
       "include": "create_domain",
       "with": {
         "name": "t22-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:X22}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        },
         "nameservers": [
           {
             "@type": "host",
@@ -421,33 +234,7 @@
             "hostName": "ns13.n22-{random_name}.net"
           }
         ],
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "registrant_id": "{handle:a:X22}"
       }
     }
   ],

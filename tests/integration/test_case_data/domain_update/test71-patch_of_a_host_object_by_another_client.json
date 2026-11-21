@@ -12,20 +12,7 @@
       "comment": "Creates host ns1.u31 with dns records ns; expects 201. A nameserver of the domain below.",
       "include": "create_host",
       "with": {
-        "name": "ns1.u31-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.u31-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns1.u31-{random_name}.net"
       }
     },
     {

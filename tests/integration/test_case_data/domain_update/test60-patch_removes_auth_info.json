@@ -23,51 +23,7 @@
       "include": "create_domain",
       "with": {
         "name": "gu61-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:R61}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        },
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "registrant_id": "{handle:a:R61}"
       }
     }
   ],

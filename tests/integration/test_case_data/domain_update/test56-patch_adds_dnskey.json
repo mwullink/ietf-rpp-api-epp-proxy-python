@@ -31,24 +31,6 @@
       "include": "create_domain",
       "with": {
         "name": "gu57-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:R57}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        },
         "dns": {
           "@type": "dnsData",
           "records": [
@@ -69,7 +51,8 @@
               }
             }
           ]
-        }
+        },
+        "registrant_id": "{handle:a:R57}"
       }
     }
   ],

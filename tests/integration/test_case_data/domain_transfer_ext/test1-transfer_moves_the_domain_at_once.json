@@ -19,8 +19,7 @@
       "comment": "Creates request contact RA08 with uriTemplate; expects 201 01000. The Abuse contact of the domain below.",
       "include": "create_request_contact",
       "with": {
-        "id": "{handle:a:RA08}",
-        "uriTemplate": "mailto:abuse@example.com"
+        "id": "{handle:a:RA08}"
       }
     },
     {
@@ -36,8 +35,7 @@
       "include": "create_request_contact",
       "with": {
         "registrar": "b",
-        "id": "{handle:b:RA08}",
-        "uriTemplate": "mailto:abuse@example.com"
+        "id": "{handle:b:RA08}"
       }
     },
     {
@@ -52,10 +50,6 @@
       "include": "create_domain",
       "with": {
         "name": "x1-{random_name}.{tld}",
-        "registrant": {
-          "@type": "contact",
-          "id": "{handle:a:XT1}"
-        },
         "abuse": {
           "@type": "requestContact",
           "id": "{handle:a:RA08}"
@@ -64,19 +58,7 @@
           "@type": "requestContact",
           "id": "{handle:a:RG08}"
         },
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "a",
-              "rdata": {
-                "address": "192.0.2.10"
-              }
-            }
-          ]
-        }
+        "registrant_id": "{handle:a:XT1}"
       }
     },
     {

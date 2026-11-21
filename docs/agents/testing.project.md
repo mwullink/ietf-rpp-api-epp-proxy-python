@@ -439,21 +439,31 @@ the tests of the runner itself use ([test_case_phases.py](../../tests/unit/test_
   include, `{param:<name>}` stands for the value: alone in a string any JSON value, within one as text
   (`"{auth:{param:registrar}}"`). The case loads with every include expanded; an unknown include, a missing or unknown
   parameter, a `{param:…}` the include does not declare and a cycle fail it at load, naming the include and the
-  parameter. An include may use includes, and a capture in it serves the later steps of the case. `drain_queue`
+  parameter. A parameter's default may use the other parameters. An include may use includes, and a capture in it
+  serves the later steps of the case. `drain_queue`
   (`registrar`) acknowledges the messages of a queue until it is empty.
 - **The cases' phases.** A case's preparation is its `setup` and its cleanup its `teardown`; `steps` holds only what
   the case checks, so a failing preparation is an error and not the failure of the operation. A preparation or cleanup
-  that more than one case does comes from an include: `create_contact` (`id`, `contactInfo`, Erika Mustermann by
-  default, and `authInfo`, `Abc2345678` where the profile has a contact authInfo; a case gives another card or password
-  only where its steps rely on it), `create_full_contact` (John Doe
-  with a region and a fax where the profile has them, for the cases that change or remove those members), `create_domain` (`name`, `authInfo`, `Abc2345678` by default, and the
-  members the domain gets), `create_host` (`name`, `dns`),
-  `create_request_contact` (`id`, `uriTemplate`), `delete_domain` (`name`) and `cancel_transfer` (`collection`, `id`;
-  by registrar `b`, the requester). Each takes `registrar` (default `a`, the sender), sends what the case passes,
-  leaving out a member it does not pass (a default of `{"select": [{"omit": true}]}`), and asserts all that its cases
-  rely on: a create 201 `01000` with `application/rpp+json`, the object's `@type`, its id or name, and of a domain its
-  status, registrant, contacts and sponsor. A preparation only one case does, or one that is the subject of the case
-  (the preset headers of `preset_signalling_*`, the draft's examples in `draft_patch`), stays a step in the setup.
+  that more than one case does comes from an include, and a case passes only what differs from the include's
+  defaults, which hold what the cases have in common; it gives a value of its own only where its steps rely on it:
+  - `create_contact`: `id`; `contactInfo`, Erika Mustermann in Frankfurt by default; `authInfo`, `Abc2345678` where
+    the profile has a contact authInfo.
+  - `create_full_contact`: `id`, `authInfo`; John Doe with a region and a fax where the profile has them, for the
+    cases that change or remove those members.
+  - `create_domain`: `name`; `registrant_id`, the registrant where the profile requires one, or `registrant`, a
+    registrant sent everywhere; `dns`, an `a` record where the profile requires DNS data by default; `authInfo`,
+    `Abc2345678` by default; and the members only some domains get (`contacts`, `nameservers`, `abuse`,
+    `generalRequest`, `lgr`, `uName`, and `url` for one that asks for the authInfo back).
+  - `create_host`: `name`; `dns`, its own `ns` record by default, which an external host needs.
+  - `create_request_contact`: `id`, `uriTemplate`. `delete_domain`: `name`. `cancel_transfer`: `collection`, `id`,
+    by registrar `b`, the requester.
+
+  Each takes `registrar` (default `a`, the sender) and leaves out a member nobody passes (a default of
+  `{"select": [{"omit": true}]}`); a default may use the other parameters (`{param:name}`). Each asserts all that its
+  cases rely on: a create 201 `01000` with `application/rpp+json`, the object's `@type`, its id or name, and of a
+  domain its status, registrant, contacts and sponsor. A preparation only one case does, or one that is the subject of
+  the case (the preset headers of `preset_signalling_*`, the draft's examples in `draft_patch`), stays a step in the
+  setup.
 - **Loops.** `{"comment": …, "loop": [items]}` runs its items again and again until the response of its one step with
   `until` (in it or in its includes, not in a loop within it) matches the `until`, after it passed its `response`;
   that step then takes no `capture`. `until` has the form of a `response` and checks only what it states

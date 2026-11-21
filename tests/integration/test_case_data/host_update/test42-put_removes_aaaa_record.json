@@ -6,20 +6,7 @@
       "comment": "Creates host hu42.….net with dns records ns; expects 201. The host the steps below work on.",
       "include": "create_host",
       "with": {
-        "name": "hu42.{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "hu42.{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "hu42.{random_name}.net"
       }
     }
   ],

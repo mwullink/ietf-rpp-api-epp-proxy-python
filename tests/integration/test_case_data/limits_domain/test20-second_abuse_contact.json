@@ -19,8 +19,7 @@
       "comment": "Creates request contact RA26 with uriTemplate; expects 201 01000. The Abuse contact of the domain below.",
       "include": "create_request_contact",
       "with": {
-        "id": "{handle:a:RA26}",
-        "uriTemplate": "mailto:abuse@example.com"
+        "id": "{handle:a:RA26}"
       }
     },
     {
@@ -40,51 +39,7 @@
       "include": "create_domain",
       "with": {
         "name": "t20-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:X20}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        },
-        "dns": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.dns.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "dnsData",
-                "records": [
-                  {
-                    "@type": "dnsRecord",
-                    "name": "@",
-                    "type": "a",
-                    "rdata": {
-                      "address": "192.0.2.10"
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "registrant_id": "{handle:a:X20}"
       }
     }
   ],

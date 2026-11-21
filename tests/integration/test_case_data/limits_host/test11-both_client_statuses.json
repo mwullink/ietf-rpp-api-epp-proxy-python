@@ -6,20 +6,7 @@
       "comment": "Creates host h11.….net with dns records ns; expects 201. The host the steps below work on.",
       "include": "create_host",
       "with": {
-        "name": "h11.{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "h11.{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "h11.{random_name}.net"
       }
     }
   ],

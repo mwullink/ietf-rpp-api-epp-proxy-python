@@ -12,20 +12,7 @@
       "comment": "Creates host ns1.t4 with dns records ns; expects 201 01000. The host the steps below work on.",
       "include": "create_host",
       "with": {
-        "name": "ns1.t4-{random_name}.{tld}",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.t4-{random_name}.{tld}."
-              }
-            }
-          ]
-        }
+        "name": "ns1.t4-{random_name}.{tld}"
       }
     }
   ],

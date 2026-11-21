@@ -26,20 +26,7 @@
       "comment": "Creates host ns1.u24 with dns records ns; expects 201. A nameserver of the domain below.",
       "include": "create_host",
       "with": {
-        "name": "ns1.u24-{random_name}.net",
-        "dns": {
-          "@type": "dnsData",
-          "records": [
-            {
-              "@type": "dnsRecord",
-              "name": "@",
-              "type": "ns",
-              "rdata": {
-                "nsdname": "ns1.u24-{random_name}.net."
-              }
-            }
-          ]
-        }
+        "name": "ns1.u24-{random_name}.net"
       }
     },
     {
@@ -47,24 +34,6 @@
       "include": "create_domain",
       "with": {
         "name": "put24-{random_name}.{tld}",
-        "registrant": {
-          "select": [
-            {
-              "when": {
-                "profile.domainName.registrant.min_count": {
-                  "min": 1
-                }
-              },
-              "then": {
-                "@type": "contact",
-                "id": "{handle:a:HU24}"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        },
         "dns": {
           "@type": "dnsData",
           "records": [
@@ -80,7 +49,8 @@
               }
             }
           ]
-        }
+        },
+        "registrant_id": "{handle:a:HU24}"
       }
     }
   ],
