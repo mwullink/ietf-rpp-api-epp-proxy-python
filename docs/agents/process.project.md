@@ -43,8 +43,9 @@ key its resolved repository environment lacks, the same signalling and profile, 
 
 ## Checks before done
 
-The only CI is the workflow of the supported Python versions (step 5), so run these checks locally from the repository
-root, in this order:
+CI runs two workflows on every PR, every push to `main` and weekly (Monday 05:00 UTC): `.github/workflows/ci.yml`
+(steps 1 and 2, and a Trivy scan of the dependencies, Dockerfiles and secrets) and the supported Python versions (step 5).
+Neither reaches a live backend, so run these checks locally from the repository root, in this order:
 
 1. `PYTHONPATH=src lint-imports`: the module boundaries, see
    [architecture.project.md](architecture.project.md#the-check).
@@ -72,3 +73,11 @@ root, in this order:
 Use `bug` for defects, plus one `severity:*` label (`critical`, `high`, `medium`,
 `low`) and one `area:*` label (`functional`, `spec-compliance`, `not-implemented`,
 `tech-debt`, `refactoring`, `performance`, `build`, `chores`).
+
+## Dependency updates
+
+Renovate ([renovate.json](../../renovate.json)) opens its PRs on Monday mornings, for no release younger than 24 hours
+(`minimumReleaseAge`): one PR for the minor and patch updates of `requirements*.txt`, one for the GitHub Actions and
+images, and one per major update. The non-major PRs merge themselves once CI passes; a major one is merged by hand. The
+Python images stay on 3.11 (`allowedVersions`). A Trivy finding of HIGH or CRITICAL with a fix fails CI: update the pin,
+or wait for Renovate's PR.

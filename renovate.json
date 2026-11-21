@@ -1,0 +1,73 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "timezone": "Europe/Berlin",
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "minimumReleaseAge": "1 day",
+  "internalChecksFilter": "strict",
+  "labels": [
+    "area:chores"
+  ],
+  "automerge": true,
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Python packages: the minor and patch updates in one weekly PR; each major update in its own.",
+      "matchManagers": [
+        "pip_requirements"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "Python packages (non-major)"
+    },
+    {
+      "description": "GitHub Actions and container images: the non-major and digest updates in one weekly PR.",
+      "matchManagers": [
+        "github-actions",
+        "dockerfile",
+        "devcontainer"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pinDigest"
+      ],
+      "groupName": "CI and container images (non-major)"
+    },
+    {
+      "description": "The images run Python 3.11, the version the project is tested with: only its patch releases and digests.",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchPackageNames": [
+        "python"
+      ],
+      "allowedVersions": "/^3\\.11(\\.|-|$)/"
+    },
+    {
+      "description": "A major update is merged by hand.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": [
+      "area:chores",
+      "severity:high"
+    ],
+    "schedule": [
+      "at any time"
+    ]
+  }
+}
