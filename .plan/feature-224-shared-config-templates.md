@@ -24,7 +24,7 @@ Branch `feature/224-shared-config-templates` from `main` (f5a4fd8). The maintain
 - [x] T3 Test `test_deploy_config_templates.py` on the new path; `process.project.md#configurations`
 - [x] T4 `deploy/README.md`
 - [x] T5 Checks: lint-imports, unit tests, smoke; `ansible-lint`, `--syntax-check`, image build; the path renders in Ansible — lint-imports 29 kept; unit 2932 passed; smoke 190 passed, 440 skipped; ansible-lint 0 failures; syntax-check ok; image built; the example inventory renders the three templates through a local Ansible run
-- [~] T6 Draft PR; then the deployment repo uses the shared templates and drops `configs/`
+- [x] T6 Draft PR; then the deployment repo uses the shared templates and drops `configs/` — deployment repo: playbook_dir paths, configs/ removed
 
 ## Open questions
 
