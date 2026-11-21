@@ -28,46 +28,6 @@
       "include": "create_contact",
       "with": {
         "id": "{handle:a:ud1}",
-        "contactInfo": {
-          "@type": "Card",
-          "version": "2.0",
-          "kind": "individual",
-          "name": {
-            "full": "John Doe"
-          },
-          "addresses": {
-            "addr": {
-              "components": [
-                {
-                  "kind": "locality",
-                  "value": "Anytown"
-                },
-                {
-                  "kind": "name",
-                  "value": "Musterweg 12"
-                },
-                {
-                  "kind": "postcode",
-                  "value": "60596"
-                }
-              ],
-              "countryCode": "US"
-            }
-          },
-          "emails": {
-            "email": {
-              "address": "foo@example.com"
-            }
-          },
-          "phones": {
-            "voice": {
-              "number": "tel:+49.6912345678",
-              "features": {
-                "voice": true
-              }
-            }
-          }
-        },
         "authInfo": {
           "select": [
             {
@@ -92,46 +52,6 @@
       "include": "create_contact",
       "with": {
         "id": "{handle:a:ud2}",
-        "contactInfo": {
-          "@type": "Card",
-          "version": "2.0",
-          "kind": "individual",
-          "name": {
-            "full": "John Doe"
-          },
-          "addresses": {
-            "addr": {
-              "components": [
-                {
-                  "kind": "locality",
-                  "value": "Anytown"
-                },
-                {
-                  "kind": "name",
-                  "value": "Musterweg 12"
-                },
-                {
-                  "kind": "postcode",
-                  "value": "60596"
-                }
-              ],
-              "countryCode": "US"
-            }
-          },
-          "emails": {
-            "email": {
-              "address": "foo@example.com"
-            }
-          },
-          "phones": {
-            "voice": {
-              "number": "tel:+49.6912345678",
-              "features": {
-                "voice": true
-              }
-            }
-          }
-        },
         "authInfo": {
           "select": [
             {
@@ -156,46 +76,6 @@
       "include": "create_contact",
       "with": {
         "id": "{handle:a:ud3}",
-        "contactInfo": {
-          "@type": "Card",
-          "version": "2.0",
-          "kind": "individual",
-          "name": {
-            "full": "John Doe"
-          },
-          "addresses": {
-            "addr": {
-              "components": [
-                {
-                  "kind": "locality",
-                  "value": "Anytown"
-                },
-                {
-                  "kind": "name",
-                  "value": "Musterweg 12"
-                },
-                {
-                  "kind": "postcode",
-                  "value": "60596"
-                }
-              ],
-              "countryCode": "US"
-            }
-          },
-          "emails": {
-            "email": {
-              "address": "foo@example.com"
-            }
-          },
-          "phones": {
-            "voice": {
-              "number": "tel:+49.6912345678",
-              "features": {
-                "voice": true
-              }
-            }
-          }
-        },
         "authInfo": {
           "select": [
             {

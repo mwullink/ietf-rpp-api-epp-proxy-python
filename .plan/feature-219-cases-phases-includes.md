@@ -48,6 +48,13 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
   `draft_patch/test1`, `test3` (they send and assert `processes`); the transfer requests in `message/test6`'s setup;
   `draft_contact/test6` (contact delete), `draft_host/test6` (host delete).
 
+- D6 (maintainer, 2026-11-21) A case passes `contactInfo` only where its steps rely on the contact's data; a
+  change of the wire is allowed where no result relied on the payload. So the 55 contacts of 40 cases that are only a
+  domain's contacts, or a contact deleted or transferred, take the default card; the 24 contact updates on the full
+  John Doe card use `create_full_contact`; 22 contact updates (and `draft_contact/test5`) keep their own card, which
+  their steps change or read back. Compare with `--contact-info`: the 40 cases differ only in the setup contacts'
+  `contactInfo`; none of their test steps names a member of a contact card.
+
 ## Results
 
 - R1 Converter (scratch `convert.py`): 372 files changed; include uses: `create_contact` 336, `create_domain` 138,
