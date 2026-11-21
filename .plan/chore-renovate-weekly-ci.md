@@ -22,8 +22,8 @@ Branch `chore/renovate-weekly-ci`.
   0.52.1 (last 0.x). Trivy with `.trivyignore`: 0 findings.
 - F7 Checks: lint-imports 29 kept; unit 2932 passed; `./test_python_versions.sh` passed on 3.11–3.15; smoke 158 passed,
   32 failed, all `rri-mtest` with 401; the deploy image builds.
-- F8 MTEST pending: the one-case check fails with `RRI login refused: 83000000010` (login refused from here). Handed
-  over to the maintainer.
+- F8 MTEST: the first one-case check failed (`RRI login refused: 83000000010`); re-run on request, the login passed and
+  `RPP_TEST_ENV=rri-mtest pytest -n 4 -m smoke tests/integration`: 38 passed, 0 failed.
 - F4 The Renovate validator could not be run here (denied); `renovate.json` is checked as JSON only.
 
 ## Tasks
@@ -33,6 +33,6 @@ Branch `chore/renovate-weekly-ci`.
 - [x] docs: process.project.md, testing.project.md
 - [x] Decide how Trivy treats F2 (D4)
 - [x] Pins, `.trivyignore`, issue #226
-- [x] lint-imports, unit tests, `./test_python_versions.sh`, smoke (MTEST pending, F8)
+- [x] lint-imports, unit tests, `./test_python_versions.sh`, smoke, MTEST (F8)
 - [~] Draft PR
 
