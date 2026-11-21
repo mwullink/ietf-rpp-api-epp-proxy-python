@@ -114,21 +114,28 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
   MTEST; a mutex for readers and producers; exact assertions.
 - D2 (maintainer, 2026-11-21) the design above is accepted.
 - D3 (maintainer, 2026-11-21) Q1: producers' teardown cancels a transfer that may still be pending.
+- D4 (maintainer, 2026-11-21) Q2 (F6): a reader acks the heads that are not its own until its own message is the head,
+  and asserts that message exactly; the exact `RPP-Queue-Size` only where the server queues nothing on its own (a new
+  environment fact).
+- D5 (maintainer, 2026-11-21) Q3 (F7): the run setup drains at the registrar's full rate, as the other workers of the
+  environment wait for it; the MTEST backlog is drained once by hand (a throwaway script outside the repository, 25
+  requests a minute, one session) while the code is written.
 
 ## Tasks
 
 - [x] T0 Design accepted by the maintainer
-- [~] T1 Probe MTEST and the EPP test server: which operations queue messages, and whether any arrive later (F5, F6)
-- [ ] T2 Failing harness tests (pytester), stubs
+- [x] T1 Probe MTEST and the EPP test server: which operations queue messages, and whether any arrive later (F5, F6)
+- [~] T2 Failing harness tests (pytester), stubs
 - [ ] T3 Include expansion and load checks
 - [ ] T4 Step runner: per-step placeholders, loops, phases, report sections
 - [ ] T5 Run setup/teardown and the mutex
 - [ ] T6 `_includes/drain_queue.json`, `_run.json`; readers and producers
 - [ ] T7 Docs: testing.project.md
+- [ ] T7b One-time MTEST drain (running since 2026-11-21)
 - [ ] T8 Checks: lint-imports, unit tests, smoke (MTEST reachable first)
 - [ ] T9 Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Open questions
 
-- Q2 If T1 shows MTEST queues messages on its own, exact head assertions cannot hold there. Decide after T1.
+- None.
