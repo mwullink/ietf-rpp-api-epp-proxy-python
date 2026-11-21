@@ -37,15 +37,21 @@ at the maintainer's request: the main checkout holds #214 and its mutex. This wo
 
 ## Tasks
 
-- [~] Loader `settings/layered_yaml.py` (include, deep merge, `.local.yaml` per layer, cycle, missing include,
+- [x] Loader `settings/layered_yaml.py` (include, deep merge, `.local.yaml` per layer, cycle, missing include,
       provenance of each top-level key) and its unit tests; `load_settings` uses it, warns about unknown `rpp_*` keys
-- [ ] `config/` tree; equivalence check: each new environment resolves to the same `Settings` as its old root file
-- [ ] Descriptors: `environments/common/`, `config:` defaults to `config/environments/<name>.yaml`, `.local.yaml`
-      skipped by `environment_names()`; equivalence check of each resolved descriptor
-- [ ] Remove root `config*.yaml`, `src/config.yaml`; update tests, Dockerfiles, deploy template headers and their test
-- [ ] Docs: README, process.project.md, architecture.project.md, testing.project.md, security.project.md,
-      docs/testing/backend-limits.yaml, .gitignore comment
-- [ ] Checks: lint-imports, unit tests, smoke (MTEST reachable first), docker build of both images, ansible checks
+- [x] `config/` tree; equivalence check: each new environment resolves to the same `Settings` as its old root file
+      (all 7 equal, checked with a script before the old files were removed)
+- [x] Descriptors: `environments/common/rri.yaml`, `sqlite-demo-*` include `sqlite-demo.yaml`, `config:` defaults to
+      `config/environments/<name>.yaml`, `.local.yaml` skipped by `environment_names()`; each resolved descriptor
+      equals the old file with the new `config` (all 7)
+- [x] Remove root `config*.yaml`, `src/config.yaml`; update tests, Dockerfiles, deploy template headers and their test;
+      `.dockerignore` keeps `*.local.yaml` (and `.env`) out of the images, as the dev image now copies `config/`
+- [x] Docs: README, config/README.md, process.project.md, architecture.project.md, testing.project.md,
+      security.project.md, docs/testing/backend-limits.yaml, .gitignore comment (docs/rri/refactoring.md is the
+      historic design and keeps its old example)
+- [~] Checks: lint-imports (29 kept), unit tests, smoke (MTEST reachable first), docker build of both images;
+      ansible-lint / --syntax-check: not installed here (only comments of the templates changed, which the unit test
+      renders)
 - [ ] Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex; maintainer moves `config.rri-mtest.local.yaml` to
       `config/environments/rri-mtest.local.yaml`

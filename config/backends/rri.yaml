@@ -1,0 +1,18 @@
+# DENIC's RRI server, in MTEST or a local test server of the same behaviour. An environment states where it is.
+include:
+  - ../protocols/rri.yaml
+
+rpp_preset_signalling: media-type
+
+# The profile of this server (see backends/epp.yaml): DENIC's, src/settings/profiles/rri.yaml.
+rpp_backend_profile:
+  extends: rri
+  # The RPP presets offered (src/rpp/schema/schemas/presets), and the one a request gets when it names none.
+  presets:
+    - base
+    - rri
+  default_preset: rri
+rpp_rri_lgr: latn-1.0   # the one LGR name a client may give for DENIC's IDN repertoire (gap Q11)
+
+rpp_tlds:
+  - de

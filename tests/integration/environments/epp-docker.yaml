@@ -1,5 +1,4 @@
 # The EPP test server of EPP-server-docker (docs/agents/testing.project.md#backend).
-config: config.yaml                    # RPP_CONFIG_FILE of the app under test: its profile, TLD, LGRs, environment name
 preset: epp-compatible               # the RPP preset the `{rpp:*}` placeholders stand for (a key of src/rpp/schema/schemas/presets)
 max_workers: 8                         # the backend refuses logins above about 16 sessions
 regacc: user                           # the sponsor id is the login

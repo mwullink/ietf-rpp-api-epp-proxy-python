@@ -4,7 +4,7 @@ vault_epp_server_mysql_password: change-me-to-a-long-random-value
 
 # The clients of the SQLite demo instance: user -> scrypt hash. Make a hash with
 #   cd src && python -m registry_adapter.sqlite.hash_password    (reads the password from standard input)
-# Never the demo hashes of config.demo.yaml.
+# Never the demo hashes of config/backends/sql.yaml.
 vault_rpp_sqlite_clients:
   client-a: scrypt$...
   client-b: scrypt$...

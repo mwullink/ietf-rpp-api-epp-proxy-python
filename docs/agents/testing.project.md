@@ -34,17 +34,17 @@ mostly building an app per test from `openapi.yaml`, so more workers than cores 
 Integration tests require a **backend EPP test server**. They do not use test
 doubles: they exercise the full RPP→EPP→RPP round trip against a live registry.
 
-Its host and port come from `config.yaml` (`rpp_epp_host`/`rpp_epp_port`) via
-`new_epp_client` in [src/main.py](../../src/main.py). The backend is a docker compose project (today `epptest`),
-and `config.yaml` names its EPP server by the compose service name, `epp-server`, on TLS port `743`. That name
+Its host and port come from [config/environments/epp-docker.yaml](../../config/environments/epp-docker.yaml)
+(`rpp_epp_host`/`rpp_epp_port`) via `new_epp_client` in [src/main.py](../../src/main.py). The backend is a docker
+compose project (today `epptest`), and that config names its EPP server by the compose service name, `epp-server`, on TLS port `743`. That name
 resolves on the project's network, `<project>_epp_net` (today `epptest_epp_net`), which the devcontainer has to
 join: `postStartCommand` in [.devcontainer/devcontainer.json](../../.devcontainer/devcontainer.json) joins it on every
 start (#111). Where the backend was not up then, attach it by hand:
 `docker network connect epptest_epp_net <container>`, where `<container>` is the devcontainer's id (`cat /etc/hostname`
 inside it); `getent hosts epp-server` shows whether it resolves. Without it every
 integration case fails with 401 (`02200`). Its certificate is self-signed and does not name that host, so
-`config.yaml` sets `rpp_epp_tls_insecure_skip_verify`. Where the backend has another name, put it in an untracked
-`config.local.yaml` (`rpp_epp_host: <name>`): its top-level keys replace those of `config.yaml`.
+the config sets `rpp_epp_tls_insecure_skip_verify`. Where the backend has another name, put it in an untracked
+`config/environments/epp-docker.local.yaml` (`rpp_epp_host: <name>`), which merges over the config.
 
 Auth uses HTTP Basic, and the username and password are passed straight through as
 the EPP `clID`/`pw` login credentials. The backend has two registrars, the slots `a` and `b` of the cases, whose
@@ -81,7 +81,7 @@ Info does not show `pendingTransfer` (#64), a completed transfer cannot be
 queried (#65), and cancel with nothing pending is `2201` (#66), so its 409 is tested only in
 unit tests. `acID` and `acDate` after cancel and reject are not asserted (#67). Contact transfers behave the same, except that Info does show the sponsor changing, so `contact_transfer` cases read it back.
 
-The IDN tables of the backend are `de` and `es`, and `config.yaml` maps `latn-1.0` to `de` only, so a read with an
+The IDN tables of the backend are `de` and `es`, and `config/backends/epp.yaml` maps `latn-1.0` to `de` only, so a read with an
 unmapped table is tested only in unit tests. It answers 2306, not the 2005 of draft-obispo-epp-idn-04, for a `uname`
 that does not match the name. Its IDN tables and the session table come from migrations in EPP-server-docker, which run
 only when the database is first created: a database from before them answers `2306 Unknown idn:table` and needs them
@@ -104,11 +104,18 @@ from its config by `main.compose`, its credentials and its pacer, or only those 
 (comma-separated); the cases of the others are skipped as not selected, and those of an environment whose
 credentials are missing from `.env` are skipped with the variables it needs. The unit tests compose the app of the
 first environment `RPP_TEST_ENV` names, default `epp-docker` (`tests/conftest.py` sets `RPP_CONFIG_FILE` from it
-before any test module imports `main`). The descriptor holds the config file of the app under test, the most workers it
+before any test module imports `main`). The descriptor holds the config file of the app under test (by default
+`config/environments/<name>.yaml`, the config of the same name; `config:` names another), the most workers it
 allows, the requests a minute per registrar (`rpp_requests_per_minute`, paced
 by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend does not know, and its `facts`. The
 `BackendProfile`, the TLD, the environment name and the LGRs are read from that config, as the app reads them, and not
 repeated. A run with more workers than an environment it tests allows does not start.
+
+A descriptor is layered like the configurations ([config/README.md](../../config/README.md)): `include:` names the
+layers it builds on (`environments/common/rri.yaml` holds what `rri-mtest` and `rri-local` share, the `sqlite-demo-*`
+descriptors include `sqlite-demo.yaml`), mappings merge and other values replace, and `null` is a fact like any value.
+An untracked `<name>.local.yaml` next to a descriptor or a common layer changes it on one machine; it is no environment
+of its own.
 
 The descriptor's `preset` is the key of the RPP preset (`epp-compatible`, `rri`, `planets`, `base`) that the placeholders of
 the preset headers stand for. The runner adds and rewrites nothing: every request of every case states its preset headers in
@@ -154,7 +161,7 @@ into the `Authorization` header when it sends the request, never into the case, 
 
 `RPP_TEST_ENV=sqlite-demo pytest -n 4 tests/integration` runs the cases of the demo backend (`planet_*`, `satellite_*`,
 `planet_transfer`, `planet_message`, `sqlite_drafts_objects`) against an app composed from
-[config.demo.yaml](../../config.demo.yaml), with a database in memory per worker. It needs no credentials and no server:
+[config/environments/sqlite-demo.yaml](../../config/environments/sqlite-demo.yaml), with a database in memory per worker. It needs no credentials and no server:
 the descriptor marks its registrars `literal`, so `user`, `password` and `prefix` are the values themselves, the DEMO
 values of the config (they are no secrets). It has four registrars: `a` and `b` for the cases, and `c` and `d` for the
 cases of the message queue only, so that no other case adds to those queues. Its `facts` are those of `epp-docker`, which
@@ -165,15 +172,15 @@ config before it looks the preset up. The cases are in the smoke suite.
 
 #### The demo configurations
 
-[config.demo.yaml](../../config.demo.yaml) and `sqlite-demo` are the bare configuration (the planets preset only), the `config.demo-bare.yaml` of #180:
-there is no second file. Three more compose the demo extensions, profiles and presets of #179, each with an environment of its own
+[sqlite-demo](../../config/environments/sqlite-demo.yaml) is the bare configuration (the planets preset only), the `config.demo-bare.yaml` of #180:
+there is no second file. Three more, which include it, compose the demo extensions, profiles and presets of #179, each with an environment of its own
 (descriptor `preset` = the default preset of its config, no credentials, cases in the smoke suite):
 
 | Config / environment | Presets (default first) | Bound profiles | Signalling |
 |---|---|---|---|
-| `config.demo-extended.yaml` / `sqlite-demo-extended` | base, planets-complete, planets, planets-atmosphere, planets-orbits | none | header |
-| `config.demo-bound.yaml` / `sqlite-demo-bound` | base, planets, planets-atmosphere, planets-complete, catalogued-planets | planets: rocky-planets, planets-atmosphere: habitable-atmospheres, planets-complete: habitable-rocky-planets | media-type |
-| `config.demo-inherit.yaml` / `sqlite-demo-inherit` | base, planets-complete, planets, planets-atmosphere, planets-orbits, catalogued-planets, habitable-worlds | none | header |
+| `sqlite-demo-extended` | base, planets-complete, planets, planets-atmosphere, planets-orbits | none | header |
+| `sqlite-demo-bound` | base, planets, planets-atmosphere, planets-complete, catalogued-planets | planets: rocky-planets, planets-atmosphere: habitable-atmospheres, planets-complete: habitable-rocky-planets | media-type |
+| `sqlite-demo-inherit` | base, planets-complete, planets, planets-atmosphere, planets-orbits, catalogued-planets, habitable-worlds | none | header |
 
 The groups of the plain objects run in every one of them. `demo_discovery/`, `demo_preset_read/` and `demo_binding/` show the
 composition of each (a case is selected by `profile.presets`, `profile.default_preset` and `profile.bound_profiles`, whose map
@@ -192,7 +199,7 @@ of the conflict, and starts the server process once to see it exit with the mess
 ### DENIC MTEST
 
 `RPP_TEST_ENV=rri-mtest pytest -n 4 tests/integration` runs the suite against DENIC's RRI test environment alone through
-[config.rri-mtest.yaml](../../config.rri-mtest.yaml). It needs the IPv4 address of the machine on the allowlist of
+[config/environments/rri-mtest.yaml](../../config/environments/rri-mtest.yaml). It needs the IPv4 address of the machine on the allowlist of
 both RegAccs (the devcontainer goes out with the host's address), and the `TEST_RRI_*` variables in `.env`: the two
 logins, their passwords, and the prefix of the handles the cases create (it starts with the RegAccId; with the 10
 random characters it leaves 4 for a case's suffix, as a handle has at most 32). Of the run's limits: 4 sessions and 100 RRI requests a minute per RegAcc, so at most 4
@@ -237,16 +244,16 @@ addresses uncompressed; the IDN repertoire holds `ñ`, which the `de` table of t
 would be (`env.session.cltrid_reuse_supported`); an `lgr` on an ASCII name is not refused, RRI takes no LGR
 (`env.domainName.name.lgr.ascii_supported`); clearing a contact's name or email is refused by RRI with 422 `02306`
 (`env.contact.name.min_count`), where EPP cannot clear them and the proxy refuses with 501
-(`profile.contact.name.removable`). [config.rri-mtest.yaml](../../config.rri-mtest.yaml) offers `latn-1.0` as the
+(`profile.contact.name.removable`). [config/environments/rri-mtest.yaml](../../config/environments/rri-mtest.yaml) offers `latn-1.0` as the
 LGR. QUEUE-DELMSG states no count of the messages left, so the proxy answers an acknowledge without `RPP-Queue-Size`
 (#172, `env.bugs.queue_del_no_msgcnt`, `message/test6`).
 
 ### Local RRI
 
 `RPP_TEST_ENV=rri-local pytest -n 4 tests/integration` runs the suite against an RRI test server on the machine through
-[config.rri-local.yaml](../../config.rri-local.yaml), with the `TEST_RRI_LOCAL_*` variables in `.env` (as `TEST_RRI_*`
+[config/environments/rri-local.yaml](../../config/environments/rri-local.yaml), with the `TEST_RRI_LOCAL_*` variables in `.env` (as `TEST_RRI_*`
 for MTEST), so that a run with MTEST's credentials only does not test it. The config names the server's container on
-Docker's default bridge network (`172.17.0.8`); another host goes in an untracked `config.rri-local.local.yaml`
+Docker's default bridge network (`172.17.0.8`); another host goes in an untracked `config/environments/rri-local.local.yaml`
 (`rpp_rri_host: <host>`). Its facts are MTEST's, except that its predelegation check passes every create and update
 (`failed_dns_status: null`, `update.dns_checked: false`, so `domain_create/test43` and the update cases of a check do
 not run), and that it allows 2000 RPP requests a minute per registrar.
@@ -325,7 +332,7 @@ Unit tests in `tests/unit/` inject test doubles through constructors:
 - `EPPClient(transport, username, password)` takes a fake transport.
 - `EppBackend(epp_client, ns_map, profile, idn_tables=None)` takes a fake client, such as
   [FakeEppClient](../../tests/helper/fake_epp_client.py), and a flow takes that backend. Tests pass
-  [EPP_NS_MAP](../../tests/helper/epp_ns_map.py), the namespace map of `config.yaml`, which the XML tests assert;
+  [EPP_NS_MAP](../../tests/helper/epp_ns_map.py), the namespace map of `config/protocols/epp.yaml`, which the XML tests assert;
   the `*_xml` functions take it as `ns_map`, and the domain ones `IdnTables` as `idn_tables`.
 - `SessionPool(backend_factory)` takes a factory returning a backend.
   [epp_backends](../../tests/helper/epp_backends.py) turns a factory of fake EPP clients into one, so the test still

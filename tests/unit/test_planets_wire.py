@@ -1,4 +1,4 @@
-"""The planets and satellites of the SQLite demo backend over the wire (config.demo.yaml): the paths of the extension, the
+"""The planets and satellites of the SQLite demo backend over the wire (config/environments/sqlite-demo.yaml): the paths of the extension, the
 authorisation of the sponsor, the transfer of a planet and the messages it queues, and the 501 of the drafts' objects."""
 import base64
 import dataclasses
@@ -34,7 +34,7 @@ def database(tmp_path_factory):
 @pytest.fixture(scope="module")
 def composition(database):
     """One app over a database file, which the tests empty between them (building an app takes a second)."""
-    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    settings = load_settings(str(REPOSITORY / "config/environments/sqlite-demo.yaml"))
     settings = dataclasses.replace(
         settings, sqlite=SqliteSettings(rpp_sqlite_url=f"sqlite:///{database}",
                                         rpp_sqlite_clients=settings.sqlite.rpp_sqlite_clients))
@@ -103,7 +103,7 @@ class Forbidden:
 @pytest.fixture(scope="module")
 def middleware_only_client():
     """An app whose backend fails the test when a gateway of the drafts' objects is called."""
-    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    settings = load_settings(str(REPOSITORY / "config/environments/sqlite-demo.yaml"))
     registry = load_registry(settings)
     profile = backend_profile(settings, registry)
     parts = load_extension_parts(registry.backend_parts("sqlite"))

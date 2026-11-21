@@ -11,8 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application code
 COPY ./src .
 
-# src/config.yaml is a symlink to ../config.yaml: put the file where it points
-COPY config.yaml /config.yaml
+# The configurations (config/README.md): without RPP_CONFIG_FILE the proxy reads /config/environments/epp-docker.yaml,
+# the config/ tree next to src/, which is /app here
+COPY config /config
 
 # Expose the port the app runs on
 EXPOSE 8000

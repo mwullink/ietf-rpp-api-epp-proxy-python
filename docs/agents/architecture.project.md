@@ -15,7 +15,7 @@ src/
 ├── api_docs/                serves the OpenAPI documents and the UI (Scalar, scalar_ui/ vendored) in front of the rpp app:
 │                            docs_app (DocsApp), served_documents, ui_configuration; knows no other package
 ├── registry_setup.py        the extensions the settings name, registered, and the backend profile built with them
-├── settings/                loads config.yaml once into typed sections, which main.py passes on
+├── settings/                loads the configuration once into typed sections, which main.py passes on
 │   └── profiles/            epp.yaml, rri.yaml, sqlite.yaml: the generic backend profile of each protocol (not the RPP presets and profiles)
 ├── registration/            the registry of the extensions a configuration names: stdlib only, knows no other package
 ├── extensions/<name>/       one extension (today `planets`, `planet_atmosphere`, `satellite_orbit`): register_<name>.py, core/{model,ports,flows}/ and
@@ -501,8 +501,8 @@ each and calls its `register(registry)` ([registration/](../../src/registration/
 | the leaves it adds to the backend profile (`objects`, `extensions` are added to the generic profile's, other leaves are new) | `BackendProfile.from_layers(..., extra_leaves=...)`: the list of leaves stays closed, and without the extension a leaf of it is unknown |
 
 The demo configurations compose the three demo extensions differently (README, [testing.project.md](testing.project.md#the-demo-configurations)):
-`config.demo.yaml` (planets only), `config.demo-extended.yaml`, `config.demo-bound.yaml` (profiles bound to presets) and
-`config.demo-inherit.yaml` (several bases). A configuration that cannot hold, a binding without a required extension, a cycle or one
+`config/environments/sqlite-demo.yaml` (planets only), `sqlite-demo-extended.yaml`, `sqlite-demo-bound.yaml` (profiles bound to presets) and
+`sqlite-demo-inherit.yaml` (several bases). A configuration that cannot hold, a binding without a required extension, a cycle or one
 extension in two versions, stops the app at start naming the conflict; those are in `tests/refused_configs/`.
 
 A backend gives the gateways of an extension by its id, `RegistryBackend.extension(extension_id)` (a `KeyError` where the
@@ -530,7 +530,7 @@ demo extensions that use it, are in [docs/demo/](../demo/)). An Extension Schema
 keyed `<$id of the owner>#/$defs/<definition>`: the owner must be in the preset (checked at start, naming both), and the
 additivity check reads the owner's definition. An extension without data objects registers no `handlers` and no `openapi`.
 
-The SQLite backend (`rpp_backend: sqlite`, [config.demo.yaml](../../config.demo.yaml)) is made as a test bed: the clients
+The SQLite backend (`rpp_backend: sqlite`, [config/backends/sql.yaml](../../config/backends/sql.yaml)) is made as a test bed: the clients
 are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m registry_adapter.sqlite.hash_password`, compared
 in constant time; the user is the sponsoring client; `ClientDirectory` checks each hash with `check_hash` at start, and a
 hash that cannot be used stops the app with a `ValueError` naming the client and never the hash, as `settings` may not
@@ -640,9 +640,14 @@ has one of its own (#205); the routing spec stays the generated 3.0.
 
 ## Configuration
 
-`load_settings` in [settings/load_settings.py](../../src/settings/load_settings.py) reads `config.yaml` (path
-overridable via `RPP_CONFIG_FILE`, and an untracked `<name>.local.yaml` next to it replaces the keys it has) into
-`Settings`, whose sections are `EppSettings` and `DiscoverySettings`; the section fields are the config.yaml keys.
+`load_settings` in [settings/load_settings.py](../../src/settings/load_settings.py) reads the file `RPP_CONFIG_FILE`
+names, else `config/environments/epp-docker.yaml` of the repository (found from the module, not the working directory),
+into `Settings`, whose sections are `EppSettings` and `DiscoverySettings`; the section fields are the configuration
+keys. The file is resolved by [settings/layered_yaml.py](../../src/settings/layered_yaml.py) (#217,
+[config/README.md](../../config/README.md)): its `include:` layers in order, then the file, then the untracked
+`<name>.local.yaml` of each layer; mappings merge, other values replace, and a top-level key that resolves to `null` is
+absent. A key the proxy does not know is ignored, with a warning naming the file for an `rpp_*` one. The test helper
+resolves the test environment descriptors with the same module.
 `main.py` loads it once and passes each section on; nothing else imports `settings`. `rpp_backend_profile` is the
 server's profile, see [Backend profile](#backend-profile). The EPP backend host and port
 come from `rpp_epp_host` and `rpp_epp_port`, and `new_epp_client` in [main.py](../../src/main.py) uses them to open

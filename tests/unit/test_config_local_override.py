@@ -26,11 +26,39 @@ def test_the_local_file_replaces_the_keys_it_has(tmp_path, monkeypatch):
     assert settings.epp.rpp_epp_port == 743
 
 
-def test_the_local_file_replaces_a_mapping_whole(tmp_path, monkeypatch):
+def test_the_local_file_merges_into_a_mapping(tmp_path, monkeypatch):
     settings = load(tmp_path, monkeypatch, "rpp_epp_host: h\nrpp_idn_lgr_tables:\n  latn-1.0: de\n  spa-1.0: es\n",
                     "rpp_idn_lgr_tables:\n  latn-1.0: xx\n")
 
-    assert settings.epp.rpp_idn_lgr_tables == {"latn-1.0": "xx"}
+    assert settings.epp.rpp_idn_lgr_tables == {"latn-1.0": "xx", "spa-1.0": "es"}
+
+
+def test_the_local_file_unsets_a_key_with_null(tmp_path, monkeypatch):
+    settings = load(tmp_path, monkeypatch, "rpp_epp_host: h\nrpp_epp_port: 7043\n", "rpp_epp_port: null\n")
+
+    assert settings.epp.rpp_epp_port == 700
+
+
+def test_an_unknown_key_of_the_proxy_is_named_with_its_file(tmp_path, monkeypatch, caplog):
+    load(tmp_path, monkeypatch, "rpp_epp_host: h\nother: 1\n", "rpp_epp_hots: typo\n")
+
+    warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    assert warnings == [f"Unknown configuration key rpp_epp_hots in {tmp_path / 'config.local.yaml'}: ignored"]
+
+
+def test_a_known_key_is_not_warned_about(tmp_path, monkeypatch, caplog):
+    load(tmp_path, monkeypatch, "rpp_backend: rri\nrpp_rri_host: h\nrpp_backend_profile:\n  extends: rri\n"
+                                "rpp_preset_signalling: header\nrpp_extensions: []\nrpp_tlds: [de]\n")
+
+    assert [r for r in caplog.records if r.levelname == "WARNING"] == []
+
+
+def test_without_a_file_named_the_default_is_the_epp_test_environment(monkeypatch):
+    from settings.load_settings import DEFAULT_CONFIG
+    monkeypatch.delenv("RPP_CONFIG_FILE", raising=False)
+
+    assert DEFAULT_CONFIG.relative_to(DEFAULT_CONFIG.parents[2]).as_posix() == "config/environments/epp-docker.yaml"
+    assert load_settings().epp.rpp_epp_host == load_settings(str(DEFAULT_CONFIG)).epp.rpp_epp_host
 
 
 def test_an_empty_local_file_changes_nothing(tmp_path, monkeypatch):

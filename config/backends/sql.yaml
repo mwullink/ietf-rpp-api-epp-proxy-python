@@ -1,7 +1,7 @@
-# The proxy over the SQLite demo backend (rpp_backend: sqlite): bare RPP with the demo objects Planet and Satellite of
-# the extension org.example.rpp.extension.planets (docs/demo/planets-extension.md). It runs without a registry, and is
-# the test environment `sqlite-demo` of the integration suite (RPP_TEST_ENV=sqlite-demo).
-rpp_backend: sqlite
+# The SQLite demo backend: bare RPP over a database with the demo objects Planet and Satellite of the extension
+# org.example.rpp.extension.planets (docs/demo/planets-extension.md). It runs without a registry.
+include:
+  - ../protocols/direct.yaml
 
 # The database: a SQLAlchemy URL, a file (sqlite:///demo.db) or one in memory (sqlite://), which starts empty.
 rpp_sqlite_url: sqlite://
@@ -10,8 +10,8 @@ rpp_sqlite_url: sqlite://
 # `python -m registry_adapter.sqlite.hash_password`, which reads the password from its standard input). The user is the
 # sponsoring client of what it creates. The passwords are DEMO values, the same as in
 # tests/integration/environments/sqlite-demo.yaml: demo-a-password, demo-b-password, demo-c-password and
-# demo-d-password (the cases about the message queue use c and d only, so that no other case adds to their queues). A real deployment never keeps
-# them: it makes its own hashes.
+# demo-d-password (the cases about the message queue use c and d only, so that no other case adds to their queues). A
+# real deployment never keeps them: it makes its own hashes.
 rpp_sqlite_clients:
   demo-a: scrypt$4096$8$1$/KkO8lOLGvobDljcFirbIg==$UdihO4qzdOTc1fYD1mk/cuVD4CpSQomj9tKX/79SnM4=
   demo-b: scrypt$4096$8$1$/2DzvTsWK2PM5ra/Q4ZZVw==$xXScrBzRxgzIkXg4ukOtCCFTsF02PVdhxJZCNsz2CTk=
@@ -23,8 +23,6 @@ rpp_sqlite_clients:
 rpp_extensions:
   - extensions.planets
 
-rpp_preset_signalling: header
-
 # The profile of this server: src/settings/profiles/sqlite.yaml, which holds none of the drafts' objects, and what the
 # planets extension adds. The RPP preset `planets` is the one the extension brings.
 rpp_backend_profile:
@@ -34,12 +32,8 @@ rpp_backend_profile:
     - planets
   default_preset: planets
 
-# What the discovery document states (placeholders for the test deployment).
-rpp_base_url: https://localhost:8000
 rpp_tlds:
   - example
-rpp_environment_name: rpp-sqlite-demo.example
-rpp_environment_status: test
 
 # The OpenAPI document served shows only what the demo serves: not the operations on the drafts' objects, which the demo
 # backend does not hold, nor those no handler serves. Against the drafts' API contract, which lists them all; requests to

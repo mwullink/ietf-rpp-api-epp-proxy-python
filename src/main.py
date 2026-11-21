@@ -111,7 +111,7 @@ def compose(settings: Settings) -> Composition:
                        app=DocsApp(rpp_app, rpp_app.openapi_documents()), rpp_app=rpp_app, registry=registry)
 
 
-# The app of the settings loaded once (RPP_CONFIG_FILE, else config.yaml), which uvicorn serves as `main:app`.
+# The app of the settings loaded once (RPP_CONFIG_FILE, else config/environments/epp-docker.yaml), which uvicorn serves as `main:app`.
 default = compose(load_settings())
 settings = default.settings
 tls_context = default.tls_context

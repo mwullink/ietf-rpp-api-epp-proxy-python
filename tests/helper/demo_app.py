@@ -1,4 +1,4 @@
-"""An app of the SQLite demo backend (config.demo.yaml) with the demo extensions and the offers a test composes (the demo
+"""An app of the SQLite demo backend (config/environments/sqlite-demo.yaml) with the demo extensions and the offers a test composes (the demo
 configurations of #180, config.demo-*.yaml, are composed from their files, see tests/unit/test_demo_configurations.py): which extensions the configuration names, which presets it offers, and the profiles it binds."""
 import dataclasses
 
@@ -17,7 +17,7 @@ ALL_PRESETS = ("planets", "planets-atmosphere", "planets-orbits", "planets-compl
 
 def demo_composition(database, extensions=ALL_EXTENSIONS, presets=ALL_PRESETS, bound=None, signalling="header"):
     """The composition of an app over the database file, offering `presets` (the first is the default)."""
-    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    settings = load_settings(str(REPOSITORY / "config/environments/sqlite-demo.yaml"))
     specific = {**settings.profile_layers[1], "presets": list(presets), "default_preset": presets[0],
                 "bound_profiles": bound or {}}
     return compose(dataclasses.replace(

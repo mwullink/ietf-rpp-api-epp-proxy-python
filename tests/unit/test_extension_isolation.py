@@ -16,7 +16,7 @@ from rpp.schema.extensions import register_extension
 from settings.load_settings import load_settings
 from tests.helper.test_environment import REPOSITORY
 
-DEMO = str(REPOSITORY / "config.demo.yaml")
+DEMO = str(REPOSITORY / "config/environments/sqlite-demo.yaml")
 
 
 def demo_settings(**changes):
@@ -64,7 +64,7 @@ def test_the_generic_code_loads_nothing_of_an_extension_unless_configured():
     script = textwrap.dedent(f"""
         import os, sys
         sys.path.insert(0, {str(REPOSITORY / 'src')!r})
-        os.environ["RPP_CONFIG_FILE"] = {str(REPOSITORY / 'src' / 'config.yaml')!r}
+        os.environ["RPP_CONFIG_FILE"] = {str(REPOSITORY / 'config' / 'environments' / 'epp-docker.yaml')!r}
         import main
         from rpp.schema.extensions import EXTENSIONS
         loaded = sorted(name for name in sys.modules if name == "extensions" or name.startswith("extensions."))
@@ -83,7 +83,7 @@ def test_a_configured_extension_that_does_not_exist_stops_the_app():
 
 
 def test_an_extension_the_backend_cannot_hold_stops_the_app():
-    epp = load_settings(str(REPOSITORY / "config.yaml"))
+    epp = load_settings(str(REPOSITORY / "config/environments/epp-docker.yaml"))
 
     with pytest.raises(ValueError, match="has no part in the epp backend"):
         compose(dataclasses.replace(epp, extensions=("extensions.planets",)))

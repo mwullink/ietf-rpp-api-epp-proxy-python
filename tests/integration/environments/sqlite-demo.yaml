@@ -1,7 +1,7 @@
-# The SQLite demo backend (config.demo.yaml): bare RPP over a database with the planets and satellites of the demo
-# extension. It needs no credentials and no server: the app is built in memory, and the clients are those of the
-# configuration, with the DEMO passwords of config.demo.yaml (`literal` below: the values are not variable names).
-config: config.demo.yaml               # RPP_CONFIG_FILE of the app under test
+# The SQLite demo backend (config/environments/sqlite-demo.yaml): bare RPP over a database with the planets and
+# satellites of the demo extension, and what the other sqlite-demo-* descriptors include. It needs no credentials and no
+# server: the app is built in memory, and the clients are those of the configuration, with the DEMO passwords of
+# config/backends/sql.yaml (`literal` below: the values are not variable names).
 preset: planets                       # the RPP preset the `{rpp:*}` placeholders stand for: the one the extension brings
 max_workers: 8
 regacc: user                           # the sponsor id is the login

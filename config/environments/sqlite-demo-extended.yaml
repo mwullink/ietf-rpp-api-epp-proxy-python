@@ -1,0 +1,20 @@
+# The SQLite demo backend with all three demo extensions (planets, planet-atmosphere, satellite-orbit) and the presets that
+# add them, with no profile bound (#180). The default preset is planets-complete, which builds on planets-atmosphere and
+# planets-orbits. It is the test environment `sqlite-demo-extended`.
+include:
+  - sqlite-demo.yaml
+
+# The extensions this deployment is built with (docs/demo/).
+rpp_extensions:
+  - extensions.planets
+  - extensions.planet_atmosphere
+  - extensions.satellite_orbit
+
+rpp_backend_profile:
+  presets:
+    - base
+    - planets
+    - planets-atmosphere
+    - planets-orbits
+    - planets-complete
+  default_preset: planets-complete

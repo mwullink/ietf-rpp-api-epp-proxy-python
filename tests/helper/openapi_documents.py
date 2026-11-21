@@ -18,8 +18,9 @@ BASIC = "Basic " + base64.b64encode(b"demo-a:demo-a-password").decode()
 SCHEMAS = "#/components/schemas/"
 
 CONFIGS = {
-    "bare": "config.demo.yaml", "extended": "config.demo-extended.yaml", "bound": "config.demo-bound.yaml",
-    "inherit": "config.demo-inherit.yaml",
+    "bare": "config/environments/sqlite-demo.yaml", "extended": "config/environments/sqlite-demo-extended.yaml",
+    "bound": "config/environments/sqlite-demo-bound.yaml",
+    "inherit": "config/environments/sqlite-demo-inherit.yaml",
 }
 
 

@@ -1,0 +1,5 @@
+# DENIC RRI 5.0 (XML over TCP). The credentials are the clients' own: HTTP Basic is passed through as the RRI LOGIN,
+# so a configuration holds none.
+rpp_backend: rri
+rpp_rri_port: 51131
+rpp_rri_use_tls: true

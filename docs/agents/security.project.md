@@ -16,7 +16,7 @@ Generic rules are in [security.md](security.md).
   errors only, and a queue message shows its type and the names of the domains and handles it is about.
 - The SQLite demo backend holds the clients as `scrypt` hashes (`rpp_sqlite_clients`), compared with
   `hmac.compare_digest`, and a login of an unknown user costs the same as a known one's. A hash is a credential: it and
-  the password are never logged. The demo passwords in `config.demo.yaml` and `tests/integration/environments/sqlite-demo.yaml`
+  the password are never logged. The demo passwords in `config/backends/sql.yaml` and `tests/integration/environments/sqlite-demo.yaml`
   are documented demo values and are never a deployment's. The authInfo of a planet is stored as given (a read shows it
   to its sponsor, as EPP does) and compared in constant time on a transfer request.
 - The MTEST credentials are in `.env`, which is ignored by git; the runner reads it, the proxy never does.

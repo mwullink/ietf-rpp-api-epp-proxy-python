@@ -1,0 +1,17 @@
+# What every test deployment of this repository shares (config/README.md). A backend or an environment states what
+# differs.
+
+# How a client names the preset of a request (core, Preset Signalling): `header` is the RPP-Preset header field,
+# `media-type` the preset and preset-version parameters of Accept and Content-Type. Without the key it is `header`. A
+# request that names none gets the `default_preset` of rpp_backend_profile.
+rpp_preset_signalling: header
+
+# What the discovery document (GET /.well-known/rpp) states. Without all four (rpp_tlds and rpp_environment_name come
+# from the backend and the environment), or with a value of the wrong shape, it answers 500. The values are
+# placeholders for the test deployments: an operator MUST replace them.
+# Public base URL of this proxy, which clients prefix to every path. It must be an absolute https URL (core §22)
+# and is never taken from the request. The proxy itself serves plain HTTP, so the https URL is that of the TLS
+# termination in front of it. The one below is a local placeholder.
+rpp_base_url: https://localhost:8000
+# Operational status ("production", "test", "development") of this server
+rpp_environment_status: test

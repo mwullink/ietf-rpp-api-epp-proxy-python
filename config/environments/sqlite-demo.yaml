@@ -1,0 +1,7 @@
+# The proxy over the SQLite demo backend, bare: the planets preset only. It is the test environment `sqlite-demo` of the
+# integration suite (RPP_TEST_ENV=sqlite-demo); the other demo compositions of #180 include it.
+include:
+  - ../common.yaml
+  - ../backends/sql.yaml
+
+rpp_environment_name: rpp-sqlite-demo.example

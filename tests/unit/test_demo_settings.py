@@ -16,7 +16,7 @@ def write(tmp_path, text):
 
 
 def test_the_demo_configuration_names_the_backend_the_clients_and_the_extension():
-    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    settings = load_settings(str(REPOSITORY / "config/environments/sqlite-demo.yaml"))
 
     assert settings.backend == "sqlite"
     assert settings.extensions == ("extensions.planets",)
@@ -48,7 +48,7 @@ def test_the_hashes_are_not_in_the_repr_of_the_settings():
 
 
 def test_an_unusable_client_hash_stops_the_app_without_naming_the_hash():
-    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    settings = load_settings(str(REPOSITORY / "config/environments/sqlite-demo.yaml"))
     bad = dataclasses.replace(settings, sqlite=SqliteSettings(rpp_sqlite_clients={"demo-a": "scrypt$3$8$1$AA==$AA=="}))
 
     with pytest.raises(ValueError, match="rpp_sqlite_clients: the hash of the client 'demo-a'") as refused:

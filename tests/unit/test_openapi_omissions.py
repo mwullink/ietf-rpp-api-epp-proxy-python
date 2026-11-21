@@ -45,7 +45,7 @@ def valid(doc):
 
 @pytest.fixture(scope="module")
 def demo(tmp_path_factory):
-    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    settings = load_settings(str(REPOSITORY / "config/environments/sqlite-demo.yaml"))
     settings = dataclasses.replace(settings, sqlite=SqliteSettings(
         rpp_sqlite_url=f"sqlite:///{tmp_path_factory.mktemp('omit') / 'demo.db'}",
         rpp_sqlite_clients=settings.sqlite.rpp_sqlite_clients))
@@ -58,7 +58,7 @@ def demo(tmp_path_factory):
 
 def test_both_switches_are_off_by_default():
     assert OpenApiSettings() == OpenApiSettings(rpp_openapi_omit_unheld_objects=False, rpp_openapi_omit_unimplemented=False)
-    assert load_settings(str(REPOSITORY / "config.yaml")).openapi == OpenApiSettings()
+    assert load_settings(str(REPOSITORY / "config/environments/epp-docker.yaml")).openapi == OpenApiSettings()
 
 
 @pytest.mark.parametrize("key", ["rpp_openapi_omit_unheld_objects", "rpp_openapi_omit_unimplemented"])
@@ -67,8 +67,8 @@ def test_a_switch_that_is_not_a_boolean_stops_the_configuration(key):
         OpenApiSettings(**{key: "yes"})
 
 
-@pytest.mark.parametrize("name", ["config.demo.yaml", "config.demo-extended.yaml", "config.demo-bound.yaml",
-                                  "config.demo-inherit.yaml"])
+@pytest.mark.parametrize("name", ["config/environments/sqlite-demo.yaml", "config/environments/sqlite-demo-extended.yaml", "config/environments/sqlite-demo-bound.yaml",
+                                  "config/environments/sqlite-demo-inherit.yaml"])
 def test_the_demo_configurations_switch_both_on(name):
     assert load_settings(str(REPOSITORY / name)).openapi == OpenApiSettings(True, True)
 

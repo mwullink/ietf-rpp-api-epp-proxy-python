@@ -1,6 +1,6 @@
 """#207: the configuration templates of the example Ansible inventory (deploy/ansible/inventory/example/configs), rendered
 with the instances of its group_vars, are configurations the proxy starts with. Each is made from a configuration of the
-repository, which its header names: it states no key that one lacks (a key the proxy does not know is ignored, so a
+repository, which its header names: it states no key that one lacks, with its includes (#217) (a key the proxy does not know is ignored, so a
 renamed key would go unnoticed), and the same signalling and backend profile."""
 import dataclasses
 import json
@@ -13,12 +13,13 @@ import yaml
 from starlette.testclient import TestClient
 
 from main import compose
+from settings.layered_yaml import load_layered
 from settings.load_settings import load_settings
 from settings.sqlite_settings import SqliteSettings
 from tests.helper.test_environment import REPOSITORY
 
 INVENTORY = REPOSITORY / "deploy" / "ansible" / "inventory" / "example"
-MADE_FROM = re.compile(r"made from (config[\w.-]*\.yaml) of the repository")
+MADE_FROM = re.compile(r"made from (config/environments/[\w.-]+\.yaml) of the repository")
 
 
 def instances() -> list[dict]:
@@ -32,7 +33,7 @@ def render(instance: dict) -> str:
     env.filters["urlsplit"] = lambda url, part: getattr(urlsplit(url), part)
     template = env.from_string((INVENTORY / instance["config_template"]).read_text())
     # The vault's clients: the demo hashes of the repository, which the vault never holds.
-    demo_clients = yaml.safe_load((REPOSITORY / "config.demo.yaml").read_text())["rpp_sqlite_clients"]
+    demo_clients = load_layered(REPOSITORY / "config/environments/sqlite-demo.yaml").data["rpp_sqlite_clients"]
     return template.render(ansible_managed="Ansible managed", instance={**instance, "sqlite_clients": demo_clients})
 
 
@@ -49,7 +50,7 @@ def rendered(request, tmp_path):
 def test_a_template_states_no_key_its_repository_configuration_lacks(rendered):
     path, source = rendered
 
-    assert set(yaml.safe_load(path.read_text())) - set(yaml.safe_load(source.read_text())) == set()
+    assert set(yaml.safe_load(path.read_text())) - set(load_layered(source).data) == set()
 
 
 def test_a_template_has_the_signalling_and_the_profile_of_its_repository_configuration(rendered):

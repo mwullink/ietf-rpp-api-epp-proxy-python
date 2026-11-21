@@ -1,4 +1,4 @@
-# The namespace prefixes of config.yaml (`rpp_epp_ns_map`), which the XML tests assert.
+# The namespace prefixes of config/protocols/epp.yaml (`rpp_epp_ns_map`), which the XML tests assert.
 EPP_NS_MAP = {
     "epp": "urn:ietf:params:xml:ns:epp-1.0",
     "domain": "urn:ietf:params:xml:ns:domain-1.0",

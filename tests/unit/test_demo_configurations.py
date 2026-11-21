@@ -1,4 +1,4 @@
-"""The demo configurations of #180 (config.demo.yaml, which is the bare one, and config.demo-extended, -bound and -inherit.yaml),
+"""The demo configurations of #180 (config/environments/sqlite-demo.yaml, the bare one, and sqlite-demo-extended, -bound and -inherit),
 composed from the files as they are: what each publishes (discovery, the Preset and Profile Data Objects, the Preset Schema) with
 the bound profiles apart and the bases flattened once, and what each accepts and refuses. The integration environments of the
 same names (tests/integration/environments/) run the cases of the plain objects and of the binding against the same files."""
@@ -34,8 +34,9 @@ def e(key):
 PLANETS, ATMOSPHERE, ORBIT = e("planets"), e("planet-atmosphere"), e("satellite-orbit")
 
 CONFIGS = {
-    "bare": "config.demo.yaml", "extended": "config.demo-extended.yaml", "bound": "config.demo-bound.yaml",
-    "inherit": "config.demo-inherit.yaml",
+    "bare": "config/environments/sqlite-demo.yaml", "extended": "config/environments/sqlite-demo-extended.yaml",
+    "bound": "config/environments/sqlite-demo-bound.yaml",
+    "inherit": "config/environments/sqlite-demo-inherit.yaml",
 }
 
 

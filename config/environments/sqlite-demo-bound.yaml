@@ -1,0 +1,32 @@
+# The SQLite demo backend whose server binds profiles to the presets it offers (#180): server policy, apart from the
+# definitions of the presets and the profiles. `planets` is bound to rocky-planets (the type of a planet is rocky),
+# planets-atmosphere to habitable-atmospheres, and planets-complete to habitable-rocky-planets, which builds on
+# habitable-atmospheres and so needs the atmosphere extension that planets-complete holds. catalogued-planets has the
+# profiles of its definition and none bound. The preset is signalled in the media type. It is the test environment
+# `sqlite-demo-bound`.
+include:
+  - sqlite-demo.yaml
+
+# The extensions this deployment is built with (docs/demo/).
+rpp_extensions:
+  - extensions.planets
+  - extensions.planet_atmosphere
+  - extensions.satellite_orbit
+
+rpp_preset_signalling: media-type
+
+rpp_backend_profile:
+  presets:
+    - base
+    - planets
+    - planets-atmosphere
+    - planets-complete
+    - catalogued-planets
+  default_preset: planets
+  bound_profiles:
+    planets:
+      - rocky-planets
+    planets-atmosphere:
+      - habitable-atmospheres
+    planets-complete:
+      - habitable-rocky-planets
