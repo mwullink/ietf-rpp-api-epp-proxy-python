@@ -1,10 +1,11 @@
-"""#207: the configuration templates of the example Ansible inventory (deploy/ansible/inventory/example/configs), rendered
-with the instances of its group_vars, are configurations the proxy starts with. Each is made from a configuration of the
+"""#207: the configuration templates of the deployment (deploy/ansible/configs, #224), rendered with the instances of the
+example inventory's group_vars, are configurations the proxy starts with. Each is made from a configuration of the
 repository, which its header names: it states no key that one lacks, with its includes (#217) (a key the proxy does not know is ignored, so a
 renamed key would go unnoticed), and the same signalling and backend profile."""
 import dataclasses
 import json
 import re
+from pathlib import Path
 from urllib.parse import urlsplit
 
 import jinja2
@@ -18,7 +19,8 @@ from settings.load_settings import load_settings
 from settings.sqlite_settings import SqliteSettings
 from tests.helper.test_environment import REPOSITORY
 
-INVENTORY = REPOSITORY / "deploy" / "ansible" / "inventory" / "example"
+PLAYBOOK_DIR = REPOSITORY / "deploy" / "ansible"
+INVENTORY = PLAYBOOK_DIR / "inventory" / "example"
 MADE_FROM = re.compile(r"made from (config/environments/[\w.-]+\.yaml) of the repository")
 
 
@@ -27,11 +29,17 @@ def instances() -> list[dict]:
     return group_vars["rpp_proxy_instances"]
 
 
+def template_path(instance: dict) -> Path:
+    """The role's resolution: the template path, rendered with playbook_dir, absolute or relative to the inventory."""
+    path = Path(jinja2.Template(instance["config_template"]).render(playbook_dir=str(PLAYBOOK_DIR)))
+    return path if path.is_absolute() else INVENTORY / path
+
+
 def render(instance: dict) -> str:
     env = jinja2.Environment(undefined=jinja2.StrictUndefined, keep_trailing_newline=True)
     env.filters["to_json"] = json.dumps
     env.filters["urlsplit"] = lambda url, part: getattr(urlsplit(url), part)
-    template = env.from_string((INVENTORY / instance["config_template"]).read_text())
+    template = env.from_string(template_path(instance).read_text())
     # The vault's clients: the demo hashes of the repository, which the vault never holds.
     demo_clients = load_layered(REPOSITORY / "config/environments/sqlite-demo.yaml").data["rpp_sqlite_clients"]
     return template.render(ansible_managed="Ansible managed", instance={**instance, "sqlite_clients": demo_clients})

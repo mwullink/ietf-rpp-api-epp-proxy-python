@@ -11,23 +11,24 @@ epp_server_mysql_password: "{{ vault_epp_server_mysql_password }}"
 epp_server_env:
   REGISTRY_TLD: EXAMPLE
 
-# One entry per instance. A new instance is a new entry with a free port and its configuration template in configs/;
+# One entry per instance. A new instance is a new entry with a free port and a configuration template: one of the
+# repository's (deploy/ansible/configs/, through playbook_dir) or the inventory's own (a path relative to the inventory);
 # nginx then needs a location for it (deploy/README.md). The entries are seen by their template as `instance`.
 rpp_proxy_instances:
   - name: epp
     port: 8091
-    config_template: configs/epp.yaml.j2
+    config_template: "{{ playbook_dir }}/configs/epp.yaml.j2"
     epp_network: true
     base_url: https://rpp-epp.example.net
 
   - name: sqlite-demo
     port: 8092
-    config_template: configs/sqlite-demo.yaml.j2
+    config_template: "{{ playbook_dir }}/configs/sqlite-demo.yaml.j2"
     data: true
     base_url: https://rpp-demo.example.net
     sqlite_clients: "{{ vault_rpp_sqlite_clients }}"
 
   - name: rri-mtest
     port: 8093
-    config_template: configs/rri-mtest.yaml.j2
+    config_template: "{{ playbook_dir }}/configs/rri-mtest.yaml.j2"
     base_url: https://rpp-rri-mtest.example.net
