@@ -139,8 +139,10 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
 - [x] T6 `_includes/drain_queue.json`, `_run.json`; readers and producers
 - [x] T7 Docs: testing.project.md
 - [ ] T7b One-time MTEST drain (running since 2026-11-21)
-- [~] T8 Checks: lint-imports, unit tests, smoke (MTEST reachable first)
-- [ ] T9 Draft PR
+- [~] T8 Checks: lint-imports (29 kept), unit tests (2976 passed), smoke on `epp-docker` and the SQLite environments
+  (152 passed, no teardown warnings) done 2026-11-21; MTEST smoke and `message/test6` on MTEST pending until the
+  one-time drain (T7b) has ended, as it holds one of MTEST's 4 sessions
+- [~] T9 Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Open questions

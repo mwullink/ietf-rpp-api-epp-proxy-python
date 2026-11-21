@@ -181,7 +181,7 @@ class Case(pytest.Item):
         """The run setup and the case's `setup`: a failure is an error of the case."""
         if self.failure is not None:
             return
-        from tests.integration.case_run import CaseRun
+        from tests.integration.case_run import CaseRun  # imports file_cases, which loads the environments
 
         self.case_run = CaseRun(self.case, self.run)
         self.case_run.setup()
