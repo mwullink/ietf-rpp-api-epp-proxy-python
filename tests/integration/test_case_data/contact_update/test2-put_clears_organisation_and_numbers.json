@@ -101,23 +101,6 @@
               "address": "foo@example.com"
             }
           }
-        },
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
         }
       }
     },
@@ -215,23 +198,6 @@
               "address": "foo@example.com"
             }
           }
-        },
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
         }
       }
     }

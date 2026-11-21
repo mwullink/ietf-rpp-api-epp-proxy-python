@@ -54,6 +54,13 @@ Branch `feature/219-cases-phases-includes` from `main` (ecd0392, #218 merged).
   John Doe card use `create_full_contact`; 22 contact updates (and `draft_contact/test5`) keep their own card, which
   their steps change or read back. Compare with `--contact-info`: the 40 cases differ only in the setup contacts'
   `contactInfo`; none of their test steps names a member of a contact card.
+- D7 (maintainer, 2026-11-21) The same for `authInfo`: `create_contact` and `create_full_contact` send `Abc2345678`
+  where `profile.contact.authInfo.supported` holds and none elsewhere, `create_domain` sends `Abc2345678`. 324 uses gave
+  exactly that and give nothing now; 29 contact and 8 domain uses keep their password (`Password1!@`, `2feeBAR9`),
+  which their transfer steps send; 7 contact and 22 domain uses whose password no step uses take the default. Compare
+  with `--contact-info --auth-info`: 0 errors; the wire changes in 20 more case runs, all on epp-docker, only in the
+  domain password of the setup (domain_renew, domain_restore/test12, domain_transfer test4, test5, test10, draft_host,
+  host_create, host_get, host_update). The contacts that gave no authInfo resolve to none where they run, as before.
 
 ## Results
 

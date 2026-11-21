@@ -9,48 +9,14 @@
       "comment": "Creates contact dt1 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:dt1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:dt1}"
       }
     },
     {
       "comment": "Creates contact dt2 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:dt2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:dt2}"
       }
     },
     {
@@ -88,11 +54,6 @@
               "omit": true
             }
           ]
-        },
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "2feeBAR9"
         }
       }
     }

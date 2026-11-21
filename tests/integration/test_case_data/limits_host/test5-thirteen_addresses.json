@@ -11,24 +11,7 @@
       },
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Y5}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Y5}"
       }
     },
     {
@@ -80,11 +63,6 @@
               "omit": true
             }
           ]
-        },
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Abc2345678"
         }
       }
     }

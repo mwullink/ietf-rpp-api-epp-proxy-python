@@ -12,144 +12,42 @@
       "comment": "Creates contact Qa1 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qa1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qa1}"
       }
     },
     {
       "comment": "Creates contact Qb1 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qb1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qb1}"
       }
     },
     {
       "comment": "Creates contact Qc1 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qc1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qc1}"
       }
     },
     {
       "comment": "Creates contact Qd1 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qd1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qd1}"
       }
     },
     {
       "comment": "Creates contact Qe1 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qe1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qe1}"
       }
     },
     {
       "comment": "Creates contact Qf1 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qf1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qf1}"
       }
     }
   ],

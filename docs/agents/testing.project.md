@@ -443,9 +443,11 @@ the tests of the runner itself use ([test_case_phases.py](../../tests/unit/test_
   (`registrar`) acknowledges the messages of a queue until it is empty.
 - **The cases' phases.** A case's preparation is its `setup` and its cleanup its `teardown`; `steps` holds only what
   the case checks, so a failing preparation is an error and not the failure of the operation. A preparation or cleanup
-  that more than one case does comes from an include: `create_contact` (`id`, `authInfo`, and `contactInfo`, Erika
-  Mustermann by default, given only by a case whose steps rely on the contact's data), `create_full_contact` (John Doe
-  with a region and a fax where the profile has them, for the cases that change or remove those members), `create_domain` (`name`, and the members the domain gets), `create_host` (`name`, `dns`),
+  that more than one case does comes from an include: `create_contact` (`id`, `contactInfo`, Erika Mustermann by
+  default, and `authInfo`, `Abc2345678` where the profile has a contact authInfo; a case gives another card or password
+  only where its steps rely on it), `create_full_contact` (John Doe
+  with a region and a fax where the profile has them, for the cases that change or remove those members), `create_domain` (`name`, `authInfo`, `Abc2345678` by default, and the
+  members the domain gets), `create_host` (`name`, `dns`),
   `create_request_contact` (`id`, `uriTemplate`), `delete_domain` (`name`) and `cancel_transfer` (`collection`, `id`;
   by registrar `b`, the requester). Each takes `registrar` (default `a`, the sender), sends what the case passes,
   leaving out a member it does not pass (a default of `{"select": [{"omit": true}]}`), and asserts all that its cases

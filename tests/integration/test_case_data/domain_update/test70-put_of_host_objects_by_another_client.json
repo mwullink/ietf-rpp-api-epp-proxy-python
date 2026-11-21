@@ -38,12 +38,7 @@
             "@type": "host",
             "hostName": "ns1.u30-{random_name}.net"
           }
-        ],
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Abc2345678"
-        }
+        ]
       }
     }
   ],

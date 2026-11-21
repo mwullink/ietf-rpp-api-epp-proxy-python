@@ -8,24 +8,7 @@
       "comment": "Creates contact ca1 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:ca1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:ca1}"
       }
     }
   ],

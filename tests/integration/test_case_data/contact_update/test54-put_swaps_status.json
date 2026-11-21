@@ -10,24 +10,7 @@
       "comment": "Creates contact P54 with authInfo (by backend); expects 201. The contact the steps below work on.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:P54}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:P54}"
       }
     }
   ],

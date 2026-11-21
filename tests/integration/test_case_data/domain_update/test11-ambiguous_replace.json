@@ -11,48 +11,14 @@
       "comment": "Creates contact uj1 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:uj1}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:uj1}"
       }
     },
     {
       "comment": "Creates contact uj2 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:uj2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:uj2}"
       }
     },
     {
@@ -127,11 +93,6 @@
               "omit": true
             }
           ]
-        },
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Abc2345678"
         }
       }
     }

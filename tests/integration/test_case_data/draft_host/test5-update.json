@@ -6,12 +6,7 @@
       "comment": "Creates domain d5 with authInfo; expects 201 01000. The domain the steps below work on.",
       "include": "create_domain",
       "with": {
-        "name": "d5-{random_name}.{tld}",
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Password1!@"
-        }
+        "name": "d5-{random_name}.{tld}"
       }
     },
     {

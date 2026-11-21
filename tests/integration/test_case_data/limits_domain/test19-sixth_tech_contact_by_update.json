@@ -13,144 +13,42 @@
       "comment": "Creates contact Qa2 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qa2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qa2}"
       }
     },
     {
       "comment": "Creates contact Qb2 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qb2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qb2}"
       }
     },
     {
       "comment": "Creates contact Qc2 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qc2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qc2}"
       }
     },
     {
       "comment": "Creates contact Qd2 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qd2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qd2}"
       }
     },
     {
       "comment": "Creates contact Qe2 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qe2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qe2}"
       }
     },
     {
       "comment": "Creates contact Qf2 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Qf2}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Qf2}"
       }
     },
     {
@@ -239,11 +137,6 @@
               "omit": true
             }
           ]
-        },
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Abc2345678"
         }
       }
     }

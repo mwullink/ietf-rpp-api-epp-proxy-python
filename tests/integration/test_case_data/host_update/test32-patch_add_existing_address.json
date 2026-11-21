@@ -5,12 +5,7 @@
       "comment": "Creates domain t32 with authInfo; expects 201 01000. The domain the steps below work on.",
       "include": "create_domain",
       "with": {
-        "name": "t32-{random_name}.{tld}",
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Password1!@"
-        }
+        "name": "t32-{random_name}.{tld}"
       }
     },
     {

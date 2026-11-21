@@ -5,12 +5,7 @@
       "comment": "Creates contact C4 with authInfo; expects 201. The contact the steps below work on.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:C4}",
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Password1!@"
-        }
+        "id": "{handle:a:C4}"
       }
     }
   ],

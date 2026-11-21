@@ -6,24 +6,7 @@
       "comment": "Creates contact U36 with authInfo (the request differs by backend); expects 201 01000. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:U36}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:U36}"
       }
     },
     {
@@ -61,11 +44,6 @@
               "omit": true
             }
           ]
-        },
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Abc2345678"
         }
       }
     }

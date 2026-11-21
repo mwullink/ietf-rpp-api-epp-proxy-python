@@ -10,120 +10,35 @@
       "comment": "Creates contact Wg0 with authInfo (by backend); expects 201. The registrant of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Wg0}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Wg0}"
       }
     },
     {
       "comment": "Creates contact Wh0 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Wh0}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Wh0}"
       }
     },
     {
       "comment": "Creates contact Wi0 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Wi0}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Wi0}"
       }
     },
     {
       "comment": "Creates contact Wj0 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Wj0}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Wj0}"
       }
     },
     {
       "comment": "Creates contact Wk0 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:Wk0}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:Wk0}"
       }
     }
   ],

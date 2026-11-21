@@ -18,24 +18,7 @@
       },
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:R44}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:R44}"
       }
     },
     {
@@ -87,11 +70,6 @@
               "omit": true
             }
           ]
-        },
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Abc2345678"
         }
       }
     },
@@ -99,24 +77,7 @@
       "comment": "Creates contact T44 with authInfo (by backend); expects 201. A contact of the domain below.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:T44}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:T44}"
       }
     }
   ],

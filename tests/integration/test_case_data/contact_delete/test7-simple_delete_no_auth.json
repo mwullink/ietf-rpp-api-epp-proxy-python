@@ -5,12 +5,7 @@
       "comment": "Creates contact D05 with authInfo; expects 201. The contact the steps below work on.",
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:D05}",
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Password1!@"
-        }
+        "id": "{handle:a:D05}"
       }
     }
   ],

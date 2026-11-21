@@ -8,12 +8,7 @@
       "comment": "Creates domain t3 with authInfo; expects 201 01000. The domain the steps below name.",
       "include": "create_domain",
       "with": {
-        "name": "t3-{random_name}.{tld}",
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Password1!@"
-        }
+        "name": "t3-{random_name}.{tld}"
       }
     }
   ],

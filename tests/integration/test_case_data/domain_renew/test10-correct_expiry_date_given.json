@@ -5,12 +5,7 @@
       "comment": "Creates domain rn10 with authInfo; expects 201. The domain the steps below work on.",
       "include": "create_domain",
       "with": {
-        "name": "rn10-{random_name}.{tld}",
-        "authInfo": {
-          "@type": "authInfo",
-          "method": "authinfo",
-          "authdata": "Password1!@"
-        }
+        "name": "rn10-{random_name}.{tld}"
       }
     }
   ],

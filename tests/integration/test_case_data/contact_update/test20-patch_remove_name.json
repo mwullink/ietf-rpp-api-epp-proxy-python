@@ -15,24 +15,7 @@
       "comment": "Creates contact 20A with authInfo (by backend); expects 201 01000. The contact the steps below work on.",
       "include": "create_full_contact",
       "with": {
-        "id": "{handle:a:20A}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:20A}"
       }
     }
   ],

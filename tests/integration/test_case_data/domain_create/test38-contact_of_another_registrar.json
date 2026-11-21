@@ -14,24 +14,7 @@
       "include": "create_contact",
       "with": {
         "registrar": "b",
-        "id": "{handle:b:B38}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:b:B38}"
       }
     }
   ],

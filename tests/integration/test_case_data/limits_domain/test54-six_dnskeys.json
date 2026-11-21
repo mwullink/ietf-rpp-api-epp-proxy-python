@@ -22,24 +22,7 @@
       },
       "include": "create_contact",
       "with": {
-        "id": "{handle:a:V54}",
-        "authInfo": {
-          "select": [
-            {
-              "when": {
-                "profile.contact.authInfo.supported": true
-              },
-              "then": {
-                "@type": "authInfo",
-                "method": "authinfo",
-                "authdata": "Abc2345678"
-              }
-            },
-            {
-              "omit": true
-            }
-          ]
-        }
+        "id": "{handle:a:V54}"
       }
     }
   ],

@@ -33,13 +33,11 @@
       }
     },
     "authInfo": {
-      "comment": "The authInfo member of the domain. Left out by default.",
+      "comment": "The authInfo. The password Abc2345678 by default; a case passes another only where its steps use the password.",
       "default": {
-        "select": [
-          {
-            "omit": true
-          }
-        ]
+        "@type": "authInfo",
+        "method": "authinfo",
+        "authdata": "Abc2345678"
       }
     },
     "dns": {
