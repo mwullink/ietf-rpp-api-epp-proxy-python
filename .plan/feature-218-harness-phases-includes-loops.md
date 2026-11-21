@@ -16,10 +16,17 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
   `planet_delete/` 1, `satellite_delete/` 1. Queue readers: `message/`, `planet_message/`.
 - F5 The EPP test server approves a pending transfer after 5 minutes and queues messages then. A case that ends with a
   transfer pending puts a message into a queue minutes after it released any mutex.
-- F6 Not known yet: whether MTEST queues messages on its own (predelegation results, DENIC notices), which no mutex of
-  the suite can hold back. Needs a probe (T1).
+- F6 Probe (T1, 2026-11-21, GET /messages): MTEST queues messages on its own, which no mutex holds back. Head of `a`
+  (2936 queued): `serviceNoticeMessage` "RRI domainStatusUpdate: t5-domain-lifecycle-….de", a status change of a
+  domain a case created; head of `b` (9 queued): "RRI contactDelete: DENIC-99995-SAKA-AUTODNS-TEST", DENIC's
+  housekeeping of a contact not of the suite. EPP test server: `a` 1529 queued, head a contact `transferRequestMessage`
+  (pending, auto-approve 5 minutes later); `b` empty.
+- F7 Drain cost: one message is a GET and a DELETE. The pacer gives each of N workers 1/N of
+  `rpp_requests_per_minute` (MTEST 25): with `-n 4` a request every 9.6 s, the 2936 messages of MTEST `a` take about
+  16 hours, about 4 hours at the full 25 a minute. Every MTEST run creates domains whose `domainStatusUpdate` arrives
+  later, so each run's setup drains the previous run's notices.
 
-## Design (proposed, awaiting acceptance)
+## Design (accepted 2026-11-21)
 
 ### Case file
 
@@ -105,11 +112,13 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
 
 - D1 (maintainer, in #218) per case and per run; until-loops without maximum; teardown warnings; setup errors; drain
   MTEST; a mutex for readers and producers; exact assertions.
+- D2 (maintainer, 2026-11-21) the design above is accepted.
+- D3 (maintainer, 2026-11-21) Q1: producers' teardown cancels a transfer that may still be pending.
 
 ## Tasks
 
-- [ ] T0 Design accepted by the maintainer
-- [ ] T1 Probe MTEST and the EPP test server: which operations queue messages, and whether any arrive later (F5, F6)
+- [x] T0 Design accepted by the maintainer
+- [~] T1 Probe MTEST and the EPP test server: which operations queue messages, and whether any arrive later (F5, F6)
 - [ ] T2 Failing harness tests (pytester), stubs
 - [ ] T3 Include expansion and load checks
 - [ ] T4 Step runner: per-step placeholders, loops, phases, report sections
@@ -122,5 +131,4 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
 
 ## Open questions
 
-- Q1 Producers' teardown cancels a pending transfer (F5): about 60 cases get one teardown step. Accept?
 - Q2 If T1 shows MTEST queues messages on its own, exact head assertions cannot hold there. Decide after T1.
