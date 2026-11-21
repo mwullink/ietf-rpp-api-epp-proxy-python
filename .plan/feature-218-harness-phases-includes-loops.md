@@ -138,10 +138,11 @@ Branch `feature/218-harness-phases-includes-loops` from `main` (591fce6). #219 (
 - [x] T5 Run setup/teardown and the mutex
 - [x] T6 `_includes/drain_queue.json`, `_run.json`; readers and producers
 - [x] T7 Docs: testing.project.md
-- [ ] T7b One-time MTEST drain (running since 2026-11-21)
-- [~] T8 Checks: lint-imports (29 kept), unit tests (2976 passed), smoke on `epp-docker` and the SQLite environments
-  (152 passed, no teardown warnings) done 2026-11-21; MTEST smoke and `message/test6` on MTEST pending until the
-  one-time drain (T7b) has ended, as it holds one of MTEST's 4 sessions
+- [x] T7b One-time MTEST drain: done 2026-11-21 (a: 2936 acked, b: 9 acked; about 3.5 hours at 25/min)
+- [x] T8 Checks: lint-imports (29 kept), unit tests (2976 passed), smoke on `epp-docker` and the SQLite environments
+  (152 passed, no teardown warnings); MTEST after the drain: reachability check passed, `message/test6` passed (own
+  `chprovAuthInfo` notice at the head, size exact), MTEST smoke 38 passed, 592 skipped, no teardown warnings; all
+  2026-11-21
 - [~] T9 Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex
 
