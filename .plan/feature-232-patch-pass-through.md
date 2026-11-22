@@ -33,8 +33,9 @@ the draft PR targets that branch and is retargeted to `main` once #231 is merged
   facts; the 8 profile cases of #192 (`contact_create/test18/23/25`, `domain_restore/test8/9`, `limits_contact/test10/21/23`)
   select on `profile.informational_profiles`. The 8 cases of the issue and these 8 pass on epp-docker (16 passed).
 - [x] T6 Docs: architecture.project.md, testing.project.md
-- [~] T7 Checks: lint-imports 29 kept; MTEST reachability passed (2026-11-22), so the smoke run covers MTEST; unit and smoke
-- [ ] T8 Draft PR
+- [x] T7 Checks (2026-11-22): lint-imports 29 kept; unit 2988 passed; MTEST reachability passed, so the smoke run covers
+  MTEST: smoke 190 passed, 440 skipped
+- [~] T8 Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Findings during the work
