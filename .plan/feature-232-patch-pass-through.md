@@ -35,7 +35,7 @@ the draft PR targets that branch and is retargeted to `main` once #231 is merged
 - [x] T6 Docs: architecture.project.md, testing.project.md
 - [x] T7 Checks (2026-11-22): lint-imports 29 kept; unit 2988 passed; MTEST reachability passed, so the smoke run covers
   MTEST: smoke 190 passed, 440 skipped
-- [~] T8 Draft PR
+- [x] T8 Draft PR #235 (base feature/219-cases-phases-includes)
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Findings during the work
