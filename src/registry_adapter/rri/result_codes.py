@@ -40,8 +40,9 @@ CODES = {
     "63000060504": ResultCode.PARAMETER_VALUE_POLICY_ERROR,  # CTID used before
     "53300062003": ResultCode.PARAMETER_VALUE_SYNTAX_ERROR,  # a domain name of an invalid format
     "83000000005": ResultCode.PARAMETER_VALUE_SYNTAX_ERROR,  # a URI template the registry cannot expand
-    # The request failed the XSDs: a defect of the proxy, not of the client's request.
-    "83000000004": ResultCode.COMMAND_FAILED,
+    # The request failed the XSDs: a value of the client's that the proxy does not check (a length, a count, a
+    # format), so a client error (#233). The detail carries RRI's message.
+    "83000000004": ResultCode.PARAMETER_VALUE_SYNTAX_ERROR,
 }
 
 CLASSES = {

@@ -360,7 +360,7 @@ separate `Result` value. The proposal:
 | `53000000008`, `56000020021`, `55000000002` | quota / ACL exceeded | `2502` | 429 |
 | `53000000012` | concurrent write | `2400` | 500 (or 409? Q19) |
 | `63000060504` | CTID reused | `2306` | 422 (the EPP backend in the devcontainer answers `2400` for this) |
-| `83000000004` | XML schema validation failed | `2400` | 500, because it is a proxy defect |
+| `83000000004` | XML schema validation failed | `2005` | 400: a value of the client's the proxy does not check (#233) |
 | class `6x…` (permanent error), otherwise | | `2306`/`2005` by module | 422 / 400 |
 | class `5x…` (temporary error), otherwise | | `2400` | 500 |
 | class `7x…`/`8x…` (technical) | | `2400` / `2500` | 500 |

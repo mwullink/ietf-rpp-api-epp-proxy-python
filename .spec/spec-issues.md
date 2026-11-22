@@ -361,8 +361,8 @@ The "ensure gone" case is the same with `remove` and `match`, and EPP answers 23
 - **Proxy:** 501 (`02102`).
 - A `1001` has not completed, and data-objects §10.3 ties the new expiry date to a completed renewal.
 - **Proxy:** `expiryDate` is left out of a `1001`, even when the registry sends `renData`.
-- `expiryDate` must be an RFC 3339 date-time. The schema `format` is not enforced (json §4.9.1's `unevaluatedProperties` is a separate gap, see "Undeclared properties").
-- **Proxy:** checks the RFC 3339 §5.6 form itself, with `T` and `Z` in either case. A leap second (`:60`) is a 400.
+- `expiryDate` must be an RFC 3339 date-time (the schema's `format`).
+- **Proxy:** checks the schema's `format` (#233) and the RFC 3339 §5.6 form itself, with `T` and `Z` in either case. A leap second (`:60`) is a 400.
 - EPP has no process list or process ids.
 - **Proxy:** `GET .../renewProcesses` is 501 (`02101`).
 

@@ -33,6 +33,15 @@ def test_without_a_profile_the_two_steps_are_the_one_validation():
         scope.validate_request("domainName.read", {**READ, "surprise": 1})
 
 
+def test_the_formats_the_definitions_state_are_checked():
+    """#233: a value that is not of its `format` is refused, as before #201."""
+    scope = SchemaScope.of()
+    read = {**READ, "provMetadata": {**READ["provMetadata"], "crDate": "yesterday"}}
+
+    with pytest.raises(ValidationError, match="date-time"):
+        scope.validate_request("domainName.read", read)
+
+
 def test_step_one_fails_with_the_error_of_today_before_a_profile_is_asked():
     scope = scope_of(ADMIN_ONLY)
 

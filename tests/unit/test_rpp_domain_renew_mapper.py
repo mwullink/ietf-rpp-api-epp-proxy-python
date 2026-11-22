@@ -83,6 +83,6 @@ def test_authorization_cannot_reach_epp():
 
 
 def test_invalid_expiry_date_is_refused_before_the_authorization():
-    with pytest.raises(ValueError) as error:
+    with pytest.raises((ValueError, ValidationError)) as error:     # the schema's format (#233), or the proxy's own check
         domain_renew_process.rpp_to_model("foo.example", {**REQUEST, "expiryDate": "tomorrow"}, "authinfo value=MmZvb0JBUg==")
     assert not isinstance(error.value, NotSupportedByBackend)

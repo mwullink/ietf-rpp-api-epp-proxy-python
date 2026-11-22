@@ -22,7 +22,7 @@
   ],
   "steps": [
     {
-      "comment": "Replaces contact 05A by a full update; expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else 501 02102. The error answer this case checks.",
+      "comment": "Replaces contact 05A by a full update; expects 422 02308 where the proxy checks the EPP Compatibility Profile, 501 02102 where EPP cannot clear it and the server checks the profile, else 422 02306. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:05A}",
@@ -69,7 +69,12 @@
         "select": [
           {
             "when": {
-              "profile.contact.name.removable": false
+              "profile.contact.name.removable": false,
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
             },
             "then": {
               "status": 422,
@@ -88,6 +93,21 @@
                     ]
                   }
                 ]
+              }
+            }
+          },
+          {
+            "when": {
+              "profile.contact.name.removable": false
+            },
+            "then": {
+              "status": 501,
+              "headers": {
+                "RPP-Code": "02102"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
               }
             }
           },
