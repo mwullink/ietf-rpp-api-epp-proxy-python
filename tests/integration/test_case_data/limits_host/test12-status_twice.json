@@ -12,7 +12,7 @@
   ],
   "steps": [
     {
-      "comment": "Patches host h12.….net: add /status clientDeleteProhibited; add /status clientDeleteProhibited; expects 200 01000 where the server takes adding a status the host has once the first add is applied as no change, else 422 02306. The answer this case checks.",
+      "comment": "Patches host h12.….net: add /status clientDeleteProhibited; add /status clientDeleteProhibited; expects 200 01000 where the proxy checks the EPP Compatibility Profile (it applies the patch to the host read, which has it), else 200 01000 where the server takes adding a status the host has once the first add is applied as no change, else 422 02306. The answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/h12.{random_name}.net",
@@ -44,6 +44,31 @@
       },
       "response": {
         "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible",
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
+            },
+            "then": {
+              "status": 200,
+              "headers": {
+                "RPP-Code": "01000"
+              },
+              "content_type": "application/rpp+json",
+              "body": {
+                "@type": "host",
+                "status": [
+                  {
+                    "label": "clientDeleteProhibited"
+                  }
+                ]
+              }
+            }
+          },
           {
             "when": {
               "env.update.add_existing_supported": true

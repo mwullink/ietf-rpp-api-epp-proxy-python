@@ -40,8 +40,14 @@ RUN_SETUP = "run-setup"
 load_dotenv(REPOSITORY / ".env", override=False)
 workers = int(os.getenv("PYTEST_XDIST_WORKER_COUNT", "1"))
 
-random_name = str(uuid.uuid4()) # Generate a random name for testing
-random_id_10 = str(uuid.uuid4())[:10]
+# The random parts of the names and handles a process creates, one pair per environment: environments over the same
+# server (`server` of the descriptor) run the same cases, and a case must not meet its twin's objects.
+_randoms: dict[str, tuple[str, str]] = {}
+
+
+def randoms(environment_name: str) -> tuple[str, str]:
+    """`{random_name}` and `{random_id_10}` of this process in the environment."""
+    return _randoms.setdefault(environment_name, (str(uuid.uuid4()), str(uuid.uuid4())[:10]))
 
 
 class EnvironmentRun:
@@ -52,6 +58,8 @@ class EnvironmentRun:
     def __init__(self, name: str, selected: list[str]):
         self.name = name
         descriptor = load(name, with_credentials=False)
+        # The backend server: environments over the same one share its mutexes, run setup and teardown, and sessions.
+        self.server = descriptor.server
         # The longest wait of this run, and the buffer of each wait (tests/helper/durations.py).
         self.facts = selectors.Facts(descriptor.profile, descriptor.facts, durations.max_wait(),
                                      durations.buffer_percent())
@@ -67,9 +75,11 @@ class EnvironmentRun:
         except EnvironmentError as exc:
             self.inactive_reason = str(exc)
             return
-        if workers > self.environment.max_workers:
+        sharing = [other for other in selected if load(other, with_credentials=False).server == self.server]
+        if workers * len(sharing) > self.environment.max_workers:
             raise EnvironmentError(
-                f"{name} allows at most {self.environment.max_workers} workers, the run has {workers}")
+                f"{name} allows at most {self.environment.max_workers} workers on its server {self.server}, the run has "
+                f"{workers} for each of {', '.join(sharing)}")
 
     @functools.cached_property
     def composition(self):
@@ -102,10 +112,11 @@ class EnvironmentRun:
         return Pacer(self.environment.rpp_requests_per_minute, 1, self.credentials.slot)
 
     def ensure_run_setup(self) -> None:
-        """Runs the run setup of this environment, once per run across the workers; fails if it failed."""
-        failure = run_once(run_directory(), f"{self.name}.{RUN_SETUP}", lambda: self._run_hook("setup"))
+        """Runs the run setup of this environment's server, once per run across the workers and the environments over
+        the server; fails if it failed."""
+        failure = run_once(run_directory(), f"{self.server}.{RUN_SETUP}", lambda: self._run_hook("setup"))
         if failure is not None:
-            raise RuntimeError(f"The run setup of {self.name} failed: {failure}")
+            raise RuntimeError(f"The run setup of {self.server} failed: {failure}")
 
     def run_teardown(self) -> list[str]:
         """Runs the run teardown of this environment; what failed in it."""
@@ -239,6 +250,7 @@ def process_placeholders(json_data, environment: TestEnvironment, obj=None, star
         one_of = replace_fact(json_data, environment)
         if not isinstance(one_of, str):
             return one_of
+        random_name, random_id_10 = randoms(environment.name)
         replaced = json_data\
             .replace("{random_name}", f"{obj['test_group'].replace('_', '-')}-{random_name}" if "test_group" in obj else random_name)\
             .replace("{random_id_10}", f"{random_id_10}")\

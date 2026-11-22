@@ -6,9 +6,12 @@
     "profile.domainName.contacts.labels": {
       "contains": "admin"
     },
-    "profile.contact.authInfo.supported": true
+    "profile.contact.authInfo.supported": true,
+    "profile.informational_profiles": {
+      "contains": "epp-compatibility"
+    }
   },
-  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no admin, tech or billing contacts; an RRI contact has no authInfo.",
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no admin, tech or billing contacts; an RRI contact has no authInfo. Skipped on epp-docker-checked until #234: the proxy applies the patch to the domain read, and a match on a name server or contact id, which the server reads back in upper case, finds no element.",
   "test_id": "test1-simple_update",
   "setup": [
     {

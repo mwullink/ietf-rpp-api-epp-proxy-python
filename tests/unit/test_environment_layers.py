@@ -56,3 +56,19 @@ def test_a_broken_layer_names_the_environment(environments):
 
     with pytest.raises(EnvironmentError, match="Test environment 'e': .*gone.yaml: no such file"):
         _descriptor("e")
+
+
+def test_the_server_is_the_environment_unless_its_descriptor_names_one():
+    """#232: epp-docker-checked runs over the server of epp-docker, and the SQLite demos each over their own."""
+    assert test_environment.load("epp-docker", with_credentials=False).server == "epp-docker"
+    assert test_environment.load("epp-docker-checked", with_credentials=False).server == "epp-docker"
+    assert test_environment.load("sqlite-demo-bound", with_credentials=False).server == "sqlite-demo-bound"
+
+
+def test_epp_docker_checked_is_epp_docker_with_the_profile_checked_by_the_proxy():
+    informational = test_environment.load("epp-docker", with_credentials=False)
+    checked = test_environment.load("epp-docker-checked", with_credentials=False)
+
+    assert informational.profile.informational_profiles == ("epp-compatibility",)
+    assert checked.profile.informational_profiles == ()
+    assert checked.facts == informational.facts

@@ -1,6 +1,8 @@
 # The EPP test server of EPP-server-docker (docs/agents/testing.project.md#backend).
 preset: epp-compatible               # the RPP preset the `{rpp:*}` placeholders stand for (a key of src/rpp/schema/schemas/presets)
-max_workers: 8                         # the backend refuses logins above about 16 sessions
+server: epp-docker                     # epp-docker-checked runs over the same server: they share its mutexes, run hooks
+max_workers: 8                         # and sessions; the backend refuses logins above about 16 sessions, so the workers
+                                       # of a run times its environments of this server are at most 8
 regacc: user                           # the sponsor id is the login
 registrars:                            # the slots the cases name, each naming its variables in .env
   a:

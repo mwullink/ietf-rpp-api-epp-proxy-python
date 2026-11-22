@@ -27,7 +27,7 @@ class CaseRun:
             pytest.skip(reason=f"Skipping test case: {self.case['test_id']} - {self.case['skip']}")
         self.run.ensure_run_setup()
         for name in sorted(set(self.case.get("exclusive", []))):
-            lock = FileLock(run_directory() / f"{self.run.name}.{name}.lock")
+            lock = FileLock(run_directory() / f"{self.run.server}.{name}.lock")     # the mutex is the server's
             lock.acquire()
             self.locks.append(lock)
         self.client = TestClient(self.run.app)

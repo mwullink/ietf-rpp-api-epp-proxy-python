@@ -36,6 +36,18 @@ the draft PR targets that branch and is retargeted to `main` once #231 is merged
 - [x] T7 Checks (2026-11-22): lint-imports 29 kept; unit 2988 passed; MTEST reachability passed, so the smoke run covers
   MTEST: smoke 190 passed, 440 skipped
 - [x] T8 Draft PR #235 (base feature/219-cases-phases-includes)
+- [x] T9 (maintainer, 2026-11-22) A second environment over epp-docker that checks the profile: `epp-docker-checked`
+  (config includes `epp-docker.yaml`, `informational_profiles: []`; descriptor includes `epp-docker.yaml`). Harness:
+  a descriptor's `server` (default its name) keys the mutex, the run setup and teardown, and the worker limit
+  (workers x environments of the server <= `max_workers`); `{random_name}`/`{random_id_10}` per process and
+  environment, so twins over one server never meet. Cases that differ select on `profile.informational_profiles`.
+  Full run of `epp-docker-checked` alone (-n 8): 8 failed, 457 passed, the 8 cases of the issue. Now: the adds
+  (`host_update/test32`, `test36`, `limits_host/test12`) are 200 and the removes of an absent status
+  (`contact_update/test6`, `test19`) 422 `02308` where the proxy checks the profile; `domain_update/test1`, `test3`,
+  `test4` are skipped there until #234 (contact ids are read back in upper case too, commented on #234). The 16
+  cases and `message/` on both environments together (-n 4): passed; -n 8 over both is refused by the worker limit.
+- [x] T10 Checks (2026-11-22): lint-imports 29 kept; unit 2991 passed; smoke (every environment, MTEST and
+  epp-docker-checked included) 232 passed, 488 skipped
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Findings during the work

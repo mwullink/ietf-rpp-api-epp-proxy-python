@@ -57,6 +57,7 @@ class TestEnvironment:
     profile: BackendProfile
     unknown_user: tuple[str, str] | None = field(default=None, repr=False)
     rpp_preset: str = "base"           # the key of the RPP preset every request names, unless a case or step says
+    server: str = ""                   # the backend server, shared by environments that name the same (default: the name)
     preset_signalling: str = "header"   # how it is named: the `rpp_preset_signalling` of the config
 
 
@@ -160,7 +161,7 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
         rpp_requests_per_minute=data.get("rpp_requests_per_minute"), registrars=registrars, facts=facts,
         profile=backend_profile(settings, registry),
         unknown_user=(unknown["user"], unknown["password"]) if unknown else None,
-        rpp_preset=rpp_preset, preset_signalling=settings.preset_signalling)
+        rpp_preset=rpp_preset, preset_signalling=settings.preset_signalling, server=data.get("server") or name)
 
 
 VALUE_PLACEHOLDER = re.compile(r"\{(handle|regacc):([a-z])(?::([^{}]*))?\}")
