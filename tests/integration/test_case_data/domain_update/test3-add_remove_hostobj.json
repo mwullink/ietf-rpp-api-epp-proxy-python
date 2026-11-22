@@ -2,12 +2,9 @@
   "when": {
     "profile.objects": {
       "contains": "host"
-    },
-    "profile.informational_profiles": {
-      "contains": "epp-compatibility"
     }
   },
-  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). Skipped on epp-docker-checked until #234: the proxy applies the patch to the domain read, and a match on a name server or contact id, which the server reads back in upper case, finds no element.",
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "test_id": "test3-add_remove_hostobj",
   "setup": [
     {

@@ -48,9 +48,14 @@ the draft PR targets that branch and is retargeted to `main` once #231 is merged
   cases and `message/` on both environments together (-n 4): passed; -n 8 over both is refused by the worker limit.
 - [x] T10 Checks (2026-11-22): lint-imports 29 kept; unit 2991 passed; smoke (every environment, MTEST and
   epp-docker-checked included) 232 passed, 488 skipped
+- [x] T11 (maintainer, 2026-11-22) Fix #234 on this branch: `json_patch.apply(caseless=...)` compares the members named
+  per array without regard to case; `domain_patch` names `/nameservers` `/hostName` and `/contacts` `/object/id`.
+  Unit tests; `domain_update/test1`, `test3`, `test4` no longer skipped on epp-docker-checked (6 passed on both EPP
+  environments). Spec note in `.spec/spec-issues.md` (case sensitivity of names and identifiers).
+- [~] T12 Checks: lint-imports, unit, full run (`pytest -n 4`, maintainer asked)
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Findings during the work
 
 - With the profile checked on epp-docker, the read path fails `domain_update/test1`, `test3`, `test4` because a
-  `match` on `hostName` is case-sensitive and EPP reads host names in upper case: #234 (not fixed here).
+  `match` on `hostName` (and on a contact id) is case-sensitive and EPP reads both in upper case: #234, fixed in T11.

@@ -2,12 +2,9 @@
   "when": {
     "profile.domainName.contacts.labels": {
       "contains": "admin"
-    },
-    "profile.informational_profiles": {
-      "contains": "epp-compatibility"
     }
   },
-  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts. Test37 is the counterpart for RRI's request contacts. Skipped on epp-docker-checked until #234: the proxy applies the patch to the domain read, and a match on a name server or contact id, which the server reads back in upper case, finds no element.",
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts. Test37 is the counterpart for RRI's request contacts.",
   "test_id": "test4-contacts_and_registrant",
   "setup": [
     {
