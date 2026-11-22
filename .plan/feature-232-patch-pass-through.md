@@ -52,7 +52,12 @@ the draft PR targets that branch and is retargeted to `main` once #231 is merged
   per array without regard to case; `domain_patch` names `/nameservers` `/hostName` and `/contacts` `/object/id`.
   Unit tests; `domain_update/test1`, `test3`, `test4` no longer skipped on epp-docker-checked (6 passed on both EPP
   environments). Spec note in `.spec/spec-issues.md` (case sensitivity of names and identifiers).
-- [~] T12 Checks: lint-imports, unit, full run (`pytest -n 4`, maintainer asked)
+- [~] T12 Checks (2026-11-22): lint-imports 29 kept; unit 2995 passed; full run (`pytest -n 4`, maintainer asked,
+  1h17m): 6 failed, 4485 passed, 3624 skipped. None touches a domain PATCH. 4 on epp-docker expect 422 `02308` from
+  the profile the proxy no longer checks there and get 501 `02102` (`contact_update/test5`, `test20`, `test21`,
+  `draft_contact/test5`): not yet adapted to `informational_profiles`. 2 on rri-mtest: `limits_contact/test16` 500 on
+  RRI `83000000004` (schema validation), `preset_signalling_media_type/test2` steps[1] 400 `02001` instead of 501
+  `02307`. Waiting for the maintainer.
 - [ ] Before merge: `git rm` this plan; release the mutex
 
 ## Findings during the work
