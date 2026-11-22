@@ -311,8 +311,16 @@ two versions (also through two bases), an extension the proxy does not implement
 does not hold, a profile (also a bound one, and through its base profiles) that requires an extension its preset lacks, a
 Profile Schema that declares a property its target does not (`profile_schema_walk.py`, at any depth), that constrains a
 definition that does not exist, or whose `$defs` keys clash with RPP's, an extension's or another profile's, and an Extension
-Schema that is not additive (`extension_additivity.py`, a whitelist, see [spec-issues.md](../../.spec/spec-issues.md#presets-profiles-and-extensions)). Inheritance is a union without overriding (`preset_flattening.py`),
+Schema that is not additive (`extension_additivity.py`, a whitelist, see [spec-issues.md](../../.spec/spec-issues.md#presets-profiles-and-extensions)), and an
+`informational_profiles` key that is unknown, named twice or applied by no offered preset. Inheritance is a union without overriding (`preset_flattening.py`),
 each item once; the applicable profiles of a preset are its own, the bound ones and the base profiles of all, bases first.
+
+**Informational profiles.** `informational_profiles` (profile keys) names the profiles the server checks itself (#232): they
+apply and are advertised as before (discovery, `GET /presets/{id}`, `/profiles/{id}`, the Preset Schema), but the proxy does not
+check a request against them, and the server's answer stands for what they forbid. `OfferedPreset.checked` is the applicable
+profiles without them, and the `SchemaScope` of a preset is built from these only, so step 2 below, `profiles_apply()` and the
+refusal of a removal know only the profiles the proxy checks. Only the profile named is informational: its base profiles are
+checked unless they are named too. epp-docker names `epp-compatibility`: an EPP server enforces what the profile takes from EPP.
 
 **Signalling** is `rpp_preset_signalling` (`Settings.preset_signalling`, default `header`), and
 `preset_signalling(method, presets)` in `rpp/http/preset_signalling.py` gives the class of the method. Each has
@@ -343,7 +351,7 @@ of the response preset; there is no `RPP-Preset` response header.
 
 **Preset Schema.** `create_app` builds `PresetSchemas` (`rpp/schema/preset_schemas.py`) once per app, so once per uvicorn worker,
 at startup: for each offered preset a `SchemaScope` (`rpp/schema/schema_scope.py`) with the validators of every definition for
-the preset's extensions without its applicable profiles, with them, and one per profile where there are several (to name the
+the preset's extensions without its applicable profiles, with those the proxy checks, and one per profile where there are several (to name the
 profile a failure belongs to), and the document (json §Preset Schema). `rpp/schema/effective_schema.py` composes it: the
 definitions of the bundle, the extension definitions and the Profile Schemas' `$defs` under their keys, a definition an
 extension extends or a profile constrains the `allOf` of the base definition in place and the references to the extension and
@@ -360,10 +368,10 @@ the base URL (`rpp/schema/https_url.py`).
 mappers' own for the handler (`rpp/schema/request_schemas.py`, a context variable set in the handler's thread), so no mapper is
 passed it. `validate_schema(name, data, extensions)` is the preset schema alone (a failure is the `ValidationError` or `ValueError`
 that `map_request` makes a 400, as before). `validate_request_schema` is for what a client sent: step 1 as `validate_schema`, then
-step 2 against the schema with the applicable profiles, whose failure is a `ProfileConstraintViolation` and answers 422 `02308`
+step 2 against the schema with the applicable profiles the proxy checks, whose failure is a `ProfileConstraintViolation` and answers 422 `02308`
 with `profile` and `paths` in the error (`profile_constraint_problem` in `rpp/http/problem.py`; the reason never holds a value of
 the request). A patch or a replacement is validated as the object it results in (`patched=True`) and a failure that concerns a
-read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles a patch of a contact, domain or host runs the same conversion that needs no read as without profiles (so it is refused alike), and is then applied to the object read for it; the native patch
+read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles the proxy checks, a patch of a contact, domain or host runs the same conversion that needs no read as without profiles (so it is refused alike), and is then applied to the object read for it (without such a profile it is sent as a partial update, and the server decides an item added twice or removed while absent); the native patch
 of an extension (no read) checks the value of each operation as the member it sets and refuses the removal of a member a profile requires, see [spec-issues.md](../../.spec/spec-issues.md#two-step-validation-of-a-patch).
 A mapper runs the checks that RPP or an extension states in prose and the schema cannot express after step 1 and before `validate_request_schema` (as `contacts.check_rpp_rules` does for the JSContact profile), so that a request that breaks one is refused as RPP defines it, under every preset, and not with 02308 (core §Extensions and Profiles of a Request, core.md:235); the profiles of an extension (the demo presets on planets, #179 and #180) follow this too. A response is validated with the preset schema without profiles, never with them. The prose constraints of a profile keep
 today's behaviour (the mapper's 501 or the backend's error), as does a request under a preset without the profile.
@@ -611,7 +619,7 @@ leaf and its type, and `BackendProfile` is the one class over the tree: an attri
 (`profile.contact.fax.supported`). It is built in two layers, merged in order (a map merges, a list or a value
 replaces): the generic profile of the protocol, `src/settings/profiles/epp.yaml` (RFC 5730 to 5733, 5910 and 3915 as
 the EPP Compatibility Profile takes them, with the gaps commented) or `rri.yaml` (DENIC RRI 5.0), then the server's own,
-`rpp_backend_profile` in the config, which names the generic one with `extends` and states only what differs, among it the RPP presets the server offers (`presets`, `default_preset`) and the profiles it binds to them (`bound_profiles`, one map leaf: `{preset key: [profile keys]}`). Another
+`rpp_backend_profile` in the config, which names the generic one with `extends` and states only what differs, among it the RPP presets the server offers (`presets`, `default_preset`) and the profiles it binds to them (`bound_profiles`, one map leaf: `{preset key: [profile keys]}`), and the profiles it checks itself (`informational_profiles`). Another
 EPP server starts from `extends: epp` alone. `main.py` adds `lgrs` from the config (`Settings.lgrs`: the LGRs of
 `rpp_idn_lgr_tables`, or `rpp_rri_lgr`). A missing, unknown or mistyped leaf stops the app at start.
 `domainName.registrant.min_count`, `domainName.dns.min_count`, `domainName.generalRequest.*` and

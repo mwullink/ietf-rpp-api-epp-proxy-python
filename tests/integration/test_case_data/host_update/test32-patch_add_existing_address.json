@@ -39,7 +39,7 @@
   ],
   "steps": [
     {
-      "comment": "Patches host ns1.t32: add /dns/records; expects 422 02306. The error answer this case checks.",
+      "comment": "Patches host ns1.t32: add /dns/records; expects 200 01000 where the server takes adding an address the host has as no change, else 422 02306. The answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/ns1.t32-{random_name}.{tld}",
@@ -66,14 +66,36 @@
         }
       },
       "response": {
-        "status": 422,
-        "content_type": "application/problem+json",
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        },
-        "headers": {
-          "RPP-Code": "02306"
-        }
+        "select": [
+          {
+            "when": {
+              "env.update.add_existing_supported": true
+            },
+            "then": {
+              "status": 200,
+              "headers": {
+                "RPP-Code": "01000"
+              },
+              "content_type": "application/rpp+json",
+              "body": {
+                "@type": "host",
+                "hostName": "ns1.t32-{random_name}.{tld}"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02306"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          }
+        ]
       }
     }
   ]

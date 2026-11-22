@@ -24,16 +24,20 @@ the draft PR targets that branch and is retargeted to `main` once #231 is merged
 
 ## Tasks
 
-- [~] T1 `BackendProfile.informational_profiles`, start-up check, `PresetSchemas` scopes from the checked profiles only
-- [ ] T2 Configs: generic profiles, `config/backends/epp.yaml`, deployment templates, `config/README.md` if needed
-- [ ] T3 Facts `update.*` in `config/common.yaml` and every backend
-- [ ] T4 Unit tests for both settings
-- [ ] T5 Integration cases: the 8 cases select by the facts; the #192 profile cases select on the profile being checked
-- [ ] T6 Docs: architecture.project.md, testing.project.md
-- [ ] T7 Checks: lint-imports, unit, MTEST reachability, smoke
+- [x] T1 `BackendProfile.informational_profiles`, start-up check, `PresetSchemas` scopes from the checked profiles only
+- [x] T2 Configs: generic profiles, `config/backends/epp.yaml`, `deploy/ansible/configs/epp.yaml.j2`, README
+- [x] T3 Facts `update.*`: `config/common.yaml` (null), `config/backends/epp.yaml` (false/true), `config/protocols/rri.yaml`
+  (true/true: RRI updates are applied to the object read, `<object>_application.apply` keeps an item once)
+- [x] T4 Unit tests (`test_preset_profile_constraints_wire.py`): both settings, PATCH without a read, start-up refusals
+- [x] T5 Integration cases: `host_update/test32`, `limits_host/test12`, `contact_update/test6`, `test19` select by the
+  facts; the 8 profile cases of #192 (`contact_create/test18/23/25`, `domain_restore/test8/9`, `limits_contact/test10/21/23`)
+  select on `profile.informational_profiles`. The 8 cases of the issue and these 8 pass on epp-docker (16 passed).
+- [x] T6 Docs: architecture.project.md, testing.project.md
+- [~] T7 Checks: lint-imports 29 kept; MTEST reachability passed (2026-11-22), so the smoke run covers MTEST; unit and smoke
 - [ ] T8 Draft PR
 - [ ] Before merge: `git rm` this plan; release the mutex
 
-## Open questions
+## Findings during the work
 
-- RRI's `update.*` facts: from what the derived update does, to be confirmed on MTEST.
+- With the profile checked on epp-docker, the read path fails `domain_update/test1`, `test3`, `test4` because a
+  `match` on `hostName` is case-sensitive and EPP reads host names in upper case: #234 (not fixed here).
