@@ -125,7 +125,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     check_known(profile.extensions)
     definitions = Definitions.load(registry, EXTENSIONS)
     presets = OfferedPresets.build(definitions, profile.presets, profile.default_preset, profile.bound_profiles,
-                                   profile.extensions)
+                                   profile.extensions, profile.informational_profiles)
     # The Preset Schemas and their validators are built here, once, per app, and only read by a request. A base URL that
     # discovery would refuse is no public URL: the documents then have no `$id`.
     preset_schemas = PresetSchemas(presets, public_base_url(discovery_settings))

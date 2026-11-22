@@ -94,6 +94,7 @@ rpp_backend_profile:
   presets: [base, rri]            # the RPP presets offered (src/rpp/schema/schemas/presets)
   default_preset: rri             # the one a request gets when it names none
   bound_profiles: {}              # per preset, the profiles this server binds to it: {rri: [my-policy]}
+  informational_profiles: []      # the profiles the server checks itself: advertised, the proxy does not check them
 rpp_preset_signalling: header     # how a client names the preset: the RPP-Preset header field (the default), or media-type
 rpp_tlds:
   - de

@@ -10,7 +10,9 @@ from rpp.schema.rpp_profile import RppProfile
 class OfferedPreset:
     """A preset one server offers (data-objects §Presets, §Profile Binding), flattened: `extensions` and `profiles` are
     those of its definition including its base presets', `bound_profiles` those the server binds to it, and `applicable`
-    all of them with their base profiles, each once (data-objects §Applicable Profiles)."""
+    all of them with their base profiles, each once (data-objects §Applicable Profiles). `informational` names (by id) the
+    applicable profiles the server checks itself (`informational_profiles` of the backend profile): they apply and are
+    advertised, but the proxy does not check them; `checked` are the others."""
     definition: RppPreset
     extensions: tuple[RppExtension, ...]
     profiles: tuple[RppProfile, ...]
@@ -18,6 +20,12 @@ class OfferedPreset:
     applicable: tuple[RppProfile, ...]
     default: bool
     required: dict[str, frozenset[str]]       # per applicable profile, its required extensions, flattened
+    informational: frozenset[str] = frozenset()
+
+    @property
+    def checked(self) -> tuple[RppProfile, ...]:
+        """The applicable profiles the proxy checks a request against."""
+        return tuple(profile for profile in self.applicable if profile.id not in self.informational)
 
     @property
     def id(self) -> str:

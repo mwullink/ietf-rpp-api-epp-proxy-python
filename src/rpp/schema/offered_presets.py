@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 from rpp.schema.definitions import Definitions
 from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.extension_additivity import check_additive
@@ -16,7 +18,8 @@ class OfferedPresets:
     preset offered twice or without being a default, a cycle, one extension in two versions, an extension the proxy does
     not implement in the version stated or the backend does not hold, a profile that requires an extension its preset
     lacks (also one a binding adds), a profile bound that the preset already includes, a Profile Schema that declares what
-    its target does not, an Extension Schema that constrains, and `$defs` keys that clash.
+    its target does not, an Extension Schema that constrains, `$defs` keys that clash, and an informational profile that no
+    offered preset applies.
     """
 
     def __init__(self, offered: tuple[OfferedPreset, ...], default: OfferedPreset, flattening: PresetFlattening):
@@ -25,7 +28,9 @@ class OfferedPresets:
         self.flattening = flattening
 
     @classmethod
-    def build(cls, definitions: Definitions, keys, default_key: str, bound: dict, held_extensions) -> "OfferedPresets":
+    def build(cls, definitions: Definitions, keys, default_key: str, bound: dict, held_extensions,
+              informational=()) -> "OfferedPresets":
+        """`informational`: the keys of the profiles the server checks itself, which the proxy does not check."""
         keys = tuple(keys)
         unknown = sorted(set(keys) - set(definitions.presets))
         if unknown:
@@ -42,6 +47,7 @@ class OfferedPresets:
                                    tuple(bound.get(key) or ()), held_extensions) for key in keys)
         for item in offered:
             cls._check_schemas(item)
+        offered = cls._with_informational(definitions, offered, tuple(informational))
         return cls(offered, next(item for item in offered if item.default), flattening)
 
     @staticmethod
@@ -91,6 +97,21 @@ class OfferedPresets:
                     for profile in applicable}
         return OfferedPreset(definition=preset, extensions=tuple(extensions), profiles=profiles, bound_profiles=bound,
                              applicable=applicable, default=default, required=required)
+
+    @staticmethod
+    def _with_informational(definitions: Definitions, offered: tuple[OfferedPreset, ...], keys: tuple[str, ...]):
+        if len(set(keys)) != len(keys):
+            raise ValueError("backend profile: informational_profiles names a profile twice")
+        unknown = sorted(set(keys) - set(definitions.profiles))
+        if unknown:
+            raise ValueError(f"backend profile: informational_profiles names an unknown profile {', '.join(unknown)}")
+        ids = frozenset(definitions.profiles[key].id for key in keys)
+        stray = sorted(key for key in keys
+                       if not any(profile.id == definitions.profiles[key].id for item in offered for profile in item.applicable))
+        if stray:
+            raise ValueError(f"backend profile: informational_profiles names {', '.join(stray)}, which no offered preset "
+                             f"applies")
+        return tuple(replace(item, informational=ids & {profile.id for profile in item.applicable}) for item in offered)
 
     @classmethod
     def _check_schemas(cls, item: OfferedPreset) -> None:

@@ -24,7 +24,8 @@ class PresetSchemas:
     server has a public base URL, the URL of the sub-resource as `$id`."""
 
     def __init__(self, presets: OfferedPresets, base_url: str | None):
-        self._scopes = {item.id: SchemaScope(item.extensions, item.applicable, item.required) for item in presets.offered}
+        # a request is checked against the profiles the proxy checks; the document states all that apply
+        self._scopes = {item.id: SchemaScope(item.extensions, item.checked, item.required) for item in presets.offered}
         self._documents = {item.id: self._document(item, base_url) for item in presets.offered}
 
     @staticmethod
