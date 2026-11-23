@@ -15,6 +15,7 @@ presets:                               # the RPP presets offered (src/rpp/schema
   - epp-compatible                     # with it
 default_preset: epp-compatible         # applied when a request names none
 bound_profiles: {}                     # per preset, the profiles this server binds to it (a server's own policy)
+informational_profiles: []             # the profiles the server checks itself: advertised, the proxy does not check them
 lgrs: []                               # from rpp_idn_lgr_tables of the config, not set here
 extensions: []                         # held by the backend: the presets offer them
 

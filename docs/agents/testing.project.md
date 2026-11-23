@@ -24,10 +24,11 @@ Each iteration runs the unit tests and the smoke suite ([process.project.md](pro
 the full suite only when the maintainer asks for it. Run it with `-n 4`, the most workers DENIC MTEST allows, since a
 run tests every environment whose credentials are in `.env`; on both backends it takes about 40 minutes. Against the EPP test server alone (`RPP_TEST_ENV=epp-docker`) `-n 8` takes about 15
 minutes on 4 cores, most of it the cases that wait for the periods of the EPP test server (`domain_lifecycle/test8`
-waits about 14 minutes). The unit tests are bound by CPU,
+waits about 14 minutes), and as long again for `epp-docker-checked` over the same server. The unit tests are bound by CPU,
 mostly building an app per test from `openapi.yaml`, so more workers than cores do not speed them up, and the backend refuses logins under about
-16 concurrent sessions (pawel-kow/EPP-server-docker#7), so 8 is the most it takes. Every worker makes its own
-`{random_name}`, so cases in different workers do not collide.
+16 concurrent sessions (pawel-kow/EPP-server-docker#7), so 8 is the most it takes: 8 workers for one of its
+environments, 4 for both. Every worker makes its own `{random_name}` and `{random_id_10}` for each environment, so cases
+in different workers, and the same case in two environments over one server, do not collide.
 
 ## Backend
 
@@ -70,7 +71,7 @@ transfer request. The backend returns the id of the acknowledged message in the 
 
 A contact `chg` of a `postalInfo` form replaces it: the address members not sent again (`sp`, `pc`) are wiped, also when
 only `name` or `org` is sent, so the proxy sends every changed form complete (pawel-kow/epp#22). A `chg` of a form the contact does not have
-is ignored although the reply is 1000 (pawel-kow/epp#23), so the proxy answers 500 (`02400`) for it (`contact_update/test33` and `test34`), and the cases that change a localization change an existing one (`test8`). Removing a status the contact does not have succeeds, so `test6` and `test19` end on a direct `remove` of an absent label that answers 200.
+is ignored although the reply is 1000 (pawel-kow/epp#23), so the proxy answers 500 (`02400`) for it (`contact_update/test33` and `test34`), and the cases that change a localization change an existing one (`test8`). Removing a status or name server the object does not have succeeds (`env.update.remove_absent_supported`), so `test6` and `test19` end on a direct `remove` of an absent label that answers 200. Adding a status or address the object has is refused with `2306` (pawel-kow/epp#18, `env.update.add_existing_supported`: `host_update/test32`, `limits_host/test12`). Both are facts of the server, which the proxy passes a PATCH to as an EPP `<update>` without a read: epp-docker names `epp-compatibility` in `informational_profiles`, so the 422 `02308` of that profile are selected where the proxy checks it (`profile.informational_profiles`): on [epp-docker-checked](#epp-docker-checked), where a PATCH is applied to the object read, adding what the object has is no change (200) and removing what it lacks is 422 `02308`.
 An empty `org`, `voice` or `fax` clears it and reads back as an empty element. Contact cases prove absence with a PATCH
 `remove` that answers 422 (`02308`) because the property is gone, after the same removal answered 200 on a twin contact.
 
@@ -118,7 +119,7 @@ which the descriptor's `facts` merge over (see [Selectors](#selectors)). The
 repeated. A run with more workers than an environment it tests allows does not start.
 
 A descriptor is layered like the configurations ([config/README.md](../../config/README.md)): `include:` names the
-layers it builds on (`environments/common/rri.yaml` holds what `rri-mtest` and `rri-local` share, the `sqlite-demo-*`
+layers it builds on (`environments/common/rri.yaml` holds what `rri-mtest` and `rri-local` share, `epp-docker-checked` includes `epp-docker.yaml`, the `sqlite-demo-*`
 descriptors include `sqlite-demo.yaml`), mappings merge and other values replace, and `null` is a fact like any value.
 An untracked `<name>.local.yaml` next to a descriptor or a common layer changes it on one machine; it is no environment
 of its own.
@@ -163,7 +164,18 @@ into the `Authorization` header when it sends the request, never into the case, 
 | `{env:<path>}` | a fact of the environment. A list fact is a whole value only, and the response may hold any of its entries: `"label": "{env:domainName.processes.create.success_status}"` |
 | `{lower:TEXT}` | TEXT in lower case, after the placeholders in it, for an id sent in another case than stored |
 
-### The SQLite demo backend
+A descriptor's `server` names the backend server it runs over, by default the environment's own name. Environments
+that name the same server share it: its mutexes (`exclusive`), its run setup and teardown, and its sessions, so the
+workers of a run times its environments over the server are at most the server's `max_workers`.
+
+### epp-docker-checked
+
+`epp-docker-checked` is `epp-docker` with the EPP Compatibility Profile checked by the proxy
+([config/environments/epp-docker-checked.yaml](../../config/environments/epp-docker-checked.yaml):
+`informational_profiles: []`): the same server (`server: epp-docker`), registrars and facts. A request that breaks the
+profile answers 422 `02308` there, and a PATCH under it is applied to the object read for it, so a case that differs
+selects on `profile.informational_profiles`. `RPP_TEST_ENV=epp-docker,epp-docker-checked pytest -n 4` runs both.
+
 
 `RPP_TEST_ENV=sqlite-demo pytest -n 4 tests/integration` runs the cases of the demo backend (`planet_*`, `satellite_*`,
 `planet_transfer`, `planet_message`, `sqlite_drafts_objects`) against an app composed from
@@ -469,13 +481,15 @@ the tests of the runner itself use ([test_case_phases.py](../../tests/unit/test_
   that step then takes no `capture`. `until` has the form of a `response` and checks only what it states
   (`{"headers": {"RPP-Code": "01300"}}`). There is no maximum: a loop ends on its `until` or on a failing step. The step
   with `until` has no `when`.
-- **Mutex.** `exclusive` names shared resources. Cases of one environment that name the same one never run at the same
-  time, also in different xdist workers: each holds a file lock from the start of its setup to the end of its
+- **Mutex.** `exclusive` names shared resources. Cases of one server (the descriptor's `server`, see
+  [Test environments](#test-environments)) that name the same one never run at the same time, also in different
+  environments over the server and in different xdist workers: each holds a file lock from the start of its setup to the end of its
   teardown. `message_queue` is the message queues of `a` and `b`.
 - **Run setup and teardown.** `test_case_data/_run.json` is `{"comment": …, "setup": [items], "teardown": [items]}`.
-  The run setup of an environment runs once per run, before its first case, in whichever worker gets there first,
-  while the others wait; if it fails, every case of the environment is an error naming it. The run teardown runs at
-  the end, in the process that started the run, for every environment whose run setup ran; a failure in it is a
+  The run setup of a server runs once per run, before the first case of an environment over it, in whichever worker
+  and environment gets there first, while the others wait; if it fails, every case of its environments is an error
+  naming it. The run teardown runs at the end, in the process that started the run, once for every server whose run
+  setup ran (in one of its environments of the run); a failure in it is a
   warning. Both pace their requests at the registrar's whole rate. The workers share the run's directory,
   `RPP_TEST_RUN_DIR`, which that process makes and removes.
 

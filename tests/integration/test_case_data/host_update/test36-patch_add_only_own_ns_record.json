@@ -11,7 +11,7 @@
   ],
   "steps": [
     {
-      "comment": "Patches host t36.….net: add /dns/records; expects 400 02003. The error answer this case checks.",
+      "comment": "Patches host t36.….net: add /dns/records; expects 200 01000 where the proxy checks the EPP Compatibility Profile (it applies the patch to the host read, which has it), else 400 02003. The answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t36.{random_name}.net",
@@ -38,14 +38,40 @@
         ]
       },
       "response": {
-        "status": 400,
-        "headers": {
-          "RPP-Code": "02003"
-        },
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        },
-        "content_type": "application/problem+json"
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible",
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
+            },
+            "then": {
+              "status": 200,
+              "headers": {
+                "RPP-Code": "01000"
+              },
+              "content_type": "application/rpp+json",
+              "body": {
+                "@type": "host"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 400,
+              "headers": {
+                "RPP-Code": "02003"
+              },
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              },
+              "content_type": "application/problem+json"
+            }
+          }
+        ]
       }
     }
   ]

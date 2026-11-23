@@ -35,7 +35,7 @@ def epp_reply(code=1000):
 
 class App:
     def __init__(self, bound=None, offered=("plain", "constrained", "limited", "short"), default="plain", signalling="header",
-                 replies=()):
+                 replies=(), informational=()):
         self.clients = []
 
         def factory(username, password):
@@ -43,7 +43,7 @@ class App:
             self.clients.append(client)
             return client
         profile = EPP_PROFILE.with_changes({"presets": list(offered), "default_preset": default,
-                                            "bound_profiles": bound or {}})
+                                            "bound_profiles": bound or {}, "informational_profiles": list(informational)})
         self.http = create_app(SessionPool(epp_backends(factory)), profile, discovery_settings=DISCOVERY,
                                registry=registry_with(PRESETS, PROFILES), signalling=signalling).test_client()
 
@@ -229,6 +229,9 @@ def test_the_profile_is_read_with_its_bases_and_required_extension_flattened():
 @pytest.mark.parametrize("change, presets, message", [
     ({"bound_profiles": {"plain": ["admin-only", "admin-only"]}}, PRESETS, "names a profile twice"),
     ({"presets": ["plain", "nope"]}, PRESETS, "unknown preset nope"),
+    ({"informational_profiles": ["nope"]}, PRESETS, "informational_profiles names an unknown profile nope"),
+    ({"informational_profiles": ["admin-only", "admin-only"]}, PRESETS, "informational_profiles names a profile twice"),
+    ({"informational_profiles": ["admin-only"]}, PRESETS, "informational_profiles names admin-only, which no offered preset"),
 ])
 def test_a_configuration_the_checks_refuse_does_not_start_the_server(change, presets, message):
     profile = EPP_PROFILE.with_changes({"presets": ["plain"], "default_preset": "plain", **change})
@@ -259,3 +262,75 @@ def test_the_same_patch_under_a_preset_without_the_profile_is_sent_without_a_rea
 
     assert response.status_code == 200
     assert "contact:update" in app.sent()[0]
+
+
+# A profile the server checks itself (`informational_profiles`, #232): it applies and is advertised, the proxy does not check it.
+
+def test_a_request_that_breaks_an_informational_profile_goes_on_to_the_server():
+    app = App(informational=["admin-only"])
+
+    response = app.create(domain("billing"), "constrained")
+
+    assert response.status_code not in (400, 422), response.text
+    assert app.sent()       # the server answers what the profile forbids
+
+
+def test_a_request_under_an_informational_profile_still_fails_the_preset_schema_with_400():
+    app = App(informational=["admin-only"])
+
+    response = app.create({**domain("billing"), "surprise": 1}, "constrained")
+
+    assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+    assert app.sent() == []
+
+
+def test_only_the_profile_named_is_informational_and_its_base_is_still_checked():
+    app = App(bound={"plain": ["at-most-one"]}, informational=["at-most-one"])
+
+    too_many = app.create(domain("admin", "admin"), "plain")       # at-most-one: left to the server
+    wrong_label = app.create(domain("tech"), "plain")              # admin-only, its base: checked
+
+    assert too_many.status_code not in (400, 422), too_many.text
+    assert wrong_label.status_code == 422 and wrong_label.json()["errors"][0]["profile"] == ADMIN_ONLY[0]
+
+
+def test_a_full_update_that_breaks_an_informational_profile_goes_on():
+    app = App(replies=[info("ns1.foo.example"), DONE, info("ns1.foo.example", "ns2.foo.example")], informational=["one-nameserver"])
+
+    response = app.http.put("/domainNames/foo.example", json={"@type": "domainName", "nameservers": TWO},
+                            headers=LIMITED_HEADERS)
+
+    assert response.status_code == 200, response.text
+
+
+def test_a_patch_under_an_informational_profile_is_sent_as_an_update_without_a_read():
+    app = App(replies=[DONE, info("ns1.foo.example", "ns2.foo.example")], informational=["one-nameserver"])
+    add = [{"op": "add", "path": "/nameservers", "value": TWO[1]}]
+
+    response = app.http.patch("/domainNames/foo.example", json=add, headers=LIMITED_HEADERS)
+
+    assert response.status_code == 200, response.text
+    assert "domain:update" in app.sent()[0]          # no read before it: the server decides
+
+
+def test_a_contact_patch_under_an_informational_profile_is_sent_without_a_read():
+    app = App(replies=[DONE, contact_info()], informational=["short-email"])
+    short = {**AUTH, "RPP-Preset": f"preset={SHORT[0]};version=1.0"}
+
+    response = app.http.patch("/contacts/JD-1234", json=LONG_EMAIL, headers=short)
+
+    assert response.status_code == 200, response.text
+    assert "contact:update" in app.sent()[0]
+
+
+def test_an_informational_profile_is_advertised_as_one_the_proxy_checks():
+    checked = App().http
+    informational = App(informational=["admin-only"]).http
+    discovery = {"Accept": MEDIA_TYPE, "RPP-Cltrid": "c"}
+    path = f"/presets/{CONSTRAINED[0]}"
+
+    for http in (checked, informational):
+        assert http.get(path, headers=AUTH).json()["profiles"] == [{"@type": "profile", "id": ADMIN_ONLY[0], "version": "1.0"}]
+        assert ADMIN_ONLY[0] in {p["id"] for p in http.get("/.well-known/rpp", headers=discovery).json()["profiles"]}
+    schema = {"Accept": "application/schema+json", "RPP-Cltrid": "c"}
+    assert checked.get(path + "/schema", headers=schema).json() == informational.get(path + "/schema", headers=schema).json()

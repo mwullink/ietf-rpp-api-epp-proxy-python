@@ -63,7 +63,7 @@ Neither reaches a live backend, so run these checks locally from the repository 
    queued since the last run, a few minutes) and sends one RRI CHECK, and creates nothing. If it passes, the smoke run of step 3 covers MTEST (its
    credentials are in `.env`): record in the plan that it ran. Only if it does not pass, because MTEST cannot be
    reached (no `TEST_RRI_*` in `.env`, a machine not on the allowlist of both RegAccs, a refused login), run
-   `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration`, record the MTEST run as pending in the plan with
+   `RPP_TEST_ENV=epp-docker,epp-docker-checked pytest -n 4 -m smoke tests/integration`, record the MTEST run as pending in the plan with
    the reason, and hand it over to the maintainer.
 5. For a change to `requirements*.txt`, or to a test marked `pyversions`: `./test_python_versions.sh` (Docker), which
    the workflow `.github/workflows/python-versions.yml` also runs on every PR. See

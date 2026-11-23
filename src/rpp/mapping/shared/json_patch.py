@@ -36,11 +36,14 @@ def _check_match(match: Any):
             raise ValueError("'match' holds a value that cannot be compared")
 
 
-def _matches(element: Any, match: Any) -> bool:
-    """json draft §5.2.1. A list of primitives matches regardless of order."""
+def _matches(element: Any, match: Any, caseless: tuple[str, ...] = (), at: str = "") -> bool:
+    """json draft §5.2.1. A list of primitives matches regardless of order.
+
+    A string on one of the `caseless` paths (members of the element, as `/object/id`) is compared without regard to case.
+    """
     if isinstance(match, dict):
         return isinstance(element, dict) and all(
-            key in element and _matches(element[key], value) for key, value in match.items()
+            key in element and _matches(element[key], value, caseless, f"{at}/{key}") for key, value in match.items()
         )
     if isinstance(match, list):
         return (
@@ -49,6 +52,8 @@ def _matches(element: Any, match: Any) -> bool:
             and all(any(_same_value(item, other) for other in match) for item in element)
             and all(any(_same_value(item, other) for other in element) for item in match)
         )
+    if at in caseless and isinstance(element, str) and isinstance(match, str):
+        return element.lower() == match.lower()
     return _same_value(element, match)
 
 
@@ -58,7 +63,7 @@ def _required_value(operation: RPPPatchOperation) -> Any:
     return copy.deepcopy(operation.value)
 
 
-def _apply_to_array(parent: dict, key: str, operation: RPPPatchOperation):
+def _apply_to_array(parent: dict, key: str, operation: RPPPatchOperation, caseless: tuple[str, ...]):
     elements = parent.get(key, [])
     if operation.match is None:
         if operation.op == "add":
@@ -74,7 +79,7 @@ def _apply_to_array(parent: dict, key: str, operation: RPPPatchOperation):
     if operation.op == "add":
         raise ValueError("'add' cannot be used together with 'match'")
     _check_match(operation.match)
-    found = [index for index, element in enumerate(elements) if _matches(element, operation.match)]
+    found = [index for index, element in enumerate(elements) if _matches(element, operation.match, caseless)]
     if not found:
         raise PatchNotApplicable("no element matches")
     if operation.op == "remove":
@@ -96,7 +101,8 @@ def _apply_to_property(parent: dict, key: str, operation: RPPPatchOperation):
         parent[key] = _required_value(operation)
 
 
-def _apply(document: dict, operation: RPPPatchOperation, array_paths: tuple[str, ...], absent_parents: dict[str, dict]):
+def _apply(document: dict, operation: RPPPatchOperation, array_paths: tuple[str, ...], absent_parents: dict[str, dict],
+           caseless: dict[str, tuple[str, ...]]):
     if operation.op not in OPERATIONS:
         raise ValueError(f"Operation '{operation.op}' is not allowed")
     keys = _pointer(operation.path)
@@ -113,7 +119,7 @@ def _apply(document: dict, operation: RPPPatchOperation, array_paths: tuple[str,
         raise ValueError(f"Path '{operation.path}' does not point to a property")
     key = keys[-1]
     if operation.path in array_paths or isinstance(parent.get(key), list):
-        _apply_to_array(parent, key, operation)
+        _apply_to_array(parent, key, operation, caseless.get(operation.path, ()))
     else:
         _apply_to_property(parent, key, operation)
 
@@ -124,11 +130,14 @@ def apply(
     array_paths: tuple[str, ...],
     ignored_paths: tuple[str, ...] = (),
     absent_parents: dict[str, dict] | None = None,
+    caseless: dict[str, tuple[str, ...]] | None = None,
 ) -> dict:
     """Applies a patch (json draft §5.2.2, steps 1 to 5) to a copy of the document, in order.
 
     `array_paths` are the properties that are arrays even when absent. Operations on `ignored_paths` are left to the caller.
     `absent_parents` gives the objects the schema allows on a path (step 2), to use when the document does not have them.
+    `caseless` gives, per array, the members of its elements a `match` compares without regard to case (names and
+    identifiers a registry may read back in another case, #234), as paths within the element (`/object/id`).
     A failure names the operation by its position.
     """
     patched = copy.deepcopy(document)
@@ -136,7 +145,7 @@ def apply(
         if operation.path in ignored_paths:
             continue
         try:
-            _apply(patched, operation, array_paths, absent_parents or {})
+            _apply(patched, operation, array_paths, absent_parents or {}, caseless or {})
         except (ValueError, PatchNotApplicable) as e:
             raise type(e)(f"Operation {number} ('{operation.op}' on '{operation.path}'): {e}") from e
     return patched

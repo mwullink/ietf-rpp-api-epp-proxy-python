@@ -56,6 +56,13 @@ Each entry says what the proxy does today.
 - json §5.2.1 says the server MUST NOT match nested data structures, but its example matches `{"label": "tech", "object": {"@type": "contact", "id": "REG-200"}}`.
 - **Proxy:** follows the example, EPP needs the role and the id to remove a contact.
 
+## Case sensitivity of names and identifiers
+
+- The drafts do not specify clearly which values are compared with regard to case. Data-objects §2.1.11 says two FQDNs are compared without regard to case and the server generates them in lower case. json §5.2.1 says a primitive in a `match` matches when it has "the same type and the same value", without saying whether "the same value" follows the data type of the element (an FQDN) or is plain string equality. json §10 makes clients lowercase `name` before they compare it, which suggests the latter.
+- The Identifier (data-objects §7.1) and the Client Identifier (§7.2) refer to RFC 5730 §2.8 and `clIDType`, which say nothing about case either. EPP servers differ: the test server reads host names and contact ids back in upper case (`NS1.EXAMPLE.NET`, `FO-0E6F867C-0UF1` for `fo-0e6f867c-0uf1`), others keep the case the client sent.
+- Open questions: does a `match` compare an FQDN, an Identifier or a Client Identifier by the rules of its data type? Are identifiers case-sensitive, case-insensitive, or server policy, and if policy, how does a client find out? Must a server read back an identifier in the case it was created with?
+- **Proxy:** where it applies a patch to the object it read, a `match` compares `hostName` in `/nameservers` and the contact `id` in `/contacts` without regard to case (#234), and every other value exactly. A PUT and the difference it sends to EPP compare host names and contact ids without regard to case, and the sponsor's login id with the `clID` too. A read passes on the case the registry returns.
+
 ## JSON Patch without a read
 
 - §5.2.2 requires an error when no element matches, and step 6 validates the resulting object. A proxy that translates operations to EPP add/rem/chg has no resulting object. Result codes for patch failures are not defined either (no match, ambiguous match, create-only path).
@@ -354,8 +361,8 @@ The "ensure gone" case is the same with `remove` and `match`, and EPP answers 23
 - **Proxy:** 501 (`02102`).
 - A `1001` has not completed, and data-objects §10.3 ties the new expiry date to a completed renewal.
 - **Proxy:** `expiryDate` is left out of a `1001`, even when the registry sends `renData`.
-- `expiryDate` must be an RFC 3339 date-time. The schema `format` is not enforced (json §4.9.1's `unevaluatedProperties` is a separate gap, see "Undeclared properties").
-- **Proxy:** checks the RFC 3339 §5.6 form itself, with `T` and `Z` in either case. A leap second (`:60`) is a 400.
+- `expiryDate` must be an RFC 3339 date-time (the schema's `format`).
+- **Proxy:** checks the schema's `format` (#233) and the RFC 3339 §5.6 form itself, with `T` and `Z` in either case. A leap second (`:60`) is a 400.
 - EPP has no process list or process ids.
 - **Proxy:** `GET .../renewProcesses` is 501 (`02101`).
 

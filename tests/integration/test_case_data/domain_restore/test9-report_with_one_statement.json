@@ -6,7 +6,7 @@
   "test_id": "test9-report_with_one_statement",
   "steps": [
     {
-      "comment": "Sends a restore report for domain rs9; expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else 400 02001. The error answer this case checks.",
+      "comment": "Sends a restore report for domain rs9; expects 422 02308 under the EPP compatible preset where the proxy checks the EPP Compatibility Profile, else 400 02001. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/rs9-{random_name}.{tld}/processes/restoreProcesses/latest",
@@ -36,7 +36,12 @@
         "select": [
           {
             "when": {
-              "profile.default_preset": "epp-compatible"
+              "profile.default_preset": "epp-compatible",
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
             },
             "then": {
               "status": 422,

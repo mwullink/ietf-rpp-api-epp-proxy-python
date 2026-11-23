@@ -12,6 +12,9 @@ rpp_protocol_config:
   message:
     queue:
       server_notices: true             # DENIC queues notices of its own: a domain's status update, a contact deleted
+  update:                              # RRI updates by replacement: the proxy applies a partial update to the object read
+    add_existing_supported: true       # an item the object has is kept once
+    remove_absent_supported: true      # an item it lacks is not there to remove
   domainName:
     name:
       lgr:

@@ -26,9 +26,10 @@
 #               /var/www/cgi-bin/epp/.
 #   rri-mtest:  DENIC RRI 5.0, MTEST (tests/integration/environments/rri-mtest.yaml). Source is
 #               docs/rri/rri-5.0-reference.md (§ given) and docs/rri/xsd/. An RRI XSD failure is
-#               83000000004 and a class-5 code is a temporary error; the proxy maps both to 500 02400
-#               (src/registry_adapter/rri/result_codes.py), so a client value over an RRI limit may
-#               come back as 500 instead of 4xx. `expected` states what it should be.
+#               83000000004, which the proxy maps to 400 02005 (#233), and a class-5 code is a
+#               temporary error, which it maps to 500 02400 (src/registry_adapter/rri/result_codes.py),
+#               so a client value over an RRI limit may come back as 400 02005 or 500 instead of what
+#               `expected` states.
 
 schema: rpp-backend-limits/0.1
 status: draft

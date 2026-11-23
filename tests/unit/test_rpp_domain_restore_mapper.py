@@ -103,7 +103,7 @@ def test_one_statement_is_a_400():
 @pytest.mark.parametrize("value", ["not a date", "2025-01-10", "2025-01-10T12:00:00", ""])
 def test_date_time_that_is_not_rfc3339_is_a_400(member, value):
     report = {**REPORT, member: value}
-    with pytest.raises(ValueError):
+    with pytest.raises((ValueError, ValidationError)):     # the schema's format (#233), or the proxy's own check
         domain_restore_report.rpp_to_model("foo.example", {**UPDATE, "restoreReport": report}, profile=EPP_PROFILE)
 
 

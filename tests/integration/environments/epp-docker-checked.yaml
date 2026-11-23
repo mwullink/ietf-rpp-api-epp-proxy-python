@@ -1,0 +1,4 @@
+# epp-docker with the EPP Compatibility Profile checked by the proxy (config/environments/epp-docker-checked.yaml): the
+# same server, registrars and facts.
+include:
+  - epp-docker.yaml

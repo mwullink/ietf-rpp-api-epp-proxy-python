@@ -26,7 +26,9 @@ def _build(definitions: dict, names) -> dict[str, Draft202012Validator]:
     for name in names:
         target = name if name in definitions else own.get(name)
         if target in definitions:
-            validators[name] = Draft202012Validator({"$ref": f"#/$defs/{target}", "$defs": definitions})
+            # the formats the definitions state are checked (#233), as Connexion's validator did before #201
+            validators[name] = Draft202012Validator({"$ref": f"#/$defs/{target}", "$defs": definitions},
+                                                    format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validators
 
 

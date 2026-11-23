@@ -9,6 +9,7 @@ presets:                               # the RPP presets offered (src/rpp/schema
   - base
 default_preset: base                   # applied when a request names none
 bound_profiles: {}                     # per preset, the profiles this server binds to it
+informational_profiles: []             # the profiles the server checks itself: advertised, the proxy does not check them
 lgrs: []                               # no IDN
 extensions: []                         # an extension adds itself
 
