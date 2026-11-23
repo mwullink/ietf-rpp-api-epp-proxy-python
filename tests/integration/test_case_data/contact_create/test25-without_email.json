@@ -3,7 +3,7 @@
   "description": "A contact without an email is refused: RFC 5733 requires one.",
   "steps": [
     {
-      "comment": "Creates contact K25 with authInfo (by backend); expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else one of 400 02001 or 400 02003 or 400 02005 or 422 02306. The error answer this case checks.",
+      "comment": "Creates contact K25 with authInfo (by backend); expects 422 02308 under the EPP compatible preset where the proxy checks the EPP Compatibility Profile, else one of 400 02001 or 400 02003 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -75,7 +75,12 @@
         "select": [
           {
             "when": {
-              "profile.default_preset": "epp-compatible"
+              "profile.default_preset": "epp-compatible",
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
             },
             "then": {
               "status": 422,

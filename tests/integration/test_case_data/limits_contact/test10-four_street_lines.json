@@ -7,7 +7,7 @@
   "description": "Four street lines, over the three of the EPP Compatibility Profile: 501 (spec-issues.md).",
   "steps": [
     {
-      "comment": "Creates contact Z10 with authInfo (by backend); expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else 501 02102. The error answer this case checks.",
+      "comment": "Creates contact Z10 with authInfo (by backend); expects 422 02308 under the EPP compatible preset where the proxy checks the EPP Compatibility Profile, else 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -96,7 +96,12 @@
         "select": [
           {
             "when": {
-              "profile.default_preset": "epp-compatible"
+              "profile.default_preset": "epp-compatible",
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
             },
             "then": {
               "status": 422,

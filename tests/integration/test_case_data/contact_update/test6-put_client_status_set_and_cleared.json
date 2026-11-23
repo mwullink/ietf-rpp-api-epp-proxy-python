@@ -4,241 +4,23 @@
   },
   "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact.",
   "test_id": "test6-put_client_status_set_and_cleared",
+  "setup": [
+    {
+      "comment": "Creates contact 06A with authInfo (by backend); expects 201 01000. The contact the steps below work on.",
+      "include": "create_full_contact",
+      "with": {
+        "id": "{handle:a:06A}"
+      }
+    },
+    {
+      "comment": "Creates contact 06B with authInfo (by backend); expects 201 01000. The contact the steps below work on.",
+      "include": "create_full_contact",
+      "with": {
+        "id": "{handle:a:06B}"
+      }
+    }
+  ],
   "steps": [
-    {
-      "comment": "Creates contact 06A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
-      "request": {
-        "method": "POST",
-        "url": "/contacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "{rpp:accept}",
-          "RPP-Preset": "{rpp:preset}",
-          "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "{rpp:content-type}"
-        },
-        "body_json": {
-          "@type": "contact",
-          "id": "{handle:a:06A}",
-          "contactInfo": {
-            "@type": "Card",
-            "version": "2.0",
-            "kind": "individual",
-            "name": {
-              "full": "John Doe"
-            },
-            "addresses": {
-              "addr": {
-                "components": [
-                  {
-                    "kind": "name",
-                    "value": "123 Main St"
-                  },
-                  {
-                    "kind": "locality",
-                    "value": "Anytown"
-                  },
-                  {
-                    "select": [
-                      {
-                        "when": {
-                          "profile.contact.region.supported": true
-                        },
-                        "then": {
-                          "kind": "region",
-                          "value": "PA"
-                        }
-                      },
-                      {
-                        "omit": true
-                      }
-                    ]
-                  },
-                  {
-                    "kind": "postcode",
-                    "value": "12345"
-                  }
-                ],
-                "countryCode": "US"
-              }
-            },
-            "phones": {
-              "voice": {
-                "number": "tel:+49.123123123"
-              },
-              "fax": {
-                "select": [
-                  {
-                    "when": {
-                      "profile.contact.fax.supported": true
-                    },
-                    "then": {
-                      "number": "tel:+49.456456456",
-                      "features": {
-                        "fax": true
-                      }
-                    }
-                  },
-                  {
-                    "omit": true
-                  }
-                ]
-              }
-            },
-            "emails": {
-              "email": {
-                "address": "foo@example.com"
-              }
-            }
-          },
-          "authInfo": {
-            "select": [
-              {
-                "when": {
-                  "profile.contact.authInfo.supported": true
-                },
-                "then": {
-                  "@type": "authInfo",
-                  "method": "authinfo",
-                  "authdata": "Abc2345678"
-                }
-              },
-              {
-                "omit": true
-              }
-            ]
-          }
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "content_type": "application/rpp+json",
-        "body": {
-          "@type": "contact",
-          "id": "{handle:a:06A}"
-        }
-      }
-    },
-    {
-      "comment": "Creates contact 06B with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
-      "request": {
-        "method": "POST",
-        "url": "/contacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "{rpp:accept}",
-          "RPP-Preset": "{rpp:preset}",
-          "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "{rpp:content-type}"
-        },
-        "body_json": {
-          "@type": "contact",
-          "id": "{handle:a:06B}",
-          "contactInfo": {
-            "@type": "Card",
-            "version": "2.0",
-            "kind": "individual",
-            "name": {
-              "full": "John Doe"
-            },
-            "addresses": {
-              "addr": {
-                "components": [
-                  {
-                    "kind": "name",
-                    "value": "123 Main St"
-                  },
-                  {
-                    "kind": "locality",
-                    "value": "Anytown"
-                  },
-                  {
-                    "select": [
-                      {
-                        "when": {
-                          "profile.contact.region.supported": true
-                        },
-                        "then": {
-                          "kind": "region",
-                          "value": "PA"
-                        }
-                      },
-                      {
-                        "omit": true
-                      }
-                    ]
-                  },
-                  {
-                    "kind": "postcode",
-                    "value": "12345"
-                  }
-                ],
-                "countryCode": "US"
-              }
-            },
-            "phones": {
-              "voice": {
-                "number": "tel:+49.123123123"
-              },
-              "fax": {
-                "select": [
-                  {
-                    "when": {
-                      "profile.contact.fax.supported": true
-                    },
-                    "then": {
-                      "number": "tel:+49.456456456",
-                      "features": {
-                        "fax": true
-                      }
-                    }
-                  },
-                  {
-                    "omit": true
-                  }
-                ]
-              }
-            },
-            "emails": {
-              "email": {
-                "address": "foo@example.com"
-              }
-            }
-          },
-          "authInfo": {
-            "select": [
-              {
-                "when": {
-                  "profile.contact.authInfo.supported": true
-                },
-                "then": {
-                  "@type": "authInfo",
-                  "method": "authinfo",
-                  "authdata": "Abc2345678"
-                }
-              },
-              {
-                "omit": true
-              }
-            ]
-          }
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "content_type": "application/rpp+json",
-        "body": {
-          "@type": "contact",
-          "id": "{handle:a:06B}"
-        }
-      }
-    },
     {
       "comment": "Patches contact 06B: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
@@ -558,7 +340,7 @@
       }
     },
     {
-      "comment": "Patches contact 06A: remove /status with a match; expects 200 01000. The operation this case checks.",
+      "comment": "Patches contact 06A: remove /status with a match; expects 422 02308 where the proxy checks the EPP Compatibility Profile (it applies the patch to the contact read, where no element matches), else 200 01000 where the server takes removing a status the contact lacks as no change, else 422 02306. The answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:06A}",
@@ -580,15 +362,56 @@
         ]
       },
       "response": {
-        "status": 200,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "content_type": "application/rpp+json",
-        "body": {
-          "@type": "contact",
-          "id": "{handle:a:06A}"
-        }
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible",
+              "profile.informational_profiles": {
+                "not": {
+                  "contains": "epp-compatibility"
+                }
+              }
+            },
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          },
+          {
+            "when": {
+              "env.update.remove_absent_supported": true
+            },
+            "then": {
+              "status": 200,
+              "headers": {
+                "RPP-Code": "01000"
+              },
+              "content_type": "application/rpp+json",
+              "body": {
+                "@type": "contact",
+                "id": "{handle:a:06A}"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02306"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          }
+        ]
       }
     }
   ]

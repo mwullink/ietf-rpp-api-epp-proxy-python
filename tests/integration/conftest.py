@@ -52,7 +52,7 @@ def pytest_configure(config):
 
 
 def pytest_sessionfinish(session):
-    """Runs the run teardown of every environment whose run setup ran, in the process that started the run, after
+    """Runs the run teardown of every server whose run setup ran (in an environment of it), in the process that started the run, after
     every case; then logs out the registry sessions of this process, in each xdist worker too, also after a Ctrl-C."""
     if not _is_worker(session.config):
         session.config.stash[RUN_TEARDOWN_WARNINGS] = _run_teardowns()
@@ -70,9 +70,10 @@ def _run_teardowns() -> list[str]:
         from tests.integration import file_cases  # in the xdist controller, which collects no case, it is not loaded
 
         runs = file_cases.environment_runs()
-        for name in done:
+        for name in done:     # a server: the teardown runs in one of its environments of this run
             try:
-                warnings += [f"{name}: {w}" for w in runs[name].run_teardown()]
+                run = next(run for run in runs.values() if run.server == name and run.environment is not None)
+                warnings += [f"{name}: {w}" for w in run.run_teardown()]
             except Exception as exc:  # noqa: BLE001 - a run teardown never fails the run
                 warnings.append(f"{name}: run teardown: {type(exc).__name__}: {exc}")
     shutil.rmtree(directory, ignore_errors=True)

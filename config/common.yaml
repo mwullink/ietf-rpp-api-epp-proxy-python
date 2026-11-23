@@ -28,6 +28,9 @@ rpp_protocol_config:
   message:
     queue:
       server_notices: null             # whether the server queues messages of its own, which no request caused
+  update:                              # a partial update of an object's items (status, address, name server, contact)
+    add_existing_supported: null       # whether adding an item the object has is taken (as no change)
+    remove_absent_supported: null      # whether removing an item the object lacks is taken (as no change)
   domainName:
     name:
       lgr:

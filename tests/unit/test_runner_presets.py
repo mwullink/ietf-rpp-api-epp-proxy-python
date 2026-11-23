@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pytest
 
+from tests.integration import file_cases
 from tests.integration.file_cases import process_placeholders
 from tests.helper.test_environment import EnvironmentError, load, with_rpp_headers
 
@@ -99,3 +100,9 @@ def test_a_key_the_config_does_not_offer_is_an_error_also_where_the_preset_is_re
     # habitable-worlds is defined by the extensions of the bound config, which does not offer it
     with pytest.raises(EnvironmentError, match=f"no preset '{key}' among the offered presets"):
         headers_of({"Accept": "{rpp:accept:%s}" % key}, DEMO)
+
+
+def test_each_environment_has_random_names_of_its_own_so_twins_over_one_server_never_meet():
+    """#232: the same case in two environments over the same server creates no object of the same name."""
+    assert file_cases.randoms("epp-docker") == file_cases.randoms("epp-docker")
+    assert file_cases.randoms("epp-docker") != file_cases.randoms("epp-docker-checked")

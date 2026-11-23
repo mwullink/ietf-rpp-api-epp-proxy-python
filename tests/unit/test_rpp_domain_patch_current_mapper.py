@@ -95,6 +95,24 @@ def test_replace_contact_by_match():
     assert [(c.type, c.contact.id) for c in result.remove.contacts] == [("tech", "REG-300")]
 
 
+def test_a_match_on_a_name_server_or_contact_id_ignores_the_case_the_registry_reads_back():
+    """#234: a registry may read host names and contact ids back in upper case."""
+    domain = current_domain(
+        ns=NS(host_objs=[HostObj(id="NS1.FOO.EXAMPLE"), HostObj(id="NS2.FOO.EXAMPLE")], host_attrs=None),
+        contacts=[ContactReference(id="REG-1", types=["registrant"]), ContactReference(id="FO-AB1", types=["billing"])],
+    )
+    operations = [
+        op("remove", "/nameservers", match={"hostName": "ns1.foo.example"}),
+        op("remove", "/contacts", match={"label": "billing", "object": {"@type": "contact", "id": "fo-ab1"}}),
+    ]
+
+    wanted = domain_patch.rpp_to_model_with_current(NAME, operations, domains.model_to_rpp(domain), profile=EPP_PROFILE)
+    result = domain_difference.difference(domain, wanted)
+
+    assert host_ids(result.remove.ns) == ["NS1.FOO.EXAMPLE"]
+    assert [(c.type, c.contact.id) for c in result.remove.contacts] == [("billing", "FO-AB1")]
+
+
 def test_replace_registrant():
     result = update(op("replace", "/registrant", value={"@type": "contact", "id": "REG-2"}))
 

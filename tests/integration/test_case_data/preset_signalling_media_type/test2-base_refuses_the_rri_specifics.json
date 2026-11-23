@@ -1,6 +1,6 @@
 {
   "test_id": "test2-base_refuses_the_rri_specifics",
-  "description": "Under the base preset a server that holds the rri preset refuses what only the rri extension adds: a domain member of the extension is undeclared, and the request contact object is not in the profile.",
+  "description": "Under the base preset a server that holds the rri preset refuses what only the rri extension adds: a domain member of the extension is undeclared, and the request contact object is outside the preset (400 02001 like any content that does not conform to it, core RC4).",
   "when": {
     "profile.presets": {
       "contains": "rri"
@@ -42,7 +42,7 @@
       }
     },
     {
-      "comment": "Creates request contact RQ2 with uriTemplate, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 501 02307. The error answer this case checks.",
+      "comment": "Creates request contact RQ2 with uriTemplate, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -59,13 +59,13 @@
         }
       },
       "response": {
-        "status": 501,
+        "status": 400,
         "content_type": "application/problem+json",
         "body": {
           "type": "urn:ietf:params:rpp:error"
         },
         "headers": {
-          "RPP-Code": "02307",
+          "RPP-Code": "02001",
           "RPP-Preset": null
         }
       }

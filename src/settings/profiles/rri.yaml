@@ -12,6 +12,7 @@ presets:                               # the RPP presets offered (src/rpp/schema
   - rri
 default_preset: rri                    # applied when a request names none
 bound_profiles: {}                     # per preset, the profiles this server binds to it (a server's own policy)
+informational_profiles: []             # the profiles the server checks itself: advertised, the proxy does not check them
 lgrs: []                               # rpp_rri_lgr of the config, not set here
 extensions:                            # docs/rri/rri-extension.md: request contacts, and CHPROV with the gainer's data
   - de.denic.rpp.rri

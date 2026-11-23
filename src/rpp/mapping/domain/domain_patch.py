@@ -22,6 +22,8 @@ ARRAY_PATHS = ("/nameservers", "/contacts")
 
 READ_ARRAY_PATHS = ARRAY_PATHS + ("/status", "/dns/records")
 
+CASELESS_MATCH = {"/nameservers": ("/hostName",), "/contacts": ("/object/id",)}     # a registry may read them back in another case
+
 OBJECT_PATHS = ("/registrant", "/authInfo")
 
 STATE_PATHS = ("/status", "/dns", "/dns/records", "/dns/controls")
@@ -186,7 +188,7 @@ def rpp_to_model_with_current(domain_name: str, rpp: list, current: dict, *, pro
     operations = _operations(rpp)
     patched = json_patch.apply(
         patch_statuses.without_server_statuses(current), operations, READ_ARRAY_PATHS,
-        ignored_paths=include_elements.on_demand_paths(OBJECT), absent_parents=DNS_PARENTS,
+        ignored_paths=include_elements.on_demand_paths(OBJECT), absent_parents=DNS_PARENTS, caseless=CASELESS_MATCH,
     )
     patched = patch_statuses.with_server_statuses(patched, current, "domainStatus")
     validate_request_schema("domainName.read", patched, extensions=profile.extensions, patched=True)

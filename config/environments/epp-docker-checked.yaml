@@ -1,0 +1,8 @@
+# epp-docker with the EPP Compatibility Profile checked by the proxy, not left to the server: a request that breaks it
+# is 422 02308, and a PATCH is applied to the object read for it. The same server and registrars as epp-docker. It is
+# the test environment `epp-docker-checked`.
+include:
+  - epp-docker.yaml
+
+rpp_backend_profile:
+  informational_profiles: []

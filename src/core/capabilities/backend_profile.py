@@ -14,6 +14,8 @@ LEAVES: dict[str, type] = {
     "presets": tuple,                                    # the keys of the RPP presets this server offers (rpp/schema)
     "default_preset": str,                               # the key of the one it applies when a request names none
     "bound_profiles": dict,                              # per preset key, the keys of the profiles the server binds to it
+    "informational_profiles": tuple,                     # the keys of the profiles the server checks itself: applicable
+                                                         # and advertised, but not checked by the proxy
     "extensions": tuple,                                 # the RPP extensions (ids) the backend can hold: the ceiling of
                                                          # the extensions of the offered presets
     "lgrs": tuple,                                       # the LGRs offered for IDNs, from the config, none without IDN

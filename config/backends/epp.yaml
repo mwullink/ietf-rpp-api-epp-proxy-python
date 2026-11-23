@@ -19,6 +19,10 @@ rpp_backend_profile:
     - base
     - epp-compatible
   default_preset: epp-compatible
+  # The server checks the EPP Compatibility Profile itself (it is EPP): the proxy advertises it and leaves its
+  # constraints to the server's answer, so a PATCH is sent as an EPP <update> without a read (#232).
+  informational_profiles:
+    - epp-compatibility
 
 # Maps an LGR name, which json §6.4 asks for in `lgr`, to the IDN table id of the EPP IDN extension
 # (urn:ietf:params:xml:ns:idn-1.0), one to one. A create with an `lgr` not listed is a 400. A domain whose table is not
@@ -38,6 +42,9 @@ rpp_protocol_config:
   message:
     queue:
       server_notices: false            # the EPP test server queues only what a transfer causes
+  update:
+    add_existing_supported: false      # adding a status or address the object has is refused (2306, pawel-kow/epp#18)
+    remove_absent_supported: true      # removing a status or name server the object lacks is taken
   domainName:
     name:
       lgr:

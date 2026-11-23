@@ -79,6 +79,30 @@ def test_no_matching_element_fails(name):
         patch(op(name, "/nameservers", match={"hostName": "other"}, value={"hostName": "x"}))
 
 
+CASELESS = {"/nameservers": ("/hostName",), "/contacts": ("/object/id",)}
+
+
+def test_caseless_members_match_without_regard_to_case():
+    operations = [
+        RPPPatchOperation.from_dict(op("remove", "/nameservers", match={"hostName": "NS1.foo.EXAMPLE"})),
+        RPPPatchOperation.from_dict(op("remove", "/contacts", match={"label": "tech", "object": {"id": "reg-200"}})),
+    ]
+
+    result = json_patch.apply(DOCUMENT, operations, ARRAYS, caseless=CASELESS)
+
+    assert result["nameservers"] == [{"hostName": "ns2.foo.example"}]
+    assert [c["object"]["id"] for c in result["contacts"]] == ["REG-300", "REG-100"]
+
+
+@pytest.mark.parametrize("match", [{"hostName": "NS1.foo.example"}, {"label": "TECH"}])
+def test_other_members_match_with_regard_to_case(match):
+    path = "/nameservers" if "hostName" in match else "/contacts"
+    caseless = None if "hostName" in match else CASELESS
+
+    with pytest.raises(PatchNotApplicable, match="no element matches"):
+        json_patch.apply(DOCUMENT, [RPPPatchOperation.from_dict(op("remove", path, match=match))], ARRAYS, caseless=caseless)
+
+
 def test_a_failure_names_the_operation():
     with pytest.raises(PatchNotApplicable, match="Operation 2"):
         patch(op("replace", "/nameservers", value=[]), op("remove", "/nameservers", match={"hostName": "a"}))

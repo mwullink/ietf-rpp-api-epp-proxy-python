@@ -1,7 +1,7 @@
 import re
 
-# RFC 3339 §5.6 date-time. The schema `format` is not enforced, so this is the whole check.
-# Leap seconds (:60) are not accepted.
+# RFC 3339 §5.6 date-time. The schema checks the `format` too (#233); this check also refuses leap seconds (:60),
+# and gives the value with `T` and `Z` in upper case.
 _DATE_TIME = re.compile(
     r"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
     r"(\.[0-9]+)?([Zz]|[+-]([01][0-9]|2[0-3]):[0-5][0-9])"
