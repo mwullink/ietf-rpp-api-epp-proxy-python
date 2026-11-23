@@ -29,7 +29,7 @@ updates of #229 on top (full run).
 - [x] T3 (#229) the dashboard's updates (marshmallow 3.26.2; checkout v7.0.1 and setup-python v7.1.0 pinned in both
   workflows; `.docker/Dockerfile` python:3.11-slim pinned to its digest; CI Python 3.11, and Renovate's 3.11 rule
   extended to the `github-actions` manager so it stops proposing 3.15)
-- [~] T4 Checks (2026-11-23): lint-imports 29 kept; unit 2996 passed; `./test_python_versions.sh` 3.11–3.15 passed;
-  full run `pytest -n 4` running
-- [ ] T5 Draft PR; issues: marshmallow 4 blocked by dataclasses-json; `starlette.testclient` deprecates `httpx`
+- [x] T4 Checks (2026-11-23): lint-imports 29 kept; unit 2996 passed; `./test_python_versions.sh` 3.11–3.15 passed;
+  full run `pytest -n 4` (MTEST included): 4492 passed, 3624 skipped (1:31:50)
+- [~] T5 Draft PR #240, awaiting the maintainer; issues #241, #242: marshmallow 4 blocked by dataclasses-json; `starlette.testclient` deprecates `httpx`
   (`StarletteDeprecationWarning`: install `httpx2`, `tests/integration/file_cases.py:16`)
