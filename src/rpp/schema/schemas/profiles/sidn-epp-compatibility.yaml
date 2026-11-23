@@ -1,0 +1,14 @@
+# The SIDN EPP Compatibility Profile: the EPP Compatibility Profile (epp-compatibility.yaml) for the SIDN EPP server, which
+# holds the localized postal info of a contact only (<contact:postalInfo type="loc">) and no <contact:authInfo>, against
+# RFC 5733 §3.2.1. Its Profile Schema, sidn-epp-compatibility.schema.json, differs from that of the EPP Compatibility Profile
+# in the Card of a contact: the name, the organisations and the addresses of the Card itself (the `int` form) are out, the
+# one localization of the Card carries them (the `loc` form, in any characters), and a contact create needs no authInfo.
+# A profile only adds constraints to those of its base profiles, so it has none: it carries all of them itself.
+id: nl.sidn.rpp.profile.epp-compatibility
+name: SIDN EPP Compatibility Profile
+description: Constrains RPP to what the SIDN EPP server can represent, which holds the localized postal info of a contact only, and no authInfo of a contact.
+version: "1.0"
+rppVersion: "1.0"
+url: https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/docs/sidn-epp-compatible.md
+baseProfiles: []
+requiredExtensions: []

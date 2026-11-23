@@ -1,0 +1,16 @@
+# The SIDN EPP compatible preset: the EPP compatible preset for an EPP server that holds no <contact:authInfo>, which
+# RFC 5733 §3.2.1 requires of a create, and only the localized postal info of a contact. The SIDN EPP Compatibility Profile
+# is the EPP Compatibility Profile without that requirement, with the authInfo of a contact out of the data model, and with
+# the name, organisations and addresses of a contact in the localization of its Card alone. A preset is the union of its bases, so it cannot
+# take a constraint away from the EPP compatible preset: it is built on the base preset and applies the profile that differs.
+id: nl.sidn.rpp.preset.epp-compatible
+name: SIDN EPP compatible preset
+description: RPP without extensions, constrained by the SIDN EPP Compatibility Profile, for an EPP server that holds the localized postal info of a contact only, and no authInfo of a contact.
+version: "1.0"
+rppVersion: "1.0"
+url: https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/docs/sidn-epp-compatible.md
+basePresets:
+  - {id: "urn:ietf:params:rpp:preset:base", version: "1.0"}
+extensions: []
+profiles:
+  - {id: "nl.sidn.rpp.profile.epp-compatibility", version: "1.0"}

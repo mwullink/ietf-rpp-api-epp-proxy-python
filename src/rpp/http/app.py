@@ -162,6 +162,8 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        # A browser client of another origin reads only the safelisted response headers, so these are named.
+        expose_headers=["RPP-Cltrid", "RPP-Svtrid", "RPP-Code", "RPP-Queue-Size", "RPP-Profile", "Link", "Location"],
     )
     app.add_api(spec, resolver=resolver, resolver_error=501,
                 validate_responses=True,

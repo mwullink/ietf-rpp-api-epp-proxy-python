@@ -167,6 +167,8 @@ def _reason(error, profile) -> str:
     of = f" of the profile {profile}" if profile else " of a profile"
     if error.validator == "required":
         return f"{error.message}, which a constraint{of} requires"
+    if error.validator is None:      # a `false` schema: the profile does not allow the member at all
+        return f"The member is not allowed{of}"
     return f"The value breaks the constraint '{error.validator}'{of}"
 
 
