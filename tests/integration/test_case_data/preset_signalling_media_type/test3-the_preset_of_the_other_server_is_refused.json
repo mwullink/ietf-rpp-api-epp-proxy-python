@@ -33,7 +33,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": "Accept, Origin"
         },
         "content_type": "application/problem+json",
         "body": {
@@ -65,7 +65,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": "Accept, Origin"
         },
         "content_type": "application/problem+json",
         "body": {

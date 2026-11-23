@@ -43,7 +43,7 @@ def assert_refused(response, status, code):
     assert response.status_code == status
     assert response.headers["RPP-Code"] == code
     assert response.headers["Content-Type"] == "application/problem+json"  # no preset parameters
-    assert response.headers["Vary"] == "Accept"
+    assert response.headers["Vary"] == "Accept, Origin"
     assert "RPP-Preset" not in response.headers
 
 
@@ -53,7 +53,7 @@ def test_a_request_without_parameters_gets_the_default_profile_and_it_is_named_i
     assert response.status_code == 200
     assert applied(response) == media(EPP)
     assert "RPP-Preset" not in response.headers
-    assert response.headers["Vary"] == "Accept"
+    assert response.headers["Vary"] == "Accept, Origin"
 
 
 def test_a_request_without_an_accept_gets_the_default_profile():
@@ -211,7 +211,7 @@ def test_an_object_of_an_extension_outside_the_request_preset_is_a_400_that_name
         assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
         assert "preset:base" in response.json()["detail"]
         assert response.headers["Content-Type"] == "application/problem+json"
-        assert response.headers["Vary"] == "Accept" and "RPP-Preset" not in response.headers
+        assert response.headers["Vary"] == "Accept, Origin" and "RPP-Preset" not in response.headers
 
 
 def test_an_object_the_request_profile_has_is_not_refused_for_the_response_profile():
@@ -239,7 +239,7 @@ def test_a_problem_detail_after_the_selection_has_no_profile_parameters_and_list
 
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/problem+json"
-    assert response.headers["Vary"] == "Accept"
+    assert response.headers["Vary"] == "Accept, Origin"
 
 
 def test_an_unauthenticated_request_is_a_401_before_any_profile():

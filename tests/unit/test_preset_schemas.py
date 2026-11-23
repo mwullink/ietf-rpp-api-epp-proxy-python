@@ -156,7 +156,7 @@ class TestTheSchemaIsAValueInItsNativeMediaTypeOutsidePresetSignalling:
         response = self.fetch(client_of, {"Accept": accept})
 
         assert response.status_code == 200 and response.headers["Content-Type"] == "application/schema+json"
-        assert response.headers["Vary"] == "Accept"
+        assert response.headers["Vary"] == "Accept, Origin"
 
     def test_no_accept_is_any(self, client_of):
         assert client_of().get(f"/presets/{BASE_ID}/schema", headers={"Accept": ""}).status_code == 200

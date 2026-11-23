@@ -22,8 +22,11 @@ updates of #229 on top (full run).
 
 ## Tasks
 
-- [~] T1 (#226) `starlette==1.10.0`, `.trivyignore` without the two CVEs, `Vary` expectations, docs
-- [ ] T2 Checks: lint-imports, unit, MTEST reachability, smoke
-- [ ] T3 (#229) the dashboard's updates (marshmallow 3.26.2, actions v7 pinned, Python 3.11)
+- [x] T1 (#226) `starlette==1.10.0`, `.trivyignore` without the two CVEs, `Vary` expectations (unit tests and
+  `preset_signalling_media_type` cases: `Accept, Origin`), architecture.project.md
+- [x] T2 Checks (2026-11-23): lint-imports 29 kept; unit 2996 passed; MTEST reachability passed, so the smoke run
+  covers MTEST: smoke 232 passed, 488 skipped
+- [~] T3 (#229) the dashboard's updates (marshmallow 3.26.2, actions v7 pinned, Python 3.11)
 - [ ] T4 Checks: lint-imports, unit, `./test_python_versions.sh`, full run `pytest -n 4`
-- [ ] T5 Draft PR; issue for marshmallow 4 blocked by dataclasses-json
+- [ ] T5 Draft PR; issues: marshmallow 4 blocked by dataclasses-json; `starlette.testclient` deprecates `httpx`
+  (`StarletteDeprecationWarning`: install `httpx2`, `tests/integration/file_cases.py:16`)
