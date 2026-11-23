@@ -16,7 +16,7 @@ updates of #229 on top (full run).
 
 ## Decisions (maintainer, 2026-11-23)
 
-- Accept `Vary: Origin` (a wire change, rule 4): tests check that `Accept` is a member of `Vary`, the cases state
+- Accept `Vary: Origin` (a wire change, rule 4): the unit tests and the cases state
   `"Accept, Origin"`, documented in architecture.project.md.
 - #229: marshmallow stays on 3.x (3.26.2); GitHub Actions to v7 and pinned to digests; CI Python stays 3.11.
 
@@ -26,7 +26,10 @@ updates of #229 on top (full run).
   `preset_signalling_media_type` cases: `Accept, Origin`), architecture.project.md
 - [x] T2 Checks (2026-11-23): lint-imports 29 kept; unit 2996 passed; MTEST reachability passed, so the smoke run
   covers MTEST: smoke 232 passed, 488 skipped
-- [~] T3 (#229) the dashboard's updates (marshmallow 3.26.2, actions v7 pinned, Python 3.11)
-- [ ] T4 Checks: lint-imports, unit, `./test_python_versions.sh`, full run `pytest -n 4`
+- [x] T3 (#229) the dashboard's updates (marshmallow 3.26.2; checkout v7.0.1 and setup-python v7.1.0 pinned in both
+  workflows; `.docker/Dockerfile` python:3.11-slim pinned to its digest; CI Python 3.11, and Renovate's 3.11 rule
+  extended to the `github-actions` manager so it stops proposing 3.15)
+- [~] T4 Checks (2026-11-23): lint-imports 29 kept; unit 2996 passed; `./test_python_versions.sh` 3.11–3.15 passed;
+  full run `pytest -n 4` running
 - [ ] T5 Draft PR; issues: marshmallow 4 blocked by dataclasses-json; `starlette.testclient` deprecates `httpx`
   (`StarletteDeprecationWarning`: install `httpx2`, `tests/integration/file_cases.py:16`)
