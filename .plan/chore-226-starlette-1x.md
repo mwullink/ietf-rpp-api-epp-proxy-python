@@ -35,5 +35,6 @@ updates of #229 on top (full run).
   full run `pytest -n 4` (MTEST included): 4492 passed, 3624 skipped (1:31:50)
 - [x] T5 Draft PR #240, awaiting the maintainer; issues #241, #242: marshmallow 4 blocked by dataclasses-json; `starlette.testclient` deprecates `httpx`
   (`StarletteDeprecationWarning`: install `httpx2`, `tests/integration/file_cases.py:16`)
-- [~] T6 Review: `list_contains` in the harness, the cases and unit tests check that `Vary` lists `Accept`; docs
-- [ ] T7 Checks: lint-imports, unit, smoke
+- [x] T6 Review: `list_contains` in the harness, the cases and unit tests check that `Vary` lists `Accept`; docs
+- [x] T7 Checks (2026-11-24): lint-imports 29 kept; unit 3004 passed; smoke 232 passed, 488 skipped; the
+  `preset_signalling_media_type` cases 9 passed, 63 skipped. Ready for review (maintainer, 2026-11-24)
