@@ -27,7 +27,7 @@
         "headers": {
           "RPP-Code": "02001",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": {"type": "list_contains", "values": ["Accept"]}
         },
         "content_type": "application/problem+json",
         "body": {

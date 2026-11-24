@@ -30,7 +30,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": {"type": "list_contains", "values": ["Accept"]}
         },
         "content_type": "application/problem+json",
         "body": {
@@ -59,7 +59,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": {"type": "list_contains", "values": ["Accept"]}
         },
         "content_type": "application/problem+json",
         "body": {
@@ -84,7 +84,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": {"type": "list_contains", "values": ["Accept"]}
         },
         "content_type": "application/problem+json",
         "body": {
@@ -116,7 +116,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": {"type": "list_contains", "values": ["Accept"]}
         },
         "content_type": "application/problem+json",
         "body": {
@@ -148,7 +148,7 @@
         "headers": {
           "RPP-Code": "02004",
           "RPP-Preset": null,
-          "Vary": "Accept"
+          "Vary": {"type": "list_contains", "values": ["Accept"]}
         },
         "content_type": "application/problem+json",
         "body": {

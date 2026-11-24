@@ -44,9 +44,10 @@
       "groupName": "CI and container images (non-major)"
     },
     {
-      "description": "The images run Python 3.11, the version the project is tested with: only its patch releases and digests.",
+      "description": "The images and CI run Python 3.11, the version the project is tested with: only its patch releases and digests.",
       "matchManagers": [
-        "dockerfile"
+        "dockerfile",
+        "github-actions"
       ],
       "matchPackageNames": [
         "python"

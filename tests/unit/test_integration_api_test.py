@@ -2,8 +2,9 @@ import json
 
 import pytest
 
-from tests.helper.integration_api_test import (assert_response, endpoint_test, field_value, replace_pad_placeholders,
-                                               replace_upper_placeholders, substitute_captures)
+from tests.helper.integration_api_test import (assert_headers, assert_response, endpoint_test, field_value,
+                                               replace_pad_placeholders, replace_upper_placeholders,
+                                               substitute_captures)
 from tests.helper.recursive_compare_existing import recusive_compare_existing
 
 REQUEST = {"method": "GET", "url": "/x", "headers": {"RPP-Cltrid": "cl-1"}}
@@ -212,3 +213,20 @@ def test_with_the_header_signalling_the_whole_media_type_is_compared():
 def test_another_media_type_or_other_parameters_are_a_mismatch(actual, expected):
     with pytest.raises(AssertionError, match="Content-Type mismatch"):
         assert_response({**CREATED, "content_type": expected}, typed(actual), "t", "media-type")
+
+
+class Headed:
+    def __init__(self, **headers):
+        self.headers = {name.lower(): value for name, value in headers.items()}
+
+
+@pytest.mark.parametrize("vary", ["Accept", "Accept, Origin", "Origin,Accept", "origin ,  ACCEPT , RPP-Preset"])
+def test_list_contains_passes_when_each_value_is_an_element_whatever_else_and_in_any_order(vary):
+    assert_headers({"Vary": {"type": "list_contains", "values": ["Accept"]}}, Headed(Vary=vary), "t")
+
+
+@pytest.mark.parametrize("vary, values", [("Origin", ["Accept"]), ("Accept-Language", ["Accept"]),
+                                          ("Accept", ["Accept", "Origin"]), ("", ["Accept"])])
+def test_list_contains_fails_when_a_value_is_not_an_element(vary, values):
+    with pytest.raises(AssertionError):
+        assert_headers({"Vary": {"type": "list_contains", "values": values}}, Headed(Vary=vary), "t")
