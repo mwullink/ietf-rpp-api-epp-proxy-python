@@ -40,6 +40,7 @@ def _sec_dns_update(add: DnsSec | None, remove: DnsSec | None) -> SecdnsUpdateTy
     return SecdnsUpdateType(
         add=DsOrKeyType(ds_data=_ds_data(add), key_data=_key_data(add)) if add else None,
         rem=SecdnsRemType(ds_data=_ds_data(remove), key_data=_key_data(remove)) if remove else None,
+        urgent=None,  # None leaves the attribute out; the default would write urgent="false"
     )
 
 
