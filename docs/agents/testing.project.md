@@ -426,7 +426,9 @@ the tests of the runner itself use ([test_case_phases.py](../../tests/unit/test_
   request; see [Waiting for a period](#waiting-for-a-period).
 - `fields`/`headers` support condition dicts (`not_null`,
   `datetime_format_utc_and_delta`, …) via `evaluate_condition`. `fields` keys are dotted
-  paths, for example `provMetadata.crDate`.
+  paths, for example `provMetadata.crDate`. A header that is a list (RFC 9110 §5.6.1) is checked with
+  `{"type": "list_contains", "values": ["Accept"]}`: each value is an element, compared without regard to case,
+  whatever else the list holds (a framework may add its own, as Starlette adds `Origin` to `Vary`) and in any order.
 - `draft_domain/`, `draft_contact/`, `draft_host/`, `draft_patch/` and `draft_discovery/` hold the examples
   of the JSON draft (§8.1, §8.2, §8.3, §5.3.1, §8.7.1; the discovery one has the configured values). Examples for operations not implemented yet have the
   expected result written down and `"skip": "#<issue>"`.

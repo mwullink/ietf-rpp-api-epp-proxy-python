@@ -13,6 +13,7 @@ from rpp.schema.effective_schema import UNEVALUATED
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
 from tests.helper.fake_rri_client import FakeRriClient, rri_backends
+from tests.helper.integration_api_test import header_list
 from tests.helper.preset_fixtures import ADMIN_ONLY, AT_MOST_ONE, BASE, definitions_with, preset, registry_with
 from tests.helper.presets import BASE as BASE_ID, EPP, RRI
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
@@ -156,7 +157,7 @@ class TestTheSchemaIsAValueInItsNativeMediaTypeOutsidePresetSignalling:
         response = self.fetch(client_of, {"Accept": accept})
 
         assert response.status_code == 200 and response.headers["Content-Type"] == "application/schema+json"
-        assert response.headers["Vary"] == "Accept, Origin"
+        assert "accept" in header_list(response.headers["Vary"])
 
     def test_no_accept_is_any(self, client_of):
         assert client_of().get(f"/presets/{BASE_ID}/schema", headers={"Accept": ""}).status_code == 200

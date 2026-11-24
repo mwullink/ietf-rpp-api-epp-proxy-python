@@ -6,6 +6,7 @@ from rpp.http.app import create_app
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
 from tests.helper.fake_rri_client import FakeRriClient, rri_backends
+from tests.helper.integration_api_test import header_list
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 from tests.unit.test_presets_wire import BASE, EPP, RRI
 from tests.unit.test_rpp_wire import check_reply
@@ -43,7 +44,7 @@ def assert_refused(response, status, code):
     assert response.status_code == status
     assert response.headers["RPP-Code"] == code
     assert response.headers["Content-Type"] == "application/problem+json"  # no preset parameters
-    assert response.headers["Vary"] == "Accept, Origin"
+    assert "accept" in header_list(response.headers["Vary"])
     assert "RPP-Preset" not in response.headers
 
 
@@ -53,7 +54,7 @@ def test_a_request_without_parameters_gets_the_default_profile_and_it_is_named_i
     assert response.status_code == 200
     assert applied(response) == media(EPP)
     assert "RPP-Preset" not in response.headers
-    assert response.headers["Vary"] == "Accept, Origin"
+    assert "accept" in header_list(response.headers["Vary"])
 
 
 def test_a_request_without_an_accept_gets_the_default_profile():
@@ -211,7 +212,7 @@ def test_an_object_of_an_extension_outside_the_request_preset_is_a_400_that_name
         assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
         assert "preset:base" in response.json()["detail"]
         assert response.headers["Content-Type"] == "application/problem+json"
-        assert response.headers["Vary"] == "Accept, Origin" and "RPP-Preset" not in response.headers
+        assert "accept" in header_list(response.headers["Vary"]) and "RPP-Preset" not in response.headers
 
 
 def test_an_object_the_request_profile_has_is_not_refused_for_the_response_profile():
@@ -239,7 +240,7 @@ def test_a_problem_detail_after_the_selection_has_no_profile_parameters_and_list
 
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/problem+json"
-    assert response.headers["Vary"] == "Accept, Origin"
+    assert "accept" in header_list(response.headers["Vary"])
 
 
 def test_an_unauthenticated_request_is_a_401_before_any_profile():

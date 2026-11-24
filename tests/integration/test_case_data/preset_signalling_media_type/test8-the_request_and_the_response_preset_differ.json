@@ -130,7 +130,7 @@
         "headers": {
           "RPP-Code": "01000",
           "RPP-Preset": null,
-          "Vary": "Accept, Origin",
+          "Vary": {"type": "list_contains", "values": ["Accept"]},
           "Content-Type": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\""
         },
         "body": {
@@ -265,7 +265,7 @@
         "headers": {
           "RPP-Code": "01000",
           "RPP-Preset": null,
-          "Vary": "Accept, Origin",
+          "Vary": {"type": "list_contains", "values": ["Accept"]},
           "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\""
         },
         "body": {

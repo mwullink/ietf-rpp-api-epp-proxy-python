@@ -351,7 +351,8 @@ of the response preset; there is no `RPP-Preset` response header.
 
 Every response of the rpp app also lists `Origin` in `Vary`: Starlette's `CORSMiddleware` (1.x, `allow_origins=["*"]` with
 `allow_credentials=True`) mirrors the `Origin` of a request in `Access-Control-Allow-Origin` and adds `Origin` to `Vary`, after
-what the signalling put there (so `Vary: Accept, Origin` under `media-type`).
+what the signalling put there (so `Vary: Accept, Origin` under `media-type`). The tests check that `Vary` lists what the
+signalling puts there, not its whole value (`list_contains`, see [testing.project.md](testing.project.md#test-data-format)).
 
 **Preset Schema.** `create_app` builds `PresetSchemas` (`rpp/schema/preset_schemas.py`) once per app, so once per uvicorn worker,
 at startup: for each offered preset a `SchemaScope` (`rpp/schema/schema_scope.py`) with the validators of every definition for
