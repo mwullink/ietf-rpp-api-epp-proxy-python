@@ -25,5 +25,6 @@ maintainer asked to replace the per-field `urgent=None` with the serializer opti
 
 - [x] T1 `ignore_default_attributes=True` in `epp/xml/codec.py`, `urgent=None` removed, tests (the 5 and `urgent`
   absent), architecture.project.md
-- [~] T2 Checks: lint-imports, unit, MTEST reachability, full run `pytest -n 4`
-- [ ] T3 Push, PR description
+- [x] T2 Checks: lint-imports 29 kept; unit 3004 passed; MTEST reachable (`domain_availability/test3`); full run
+  `pytest -n 4`: 4500 passed, 3624 skipped (selectors; `rri-local` has no credentials in `.env`), 1:32:13
+- [~] T3 Push, PR description
