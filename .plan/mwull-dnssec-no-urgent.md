@@ -14,10 +14,16 @@ maintainer asked to replace the per-field `urgent=None` with the serializer opti
 ## Decisions (maintainer, 2026-11-25)
 
 - The option is set for every EPP request; pushed to the PR branch. Full run `pytest -n 4` on all backends.
+- `pretty_print=True` (deprecated in xsdata) is dropped: requests are sent without indentation.
+
+## Corrections
+
+- The branch was based on 0d1d35b; with the venv on Starlette 1.10 (#240) the unit run failed 30 tests on `Vary`.
+  `main` (ef390cd) is merged into the branch; the unit run then passes (3004).
 
 ## Tasks
 
-- [~] T1 `ignore_default_attributes=True` in `epp/xml/codec.py`, `urgent=None` removed, tests (the 5 and `urgent`
+- [x] T1 `ignore_default_attributes=True` in `epp/xml/codec.py`, `urgent=None` removed, tests (the 5 and `urgent`
   absent), architecture.project.md
-- [ ] T2 Checks: lint-imports, unit, MTEST reachability, full run `pytest -n 4`
+- [~] T2 Checks: lint-imports, unit, MTEST reachability, full run `pytest -n 4`
 - [ ] T3 Push, PR description
