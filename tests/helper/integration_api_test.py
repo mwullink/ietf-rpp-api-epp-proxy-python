@@ -6,11 +6,20 @@ import time
 from datetime import datetime, timezone
 from tests.helper.check_datetime import check_datetime_format_utc_and_delta
 
+def header_list(value):
+    """The elements of a header that is a list (RFC 9110 §5.6.1, for example Vary), trimmed and in lower case."""
+    return {element.strip().lower() for element in value.split(",") if element.strip()}
+
 def evaluate_condition(value, spec):
     if spec["type"] == "not_null":
         return value is not None
     elif spec["type"] == "not_empty_string":
         return isinstance(value, str) and value != ""
+    elif spec["type"] == "list_contains":
+        # A header that is a list (RFC 9110 §5.6.1, for example Vary): every value of the condition is an element, whatever
+        # else the list holds and in whatever order; the elements compare without regard to case.
+        elements = header_list(value) if isinstance(value, str) else set()
+        return all(wanted.lower() in elements for wanted in spec["values"])
     elif spec["type"] == "datetime_format_utc_and_delta":
         return check_datetime_format_utc_and_delta(
             datetime.fromisoformat(spec["reference"].replace("Z", "+00:00")), value, spec["min_delta"], spec["max_delta"]
